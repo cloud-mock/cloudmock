@@ -332,4 +332,14 @@ the Docker dependency or startup time.
 | 2     | What is the versioning and compatibility policy between core and module JARs?                                | Core team  | Phase 1 |
 | 3     | Which services should follow SQS and Secrets Manager in Phase 3? (Candidates: S3, DynamoDB, Lambda)          | Community  | Phase 2 |
 | 4     | Should the interaction capture agent be a separate Maven/Gradle plugin or bundled in core?                   | Agent team | Phase 3 |
-| ~~5~~ | ~~What is the minimum Java version target?~~ Resolved: Java 17 LTS.                                          | Core team  | Phase 1 |
+| ~~5~~ | ~~What is the minimum Java version target?~~ Resolved: Java 17 LTS. See decision record below.               | Core team  | Phase 1 |
+
+### Decision: minimum Java version is Java 17 LTS
+
+**Resolved:** Java 17 LTS.
+
+CloudMock is a library that runs inside the consumer's JVM. The minimum version is not a constraint on CloudMock's own development environment — it is a constraint on every project that wants to adopt CloudMock. Setting the floor too high at launch would exclude a significant portion of the target audience before the project has established itself.
+
+Java 17 remains the dominant LTS in enterprise and Spring Boot 3.x ecosystems as of the time this decision was made, even though Java 21 is the current LTS. None of the features introduced in Java 21 — virtual threads, finalised pattern matching for switch, sequenced collections — are meaningful for CloudMock's core implementation: an embedded WireMock server, a `ServiceLoader` loop, and Handlebars response templates. The upgrade would carry adoption cost with no technical benefit at this stage.
+
+**Build target:** compile against Java 17; run CI against both Java 17 and Java 21 to validate compatibility. When Java 17 adoption in the target ecosystem drops below a meaningful threshold, bumping the minimum is a one-line change in the root `build.gradle`.
