@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Git workflow
+
+Every feature must be developed on a dedicated branch created from `main` before any code is written. Branch names should follow the pattern `feature/<short-description>`. Never commit feature work directly to `main`.
+
 ## Current state
 
 Pre-Phase 1. Only `src/Main.java` (Hello World) exists. No build file, no git history. The next step is setting up a
