@@ -25,7 +25,6 @@ class ModuleGeneratorTest {
         Map<String, String> files = result.files().stream()
                 .collect(Collectors.toMap(GeneratedFile::relativePath, GeneratedFile::content));
 
-        // build.gradle uses published coordinates, not project(':cloudmock-core')
         assertTrue(files.containsKey("build.gradle"), "build.gradle missing");
         String buildGradle = files.get("build.gradle");
         assertTrue(buildGradle.contains("io.cloudmock:cloudmock-core:0.1.0-SNAPSHOT"),
@@ -33,13 +32,11 @@ class ModuleGeneratorTest {
         assertFalse(buildGradle.contains("project(':cloudmock-core')"),
                 "build.gradle must not reference project path");
 
-        // META-INF/services entry
         String spiKey = "src/main/resources/META-INF/services/io.cloudmock.core.spi.CloudMockService";
         assertTrue(files.containsKey(spiKey), "META-INF/services file missing");
         assertTrue(files.get(spiKey).contains("CloudMockTestServiceService"),
                 "META-INF/services must name the generated class");
 
-        // service class uses loadTemplate(), not inlined constants
         String serviceKey = "src/main/java/io/cloudmock/testservice/CloudMockTestServiceService.java";
         assertTrue(files.containsKey(serviceKey), "service class missing");
         String serviceClass = files.get(serviceKey);
@@ -50,27 +47,23 @@ class ModuleGeneratorTest {
         assertFalse(serviceClass.contains("private static final String CREATE_FOO"),
                 "service class must not inline operation templates as constants");
 
-        // one .hbs file per operation
         assertTrue(files.containsKey("src/main/resources/templates/CreateFoo.hbs"),
                 "CreateFoo.hbs template missing");
         assertTrue(files.containsKey("src/main/resources/templates/DeleteFoo.hbs"),
                 "DeleteFoo.hbs template missing");
 
-        // template content is non-empty and not a bare Java-escaped string
         String createFooTemplate = files.get("src/main/resources/templates/CreateFoo.hbs");
         assertFalse(createFooTemplate.contains("\\\""),
                 "template file must not contain Java-escaped quotes");
         assertTrue(createFooTemplate.contains("fooId"),
                 "CreateFoo.hbs must reference the fooId output field");
 
-        // test class has one method stub per operation
         String testKey = "src/test/java/io/cloudmock/testservice/CloudMockTestServiceServiceTest.java";
         assertTrue(files.containsKey(testKey), "test class missing");
         String testClass = files.get(testKey);
         assertTrue(testClass.contains("void createFoo()"), "test class must stub createFoo");
         assertTrue(testClass.contains("void deleteFoo()"), "test class must stub deleteFoo");
 
-        // total file count: build.gradle + service class + META-INF/services + test class + 2 .hbs
         assertEquals(6, files.size(), "unexpected number of generated files");
     }
 
@@ -82,7 +75,6 @@ class ModuleGeneratorTest {
 
         GenerationResult result = new ModuleGenerator().generate(modelPath, "0.1.0-SNAPSHOT");
 
-        // sdkId "Widget Service" → serviceId "widgetservice", className "WidgetService"
         assertEquals("widgetservice", result.serviceId());
         assertEquals("cloudmock-widgetservice", result.moduleName());
 
@@ -91,13 +83,11 @@ class ModuleGeneratorTest {
 
         assertEquals(6, files.size(), "unexpected number of generated files");
 
-        // service class uses JSON target protocol (awsJson1_0)
         String serviceKey = "src/main/java/io/cloudmock/widgetservice/CloudMockWidgetServiceService.java";
         assertTrue(files.containsKey(serviceKey), "service class missing");
         assertTrue(files.get(serviceKey).contains("registerJsonTargetStub"),
                 "service class must use JSON target protocol");
 
-        // one .hbs file per operation; CreateWidget has an output shape with a field
         assertTrue(files.containsKey("src/main/resources/templates/CreateWidget.hbs"),
                 "CreateWidget.hbs template missing");
         assertTrue(files.containsKey("src/main/resources/templates/DeleteWidget.hbs"),
@@ -105,8 +95,6 @@ class ModuleGeneratorTest {
 
         assertTrue(files.get("src/main/resources/templates/CreateWidget.hbs").contains("widgetId"),
                 "CreateWidget.hbs must reference the widgetId output field");
-
-        // DeleteWidget output is smithy.api#Unit → empty JSON object
         assertTrue(files.get("src/main/resources/templates/DeleteWidget.hbs").contains("{}"),
                 "DeleteWidget.hbs must produce an empty JSON object for Unit output");
     }
