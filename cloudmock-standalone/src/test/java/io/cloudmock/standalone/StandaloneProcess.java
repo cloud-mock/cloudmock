@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -42,6 +43,24 @@ final class StandaloneProcess implements AutoCloseable {
     /** Startup log lines captured from the subprocess stdout. */
     List<String> output() {
         return output;
+    }
+
+    /**
+     * Waits up to {@code timeoutMs} for a captured stdout line to match {@code predicate}.
+     * Necessary because stdout is drained asynchronously, so a line may not be in {@link #output()}
+     * the instant the server starts accepting connections.
+     *
+     * @return {@code true} if a matching line appeared before the timeout
+     */
+    boolean awaitOutput(Predicate<String> predicate, long timeoutMs) throws InterruptedException {
+        long deadline = System.currentTimeMillis() + timeoutMs;
+        while (System.currentTimeMillis() < deadline) {
+            if (output.stream().anyMatch(predicate)) {
+                return true;
+            }
+            Thread.sleep(50);
+        }
+        return output.stream().anyMatch(predicate);
     }
 
     private void drainOutput() {

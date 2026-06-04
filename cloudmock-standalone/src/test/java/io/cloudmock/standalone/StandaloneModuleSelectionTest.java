@@ -38,9 +38,9 @@ class StandaloneModuleSelectionTest {
     }
 
     @Test
-    void startupLogReportsOnlySqsEnabled() {
+    void startupLogReportsOnlySqsEnabled() throws Exception {
         assertTrue(
-                process.output().stream().anyMatch(l -> l.contains("Enabled modules: sqs")),
+                process.awaitOutput(l -> l.contains("Enabled modules: sqs"), 5_000),
                 "Expected startup log to report only sqs enabled, got: " + process.output());
     }
 
