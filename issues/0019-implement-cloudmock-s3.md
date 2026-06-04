@@ -13,14 +13,14 @@ operations covered by integration tests.
 
 ## Acceptance criteria
 
-- [ ] Run `cloudmock-codegen` against the S3 Smithy model and commit the generated stub output as the starting point
-- [ ] `cloudmock-s3` registers stubs for the following operations at minimum: `PutObject`, `GetObject`, `DeleteObject`, `ListObjectsV2`, `CreateBucket`, `HeadObject`
-- [ ] Each stub matches on HTTP method and path regex; no operation leaks into another's path pattern
-- [ ] Response templates use Handlebars and return well-formed S3 XML responses
-- [ ] Integration tests use the AWS SDK v2 S3 client pointed at the CloudMock instance and assert that each supported operation returns without an SDK exception
-- [ ] The module registers itself via `META-INF/services/io.cloudmock.core.spi.CloudMockService`
-- [ ] `cloudmock-s3` has no compile or runtime dependency on any other `cloudmock-*` module; the Gradle isolation check passes
-- [ ] `./gradlew build` passes with the new module included
+- [x] Run `cloudmock-codegen` against the S3 Smithy model and commit the generated stub output as the starting point
+- [x] `cloudmock-s3` registers stubs for the following operations at minimum: `PutObject`, `GetObject`, `DeleteObject`, `ListObjectsV2`, `CreateBucket`, `HeadObject`
+- [x] Each stub matches on HTTP method and path regex; no operation leaks into another's path pattern
+- [x] Response templates use Handlebars and return well-formed S3 XML responses
+- [x] Integration tests use the AWS SDK v2 S3 client pointed at the CloudMock instance and assert that each supported operation returns without an SDK exception
+- [x] The module registers itself via `META-INF/services/io.cloudmock.core.spi.CloudMockService`
+- [x] `cloudmock-s3` has no compile or runtime dependency on any other `cloudmock-*` module; the Gradle isolation check passes
+- [x] `./gradlew build` passes with the new module included
 
 ## Dependencies
 

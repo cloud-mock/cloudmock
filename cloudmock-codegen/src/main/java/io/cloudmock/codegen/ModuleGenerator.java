@@ -2,13 +2,13 @@ package io.cloudmock.codegen;
 
 import software.amazon.smithy.aws.traits.ServiceTrait;
 import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.loader.ModelAssembler;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.HttpTrait;
 import software.amazon.smithy.model.validation.ValidatedResult;
-import software.amazon.smithy.model.validation.ValidationEvent;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -58,20 +58,16 @@ public class ModuleGenerator {
     }
 
     private Model loadModel(Path modelPath) {
+        // allowUnknownTraits: real-world AWS models use traits (smithy.rules, smithy.waiters)
+        //   not bundled with smithy-aws-traits — ignore them rather than failing.
+        // disableValidation: enum constraints in aws-traits (e.g. ChecksumAlgorithm) lag behind
+        //   the actual models; a code-gen tool needs structure, not strict trait validation.
         ValidatedResult<Model> result = Model.assembler()
+                .putProperty(ModelAssembler.ALLOW_UNKNOWN_TRAITS, true)
                 .discoverModels()
                 .addImport(modelPath)
+                .disableValidation()
                 .assemble();
-        result.getValidationEvents().stream()
-                .filter(e -> e.getSeverity().ordinal() >= 3)
-                .forEach(e -> System.err.println("  [" + e.getSeverity() + "] " + e.getMessage()));
-        List<ValidationEvent> fatalErrors = result.getValidationEvents().stream()
-                .filter(e -> e.getSeverity().ordinal() >= 4)
-                .toList();
-        if (!fatalErrors.isEmpty()) {
-            throw new IllegalArgumentException(
-                    fatalErrors.size() + " model error(s) — fix them before generating.");
-        }
         return result.getResult().orElseThrow(
                 () -> new IllegalArgumentException("Model produced no output."));
     }

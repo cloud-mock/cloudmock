@@ -99,6 +99,32 @@ class ModuleGeneratorTest {
                 "DeleteWidget.hbs must produce an empty JSON object for Unit output");
     }
 
+    /**
+     * Regression for issue #0019 review (finding #3): real AWS models (e.g. S3) reference traits not
+     * bundled with smithy-aws-traits (smithy.rules#*, smithy.waiters#*). The generator must tolerate
+     * unknown traits and skip strict validation rather than aborting model assembly.
+     */
+    @Test
+    void generatesFromModelWithUnknownTraits() throws Exception {
+        URL fixture = getClass().getResource("/fixtures/unknown-trait-service.smithy");
+        assertNotNull(fixture, "unknown-trait-service.smithy fixture not found on classpath");
+        Path modelPath = Path.of(fixture.toURI());
+
+        GenerationResult result = new ModuleGenerator().generate(modelPath, "0.1.0-SNAPSHOT");
+
+        assertEquals("gadget", result.serviceId());
+
+        Map<String, String> files = result.files().stream()
+                .collect(Collectors.toMap(GeneratedFile::relativePath, GeneratedFile::content));
+
+        String serviceClass = files.get("src/main/java/io/cloudmock/gadget/CloudMockGadgetService.java");
+        assertNotNull(serviceClass, "service class missing");
+        assertTrue(serviceClass.contains("registerRestStub"),
+                "restXml service must route via REST path stubs");
+        assertTrue(files.containsKey("src/main/resources/templates/GetGadget.hbs"),
+                "GetGadget.hbs template missing");
+    }
+
     @Test
     void generatesXmlTemplatesAndRestRoutingForRestXmlProtocol() throws Exception {
         URL fixture = getClass().getResource("/fixtures/photo-service.smithy");
