@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
  */
 public class ModuleGenerator {
 
-    public GenerationResult generate(Path modelPath) {
+    public GenerationResult generate(Path modelPath, String coreVersion) {
         Model model = loadModel(modelPath);
 
         ServiceShape service = model.shapes(ServiceShape.class)
@@ -46,27 +46,28 @@ public class ModuleGenerator {
                 .collect(Collectors.toList());
 
         List<GeneratedFile> files = new ArrayList<>();
-        files.add(buildGradle(moduleName, serviceId));
-        files.add(serviceClass(model, service, operations, protocol, pkg, className));
+        files.add(buildGradle(serviceId, coreVersion));
+        files.add(serviceClass(service, operations, protocol, pkg, className));
         files.add(serviceLoaderFile(pkg, className));
         files.add(testClass(operations, pkg, className));
+        for (OperationShape op : operations) {
+            files.add(templateFile(model, op, protocol));
+        }
 
         return new GenerationResult(serviceId, moduleName, files);
     }
 
-    // ── model loading ─────────────────────────────────────────────────────────
-
     private Model loadModel(Path modelPath) {
         ValidatedResult<Model> result = Model.assembler()
-                .discoverModels()   // loads AWS trait definitions from smithy-aws-traits on classpath
+                .discoverModels()
                 .addImport(modelPath)
                 .assemble();
         result.getValidationEvents().stream()
-                .filter(e -> e.getSeverity().ordinal() >= 3) // DANGER or ERROR
+                .filter(e -> e.getSeverity().ordinal() >= 3)
                 .forEach(e -> System.err.println("  [" + e.getSeverity() + "] " + e.getMessage()));
         List<ValidationEvent> fatalErrors = result.getValidationEvents().stream()
-                .filter(e -> e.getSeverity().ordinal() >= 4) // ERROR only
-                .collect(Collectors.toList());
+                .filter(e -> e.getSeverity().ordinal() >= 4)
+                .toList();
         if (!fatalErrors.isEmpty()) {
             throw new IllegalArgumentException(
                     fatalErrors.size() + " model error(s) — fix them before generating.");
@@ -74,8 +75,6 @@ public class ModuleGenerator {
         return result.getResult().orElseThrow(
                 () -> new IllegalArgumentException("Model produced no output."));
     }
-
-    // ── name derivation ───────────────────────────────────────────────────────
 
     private String deriveServiceId(ServiceShape service) {
         return service.getTrait(ServiceTrait.class)
@@ -93,47 +92,49 @@ public class ModuleGenerator {
                 .collect(Collectors.joining());
     }
 
-    // ── file generators ───────────────────────────────────────────────────────
-
-    private GeneratedFile buildGradle(String moduleName, String serviceId) {
+    private GeneratedFile buildGradle(String serviceId, String coreVersion) {
         String content = """
                 dependencies {
-                    compileOnly project(':cloudmock-core')
-                    testImplementation project(':cloudmock-core')
-                    // TODO: replace with correct AWS SDK library alias from libs.versions.toml
-                    // testImplementation libs.aws.%s
+                    compileOnly 'io.cloudmock:cloudmock-core:%s'
+                    testImplementation 'io.cloudmock:cloudmock-core:%s'
+                    // TODO: add the AWS SDK v2 client dependency, e.g.:
+                    // testImplementation 'software.amazon.awssdk:%s:VERSION'
                 }
-                """.formatted(serviceId);
+                """.formatted(coreVersion, coreVersion, serviceId);
         return new GeneratedFile("build.gradle", content);
     }
 
-    private GeneratedFile serviceClass(Model model, ServiceShape service,
+    private GeneratedFile serviceClass(ServiceShape service,
             List<OperationShape> operations, Protocol protocol,
             String pkg, String className) {
 
+        String simpleClassName = "CloudMock" + className + "Service";
         StringBuilder sb = new StringBuilder();
         sb.append("package ").append(pkg).append(";\n\n");
         sb.append("import io.cloudmock.core.spi.CloudMockService;\n");
         sb.append("import io.cloudmock.core.spi.StubRegistrar;\n");
-        if (protocol == Protocol.REST) {
+        if (protocol.isRest()) {
             sb.append("import io.cloudmock.core.spi.HttpMethod;\n");
         }
+        sb.append("import java.io.IOException;\n");
+        sb.append("import java.io.InputStream;\n");
+        sb.append("import java.io.UncheckedIOException;\n");
         sb.append("\n");
         sb.append("""
                 /**
                  * CloudMock service module for %s.
                  *
                  * <p><strong>GENERATED — HUMAN REVIEW REQUIRED.</strong>
-                 * Response templates are minimal placeholders. Replace each template constant
-                 * with a well-formed Handlebars response that the AWS SDK can parse without error.
-                 * See existing modules (cloudmock-sqs, cloudmock-secretsmanager) for examples.
+                 * Response templates are minimal placeholders in {@code src/main/resources/templates/}.
+                 * Replace each {@code .hbs} file with a well-formed Handlebars response that the AWS SDK
+                 * can parse without error. See existing modules (cloudmock-sqs, cloudmock-secretsmanager)
+                 * for examples.
                  */
                 """.formatted(className));
-        sb.append("public class CloudMock").append(className)
-                .append("Service implements CloudMockService {\n\n");
+        sb.append("public class ").append(simpleClassName).append(" implements CloudMockService {\n\n");
 
-        String serviceIdVal = deriveServiceId(service);
-        sb.append("    private static final String SERVICE_ID = \"").append(serviceIdVal).append("\";\n");
+        sb.append("    private static final String SERVICE_ID = \"")
+                .append(deriveServiceId(service)).append("\";\n");
 
         if (protocol == Protocol.JSON_TARGET) {
             sb.append("    // TODO: verify X-Amz-Target prefix — common formats:\n");
@@ -145,13 +146,6 @@ public class ModuleGenerator {
         }
         sb.append("\n");
 
-        for (OperationShape op : operations) {
-            String constName = toScreamingSnake(op.getId().getName());
-            sb.append(templateComment(model, op));
-            sb.append("    private static final String ").append(constName)
-                    .append(" = \"").append(templateBody(model, op, protocol)).append("\";\n\n");
-        }
-
         sb.append("    @Override\n");
         sb.append("    public String serviceId() {\n");
         sb.append("        return SERVICE_ID;\n");
@@ -160,26 +154,38 @@ public class ModuleGenerator {
         sb.append("    @Override\n");
         sb.append("    public void register(StubRegistrar registrar) {\n");
         for (OperationShape op : operations) {
-            String opName    = op.getId().getName();
-            String constName = toScreamingSnake(opName);
+            String opName = op.getId().getName();
             switch (protocol) {
                 case JSON_TARGET -> sb.append(
                         "        registrar.registerJsonTargetStub(TARGET_PREFIX + \"")
-                        .append(opName).append("\", ").append(constName).append(");\n");
+                        .append(opName).append("\", loadTemplate(\"").append(opName).append("\"));\n");
                 case FORM_URL -> sb.append(
                         "        registrar.registerXmlFormStub(\"")
-                        .append(opName).append("\", ").append(constName).append(");\n");
-                case REST -> {
+                        .append(opName).append("\", loadTemplate(\"").append(opName).append("\"));\n");
+                case REST_JSON, REST_XML -> {
                     String[] mp = httpMethodAndPath(op);
                     sb.append("        registrar.registerRestStub(HttpMethod.")
-                            .append(mp[0]).append(", \"").append(mp[1]).append("\", ")
-                            .append(constName).append(");\n");
+                            .append(mp[0]).append(", \"").append(mp[1]).append("\", loadTemplate(\"")
+                            .append(opName).append("\"));\n");
                 }
             }
         }
+        sb.append("    }\n\n");
+
+        sb.append("    private static String loadTemplate(String name) {\n");
+        sb.append("        String path = \"/templates/\" + name + \".hbs\";\n");
+        sb.append("        try (InputStream in = ").append(simpleClassName)
+                .append(".class.getResourceAsStream(path)) {\n");
+        sb.append("            if (in == null)\n");
+        sb.append("                throw new IllegalStateException(\"Template not found: \" + path);\n");
+        sb.append("            return new String(in.readAllBytes(),\n");
+        sb.append("                    java.nio.charset.StandardCharsets.UTF_8).trim();\n");
+        sb.append("        } catch (IOException e) {\n");
+        sb.append("            throw new UncheckedIOException(e);\n");
+        sb.append("        }\n");
         sb.append("    }\n}\n");
 
-        String path = "src/main/java/" + pkg.replace('.', '/') + "/CloudMock" + className + "Service.java";
+        String path = "src/main/java/" + pkg.replace('.', '/') + "/" + simpleClassName + ".java";
         return new GeneratedFile(path, sb.toString());
     }
 
@@ -187,6 +193,31 @@ public class ModuleGenerator {
         return new GeneratedFile(
                 "src/main/resources/META-INF/services/io.cloudmock.core.spi.CloudMockService",
                 pkg + ".CloudMock" + className + "Service\n");
+    }
+
+    private GeneratedFile templateFile(Model model, OperationShape op, Protocol protocol) {
+        String name = op.getId().getName();
+        StringBuilder sb = new StringBuilder();
+
+        op.getOutput().ifPresent(outputId -> {
+            Shape output = model.expectShape(outputId);
+            sb.append("{{! REVIEW REQUIRED — output: ").append(output.getId().getName());
+            if (output instanceof StructureShape struct && !struct.getAllMembers().isEmpty()) {
+                String members = struct.getAllMembers().entrySet().stream()
+                        .map(e -> e.getKey() + ": "
+                                + model.expectShape(e.getValue().getTarget()).getType())
+                        .collect(Collectors.joining(", "));
+                sb.append(" [").append(members).append("]");
+            }
+            sb.append(" }}\n");
+        });
+        if (op.getOutput().isEmpty()) {
+            sb.append("{{! REVIEW REQUIRED — no output shape (returns empty response) }}\n");
+        }
+
+        sb.append(templateBody(model, op, protocol));
+
+        return new GeneratedFile("src/main/resources/templates/" + name + ".hbs", sb.toString());
     }
 
     private GeneratedFile testClass(List<OperationShape> operations, String pkg, String className) {
@@ -241,27 +272,6 @@ public class ModuleGenerator {
         return new GeneratedFile(path, sb.toString());
     }
 
-    // ── template helpers ──────────────────────────────────────────────────────
-
-    private String templateComment(Model model, OperationShape op) {
-        StringBuilder sb = new StringBuilder("    // REVIEW REQUIRED");
-        op.getOutput().ifPresent(outputId -> {
-            Shape output = model.expectShape(outputId);
-            sb.append(" — output: ").append(output.getId().getName());
-            if (output instanceof StructureShape struct && !struct.getAllMembers().isEmpty()) {
-                String members = struct.getAllMembers().entrySet().stream()
-                        .map(e -> e.getKey() + ": "
-                                + model.expectShape(e.getValue().getTarget()).getType())
-                        .collect(Collectors.joining(", "));
-                sb.append(" [").append(members).append("]");
-            }
-        });
-        if (op.getOutput().isEmpty()) {
-            sb.append(" — no output shape (returns empty response)");
-        }
-        return sb.append("\n").toString();
-    }
-
     private String templateBody(Model model, OperationShape op, Protocol protocol) {
         if (protocol == Protocol.FORM_URL) {
             String name = op.getId().getName();
@@ -269,13 +279,20 @@ public class ModuleGenerator {
                     + "<RequestId>{{randomValue type='UUID'}}</RequestId>"
                     + "</ResponseMetadata></" + name + "Response>";
         }
-        return op.getOutput()
-                .map(outId -> model.expectShape(outId))
+
+        StructureShape output = op.getOutput()
+                .map(model::expectShape)
                 .filter(s -> s instanceof StructureShape)
                 .map(s -> (StructureShape) s)
                 .filter(s -> !s.getAllMembers().isEmpty())
-                .map(s -> buildJsonTemplate(model, s))
-                .orElse("{}");
+                .orElse(null);
+
+        if (protocol == Protocol.REST_XML) {
+            // restXml services (e.g. S3) expect XML bodies, not JSON. Empty output → empty body.
+            return output == null ? "" : buildXmlTemplate(model, output);
+        }
+        // JSON_TARGET and REST_JSON
+        return output == null ? "{}" : buildJsonTemplate(model, output);
     }
 
     private String buildJsonTemplate(Model model, StructureShape output) {
@@ -284,15 +301,28 @@ public class ModuleGenerator {
                 .map(e -> {
                     String name   = e.getKey();
                     Shape  target = model.expectShape(e.getValue().getTarget());
-                    return "\\\"" + name + "\\\":" + jsonPlaceholder(target);
+                    return "\"" + name + "\":" + jsonPlaceholder(target);
                 })
                 .collect(Collectors.joining(","));
         return "{" + fields + "}";
     }
 
+    private String buildXmlTemplate(Model model, StructureShape output) {
+        String root = output.getId().getName();
+        String body = output.getAllMembers().entrySet().stream()
+                .limit(8)
+                .map(e -> {
+                    String name   = e.getKey();
+                    Shape  target = model.expectShape(e.getValue().getTarget());
+                    return "<" + name + ">" + xmlPlaceholder(target) + "</" + name + ">";
+                })
+                .collect(Collectors.joining());
+        return "<" + root + ">" + body + "</" + root + ">";
+    }
+
     private String jsonPlaceholder(Shape shape) {
         return switch (shape.getType()) {
-            case STRING  -> "\\\"{{randomValue type='UUID'}}\\\"";
+            case STRING  -> "\"{{randomValue type='UUID'}}\"";
             case INTEGER, LONG, SHORT, BYTE, BIG_INTEGER -> "0";
             case FLOAT, DOUBLE, BIG_DECIMAL             -> "0.0";
             case BOOLEAN                                 -> "false";
@@ -301,20 +331,25 @@ public class ModuleGenerator {
         };
     }
 
+    private String xmlPlaceholder(Shape shape) {
+        return switch (shape.getType()) {
+            case STRING  -> "{{randomValue type='UUID'}}";
+            case INTEGER, LONG, SHORT, BYTE, BIG_INTEGER -> "0";
+            case FLOAT, DOUBLE, BIG_DECIMAL             -> "0.0";
+            case BOOLEAN                                 -> "false";
+            default                                      -> "";
+        };
+    }
+
     private String[] httpMethodAndPath(OperationShape op) {
         return op.getTrait(HttpTrait.class)
                 .map(h -> new String[]{
                         h.getMethod().toUpperCase(),
-                        h.getUri().toString().replaceAll("\\{[^}+][^}]*}", "[^/]+")
-                                              .replaceAll("\\{\\+[^}]*}", ".+")
+                        // Greedy labels {key+} span path segments (.+); normal labels {id} stay within one ([^/]+).
+                        // Replace greedy labels first so the normal-label rule doesn't consume them.
+                        h.getUri().toString().replaceAll("\\{[^}]*\\+}", ".+")
+                                              .replaceAll("\\{[^}]+}", "[^/]+")
                 })
                 .orElse(new String[]{"POST", "/.*"});
-    }
-
-    private String toScreamingSnake(String camelCase) {
-        return camelCase
-                .replaceAll("([A-Z]+)([A-Z][a-z])", "$1_$2")
-                .replaceAll("([a-z])([A-Z])", "$1_$2")
-                .toUpperCase();
     }
 }
