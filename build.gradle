@@ -29,11 +29,16 @@ subprojects {
         useJUnitPlatform()
     }
 
-    publishing {
-        publications {
-            mavenJava(MavenPublication) {
-                from components.java
-                artifactId = project.name
+    // Publishing is configured in afterEvaluate so that modules applying the
+    // Shadow plugin (cloudmock-core) can publish the shadow JAR via components.shadow
+    // rather than the empty components.java.
+    afterEvaluate {
+        publishing {
+            publications {
+                mavenJava(MavenPublication) {
+                    from(components.findByName('shadow') ?: components.java)
+                    artifactId = project.name
+                }
             }
         }
     }

@@ -1,4 +1,25 @@
+apply plugin: 'com.github.johnrengelman.shadow'
+
 dependencies {
     implementation libs.wiremock
     testImplementation libs.slf4j.simple
+}
+
+shadowJar {
+    archiveClassifier.set('')
+
+    // Relocate Jetty and WireMock into a private package so they never
+    // conflict with whatever version the user's project depends on.
+    relocate 'org.eclipse.jetty',                'io.cloudmock.shaded.jetty'
+    relocate 'com.github.tomakehurst.wiremock',  'io.cloudmock.shaded.wiremock'
+
+    // Keep SLF4J API unshaded so the user's logging configuration applies.
+    dependencies {
+        exclude(dependency('org.slf4j:slf4j-api'))
+    }
+}
+
+// The shadow JAR is the primary artifact; disable the empty regular JAR.
+jar {
+    enabled = false
 }
