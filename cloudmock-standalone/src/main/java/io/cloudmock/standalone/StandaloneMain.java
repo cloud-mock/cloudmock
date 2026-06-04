@@ -21,18 +21,19 @@ public final class StandaloneMain {
             System.out.println("[CloudMock] Discovered modules: " + String.join(", ", discovered));
         }
 
-        CloudMock cloudMock = new CloudMock().withPort(port);
-        cloudMock.start();
+        try (CloudMock cloudMock = new CloudMock().withPort(port)) {
+            cloudMock.start();
 
-        System.out.println("CloudMock started on port " + cloudMock.port());
-        System.out.flush();
+            System.out.println("CloudMock started on port " + cloudMock.port());
+            System.out.flush();
 
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            System.out.println("[CloudMock] Shutting down...");
-            cloudMock.stop();
-        }));
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                System.out.println("[CloudMock] Shutting down...");
+                cloudMock.stop();
+            }));
 
-        Thread.currentThread().join();
+            Thread.currentThread().join();
+        }
     }
 
     private static int resolvePort(String[] args) {
