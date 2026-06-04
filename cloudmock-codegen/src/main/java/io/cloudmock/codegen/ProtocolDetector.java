@@ -13,8 +13,8 @@ import software.amazon.smithy.model.shapes.ServiceShape;
  * <p>Detection order mirrors CloudMock's routing table:
  * <ol>
  *   <li>JSON / X-Amz-Target — {@code @aws.protocols#awsJson1_0} or {@code #awsJson1_1}</li>
- *   <li>XML / Form URL — {@code @aws.protocols#query} or {@code #restXml}</li>
- *   <li>REST path — {@code @aws.protocols#restJson1}</li>
+ *   <li>XML / Form URL — {@code @aws.protocols#query} (Action-based: SQS, SNS)</li>
+ *   <li>REST path — {@code @aws.protocols#restXml} or {@code #restJson1} (S3, API Gateway…)</li>
  * </ol>
  *
  * <p>If none of the above traits is present, the detector falls back to
@@ -28,11 +28,14 @@ class ProtocolDetector {
         if (service.hasTrait(AwsJson1_0Trait.class) || service.hasTrait(AwsJson1_1Trait.class)) {
             return Protocol.JSON_TARGET;
         }
-        if (service.hasTrait(AwsQueryTrait.class) || service.hasTrait(RestXmlTrait.class)) {
+        if (service.hasTrait(AwsQueryTrait.class)) {
             return Protocol.FORM_URL;
         }
+        if (service.hasTrait(RestXmlTrait.class)) {
+            return Protocol.REST_XML;
+        }
         if (service.hasTrait(RestJson1Trait.class)) {
-            return Protocol.REST;
+            return Protocol.REST_JSON;
         }
         System.err.println("WARNING: no known protocol trait found on "
                 + service.getId() + " — defaulting to JSON_TARGET. "
