@@ -27,7 +27,8 @@ Standard commands:
 ./gradlew build                      # compile + test all subprojects
 ./gradlew :cloudmock-core:test       # single subproject tests
 ./gradlew publishToMavenLocal        # publish for local smoke testing
-./gradlew :cloudmock-codegen:run --args="<model.smithy> <output-dir>"  # stub generation
+./gradlew :cloudmock-codegen:shadowJar                                 # build the codegen fat JAR
+java -jar cloudmock-codegen/build/libs/cloudmock-codegen.jar --model <path-or-url> [--output <dir>]  # stub generation
 ```
 
 ### Subprojects
