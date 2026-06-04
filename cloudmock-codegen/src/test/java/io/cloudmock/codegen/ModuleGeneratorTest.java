@@ -125,6 +125,23 @@ class ModuleGeneratorTest {
                 "GetGadget.hbs template missing");
     }
 
+    /**
+     * Regression for issue #0019 review (finding #3): with validation disabled, a service that
+     * resolves to zero operations (wrong file / structurally broken model) must fail loudly rather
+     * than silently emit a useless empty module.
+     */
+    @Test
+    void failsLoudlyWhenServiceHasNoOperations() throws Exception {
+        URL fixture = getClass().getResource("/fixtures/empty-service.smithy");
+        assertNotNull(fixture, "empty-service.smithy fixture not found on classpath");
+        Path modelPath = Path.of(fixture.toURI());
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> new ModuleGenerator().generate(modelPath, "0.1.0-SNAPSHOT"));
+        assertTrue(ex.getMessage().contains("0 operations"),
+                "error must explain the service resolved no operations, got: " + ex.getMessage());
+    }
+
     @Test
     void generatesXmlTemplatesAndRestRoutingForRestXmlProtocol() throws Exception {
         URL fixture = getClass().getResource("/fixtures/photo-service.smithy");

@@ -8,13 +8,14 @@ import java.nio.file.Path;
  * Entry point for the CloudMock stub code generator.
  *
  * <pre>
- * java -jar cloudmock-codegen.jar --model &lt;path-or-url&gt; [--output &lt;dir&gt;] [--core-version &lt;version&gt;]
+ * java -jar cloudmock-codegen.jar --model &lt;path-or-url&gt; [--output &lt;dir&gt;] [--core-version &lt;version&gt;] [--verbose]
  * </pre>
  *
  * <p>{@code --model} — path or HTTPS URL to a Smithy model file ({@code .smithy} IDL or {@code .json} AST).
  * <p>{@code --output} — directory to write the generated module into (default: {@code ./<module-name>}).
  * <p>{@code --core-version} — {@code cloudmock-core} version for the generated {@code build.gradle}
  * (default: {@value #DEFAULT_CORE_VERSION}).
+ * <p>{@code --verbose} — print each suppressed model validation event in full (default: count only).
  */
 public class Main {
 
@@ -24,12 +25,14 @@ public class Main {
         String modelArg    = null;
         Path outputDir     = null;
         String coreVersion = DEFAULT_CORE_VERSION;
+        boolean verbose    = false;
 
         for (int i = 0; i < args.length; i++) {
             switch (args[i]) {
                 case "--model"        -> modelArg    = args[++i];
                 case "--output"       -> outputDir   = Path.of(args[++i]).toAbsolutePath().normalize();
                 case "--core-version" -> coreVersion = args[++i];
+                case "--verbose"      -> verbose     = true;
                 default -> {
                     System.err.println("Unknown argument: " + args[i]);
                     usage();
@@ -56,7 +59,7 @@ public class Main {
         GenerationResult result;
 
         try {
-            result = new ModuleGenerator().generate(modelPath, coreVersion);
+            result = new ModuleGenerator(verbose).generate(modelPath, coreVersion);
         } catch (Exception e) {
             System.err.println("Generation failed: " + e.getMessage());
             System.exit(1);
@@ -84,9 +87,10 @@ public class Main {
     }
 
     private static void usage() {
-        System.err.println("Usage: java -jar cloudmock-codegen.jar --model <path-or-url> [--output <dir>] [--core-version <version>]");
+        System.err.println("Usage: java -jar cloudmock-codegen.jar --model <path-or-url> [--output <dir>] [--core-version <version>] [--verbose]");
         System.err.println("  --model        <path-or-url>  single Smithy model file (.smithy IDL or .json AST), local path or https:// URL");
         System.err.println("  --output       <dir>          output directory (default: ./<module-name>)");
         System.err.println("  --core-version <version>      cloudmock-core version (default: " + DEFAULT_CORE_VERSION + ")");
+        System.err.println("  --verbose                     print each suppressed model validation event in full");
     }
 }
