@@ -45,6 +45,21 @@ public final class CloudMock implements AutoCloseable {
     private WireMockServer server;
     private FaultEngine faultEngine;
     private final List<CloudMockService> explicitServices = new ArrayList<>();
+    private int fixedPort = 0;
+
+    /**
+     * Binds the server to a specific port instead of a random available one.
+     * Must be called before {@link #start()}.
+     *
+     * @throws CloudMockAlreadyStartedException if already started
+     */
+    public CloudMock withPort(int port) {
+        if (server != null) {
+            throw new CloudMockAlreadyStartedException();
+        }
+        this.fixedPort = port;
+        return this;
+    }
 
     /**
      * Registers a service module explicitly, in addition to any modules discovered via
@@ -187,10 +202,15 @@ public final class CloudMock implements AutoCloseable {
         });
     }
 
-    private static WireMockConfiguration wireMockConfig() {
-        return WireMockConfiguration.options()
-                .dynamicPort()
+    private WireMockConfiguration wireMockConfig() {
+        WireMockConfiguration config = WireMockConfiguration.options()
                 .globalTemplating(true)
                 .extensions(new Md5HandlebarsHelper(), new BrownoutTransformer());
+        if (fixedPort > 0) {
+            config.port(fixedPort);
+        } else {
+            config.dynamicPort();
+        }
+        return config;
     }
 }
