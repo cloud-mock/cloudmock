@@ -8,7 +8,7 @@ CloudMock's first-party service modules target the **AWS SDK for Java v2**. For 
     **connectivity**; it does not provide v1-shaped stub responses. See
     [Connectivity vs response fidelity](#connectivity-vs-response-fidelity) below before you rely on it.
 
-The AWS Java SDK v1 reached [end-of-support on 2025-12-31](https://aws.amazon.com/blogs/developer/announcing-end-of-support-for-aws-sdk-for-java-v1-x/).
+The AWS Java SDK v1 reached [end-of-support on 2025-12-31](https://aws.amazon.com/de/blogs/developer/announcing-end-of-support-for-aws-sdk-for-java-v1-x-on-december-31-2025/).
 The companion exists to support teams mid-migration. **Per-service first-party v1 stubs are explicitly a non-goal** —
 new service modules target the v2 protocol shape only.
 
