@@ -1,1 +1,5 @@
-// Phase 3 — stub
+dependencies {
+    compileOnly project(':cloudmock-core')
+    testImplementation project(':cloudmock-core')
+    testImplementation libs.aws.s3
+}
