@@ -61,21 +61,37 @@ See the full working tests in `cloudmock-example`:
 
 ## Dependencies
 
-```groovy
-def springBootVersion = '3.3.5'
+The `cloudmock-core` artifact shades its internal WireMock and Jetty dependencies, so it does not interfere with Spring Boot's own dependency management. You can use the Spring Boot BOM as normal.
 
-dependencies {
-    implementation "org.springframework.boot:spring-boot-starter:${springBootVersion}"
-    implementation 'software.amazon.awssdk:sqs:2.25.70'
-    implementation 'software.amazon.awssdk:secretsmanager:2.25.70'
+=== "Gradle"
 
-    testImplementation 'io.cloudmock:cloudmock-core:0.1.0'
-    testImplementation 'io.cloudmock:cloudmock-junit6:0.1.0'
-    testImplementation 'io.cloudmock:cloudmock-sqs:0.1.0'
-    testImplementation 'io.cloudmock:cloudmock-secretsmanager:0.1.0'
-    testImplementation "org.springframework.boot:spring-boot-starter-test:${springBootVersion}"
-}
-```
+    ```groovy
+    dependencies {
+        implementation platform('org.springframework.boot:spring-boot-dependencies:4.0.6')
+        implementation 'org.springframework.boot:spring-boot-starter'
+        implementation 'software.amazon.awssdk:sqs:2.25.70'
+        implementation 'software.amazon.awssdk:secretsmanager:2.25.70'
 
-!!! warning "Spring Boot BOM and WireMock"
-    Do not import `org.springframework.boot:spring-boot-dependencies` as a Gradle `platform()`. Spring Boot's BOM constrains Jetty to version 12, but CloudMock's embedded WireMock uses Jetty 11. Declare Spring Boot starters with explicit versions instead, as shown above.
+        testImplementation 'io.cloudmock:cloudmock-core:0.1.0'
+        testImplementation 'io.cloudmock:cloudmock-junit6:0.1.0'
+        testImplementation 'io.cloudmock:cloudmock-sqs:0.1.0'
+        testImplementation 'io.cloudmock:cloudmock-secretsmanager:0.1.0'
+        testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    }
+    ```
+
+=== "Maven"
+
+    ```xml
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>4.0.6</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+    ```
