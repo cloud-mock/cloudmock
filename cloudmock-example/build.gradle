@@ -10,4 +10,8 @@ dependencies {
     testImplementation project(':cloudmock-sqs')
     testImplementation project(':cloudmock-secretsmanager')
     testImplementation "org.springframework.boot:spring-boot-starter-test:${springBootVersion}"
+
+    // AWS SDK v1 companion + a real v1 client, for the SDK v1 bring-your-own-stub worked example
+    testImplementation project(':cloudmock-sdk-v1')
+    testImplementation libs.aws.v1.sns
 }
