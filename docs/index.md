@@ -12,18 +12,9 @@ It also ships as a **standalone runnable JAR** for local development: start it o
 
 ## Why CloudMock
 
-Testing against real AWS services or LocalStack means waiting for a container to start, keeping Docker available on
-every machine and CI runner, and loading every AWS service into memory whether you use it or not.
+Testing AWS integrations on the JVM typically means running an external process — a Docker container, a Python runtime, or both. That adds startup time and environment dependencies to every test and CI run.
 
 CloudMock answers a simpler question: what if the mock ran inside the JVM itself?
-
-|                   | CloudMock | LocalStack (free) | Mockito / SDK mocks |
-|-------------------|-----------|-------------------|---------------------|
-| Startup time      | ~100 ms   | 5–30 s            | Instant             |
-| Docker required   | No        | Yes               | No                  |
-| Tests HTTP layer  | Yes       | Yes               | No                  |
-| Modular footprint | Yes       | No                | N/A                 |
-| Open source       | Yes       | Partial           | Yes                 |
 
 ---
 

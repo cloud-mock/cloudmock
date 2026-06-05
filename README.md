@@ -8,27 +8,12 @@ CloudMock lets you test AWS service integrations without Docker, without credent
 container to spin up. It runs entirely in-process inside the JVM, starts in milliseconds, and loads only the service
 modules your project actually needs.
 
----
 
 ## Why CloudMock
 
-Local AWS testing today means running LocalStack — a full Docker container backed by a Python runtime. It works, but
-it brings real costs: 5–30 seconds of startup on a modern machine (60+ seconds under CI resource constraints), a hard
-Docker dependency that breaks lightweight runners, and every service module loaded into memory whether you use it or
-not.
+Testing AWS integrations on the JVM typically means running an external process — a Docker container, a Python runtime, or both. That adds startup time and environment dependencies to every test and CI run.
 
-CloudMock runs inside the JVM. No container, no external process, no configuration.
-
-|                   | CloudMock | LocalStack (free) | LocalStack (Pro) | Mockito / SDK mocks |
-|-------------------|-----------|-------------------|------------------|---------------------|
-| Startup time      | ~100ms    | 5–30s             | 5–30s            | Instant             |
-| Docker required   | No        | Yes               | Yes              | No                  |
-| Internet required | No        | No                | Yes (license)    | No                  |
-| Tests HTTP layer  | Yes       | Yes               | Yes              | No                  |
-| Modular footprint | Yes       | No                | No               | N/A                 |
-| Open source       | Yes       | Partial           | No               | Yes                 |
-
----
+CloudMock runs inside the JVM itself. No container, no external process, no extra runtime.
 
 ## Installation
 
@@ -77,8 +62,6 @@ dependencies {
 </dependencies>
 ```
 
----
-
 ## Quickstart
 
 ```java
@@ -107,9 +90,7 @@ cloudMock.stop();
 
 `CloudMock.start()` sets `aws.endpoint-url` automatically, so all AWS SDK v2 clients in the same JVM are redirected
 with no further configuration. For full JUnit 6 lifecycle management, fault injection, and `@ExtendWith` usage, see the
-[Getting Started guide](https://bnmosria.github.io/cloud-mock/getting-started/).
-
----
+[Getting Started guide](https://cloud-mock.github.io/cloud-mock/getting-started/).
 
 ## Standalone mode
 
@@ -131,9 +112,7 @@ export AWS_ENDPOINT_URL=http://localhost:4566
 ```
 
 > Standalone mode serves the same stateless, templated responses as embedded mode — it does not persist state across
-> calls. See the [Standalone Mode guide](https://bnmosria.github.io/cloud-mock/standalone/) for full details.
-
----
+> calls. See the [Standalone Mode guide](https://cloud-mock.github.io/cloud-mock/standalone/) for full details.
 
 ## Supported services
 
@@ -152,32 +131,21 @@ export AWS_ENDPOINT_URL=http://localhost:4566
 | `cloudmock-codegen` | Stub generator — produces a module skeleton from a Smithy model                |
 | `cloudmock-sdk-v1`  | AWS SDK v1 companion — one-line endpoint redirection for teams still on SDK v1 |
 
----
-
 ## Scope and limitations
 
-CloudMock simulates the AWS API surface well enough to test application logic, but it is not a full reimplementation of
-AWS. The following are explicitly out of scope:
+CloudMock validates that your application calls AWS correctly and handles responses properly. It is not a full reimplementation of AWS. Service-level behaviours like FIFO ordering, multipart upload lifecycle, conditional expressions, and IAM policy evaluation are out of scope. Tests that depend on these behaviours should run against a real AWS environment.
 
-- AWS SDK v1 automatic zero-config redirection — `aws.endpoint-url` is SDK v2 only; SDK v1 users use `cloudmock-sdk-v1`
-  for a one-line per-client redirect
-- SQS FIFO deduplication and ordering semantics
-- S3 multipart upload lifecycle and versioning
-- DynamoDB conditional expressions and transaction semantics
-- IAM policy evaluation
-
-Tests that depend on these behaviours should use LocalStack or a real AWS environment.
-
----
+AWS SDK v2 is fully supported with automatic zero-config redirection. SDK v1 users can use cloudmock-sdk-v1 for a one-line per-client redirect.
 
 ## Contributing
 
-CloudMock grows through community-contributed modules. Each AWS service is an independent module implementing a simple
+If a module you need doesn't exist yet, you can build it. Each AWS service is an independent module implementing a
+simple
 two-method SPI (`CloudMockService` + `StubRegistrar`).
 
-- **New module:** follow the [Module Authoring Guide](https://bnmosria.github.io/cloud-mock/module-authoring/)
+- **New module:** follow the [Module Authoring Guide](https://cloud-mock.github.io/cloud-mock/module-authoring/)
 - **New feature or bug:** open an issue in the [`issues/`](issues/) directory following the existing format
-- **Stub generation:** use the [codegen tool](https://bnmosria.github.io/cloud-mock/codegen/) to generate a module
+- **Stub generation:** use the [codegen tool](https://cloud-mock.github.io/cloud-mock/codegen/) to generate a module
   skeleton from a Smithy model
 
-Full documentation: **[bnmosria.github.io/cloud-mock](https://bnmosria.github.io/cloud-mock/)**
+Full documentation: **[CloudMock](https://cloud-mock.github.io/cloud-mock/)**

@@ -25,8 +25,8 @@ only on the services they use. The publishable set is the libraries consumers co
 - `io.github.cloud-mock:cloudmock-s3`
 - `io.github.cloud-mock:cloudmock-dynamodb` *(when implemented)*
 - `io.github.cloud-mock:cloudmock-lambda` *(when implemented)*
-- `io.github.cloud-mock:cloudmock-sdk-v1`
-- `io.github.cloud-mock:cloudmock-codegen`
+- `io.github.cloud-mock:cloudmock-sdk-v1` *(opt-in companion library for AWS SDK v1 consumers)*
+- `io.github.cloud-mock:cloudmock-codegen` *(published as a runnable tool JAR, like standalone — downloaded and run with `java -jar`, not compiled against)*
 - `io.github.cloud-mock:cloudmock-standalone`
 
 `cloudmock-example` is **not** published (it is a demonstration app, not a library).
@@ -53,8 +53,11 @@ plugin directory described in #0030 — Central simply hosts core-bundled-with-l
   existing `components.shadow` handling.)
 - [ ] All artifacts are PGP-signed (Gradle `signing` plugin). The signing key and passphrase are supplied via
   environment/Gradle properties (in-memory key for CI), never committed.
-- [ ] A release (non-`SNAPSHOT`) version is published. Define the initial release version (e.g. `0.1.0`) and keep
-  `-SNAPSHOT` only for ongoing development; document the snapshot-vs-release distinction.
+- [ ] A release (non-`SNAPSHOT`) version is published. The initial release is `0.1.0-beta.1` (a pre-release qualifier
+  signalling the API is not yet stable; Central accepts it because it is not a `-SNAPSHOT`), graduating to `0.1.0` for
+  the first stable release. Keep `-SNAPSHOT` only for ongoing development; document the snapshot/beta/release distinction.
+  Note Maven version ordering: `0.1.0-beta.1` < `0.1.0`, so the stable release correctly supersedes the beta, and the
+  numbered suffix allows further betas (`-beta.2`, …) before graduating.
 - [ ] Publication targets the Central Publisher Portal (Sonatype) repository. Credentials come from environment/Gradle
   properties; no secrets in the repo.
 - [ ] `cloudmock-standalone`'s published JAR bundles `cloudmock-core` and runs via `java -jar` with no extra core

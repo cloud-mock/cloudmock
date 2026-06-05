@@ -1,8 +1,8 @@
 site_name: CloudMock
 site_description: Embedded, containerless AWS mock for JVM integration tests
-site_url: https://bnmosria.github.io/cloud-mock/
-repo_url: https://github.com/bnmosria/cloud-mock
-repo_name: bnmosria/cloud-mock
+site_url: https://cloud-mock.github.io/cloud-mock/
+repo_url: https://github.com/cloud-mock/cloud-mock
+repo_name: cloud-mock/cloud-mock
 edit_uri: edit/main/docs/
 
 theme:
