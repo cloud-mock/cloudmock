@@ -1,10 +1,13 @@
 package io.cloudmock.core.internal;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
+import io.cloudmock.core.restapi.ModuleStatus;
+import io.cloudmock.core.restapi.StubInfo;
 import io.cloudmock.core.spi.HttpMethod;
 import io.cloudmock.core.spi.StubRegistrar;
 
 import java.net.HttpURLConnection;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
@@ -16,6 +19,9 @@ import static io.cloudmock.core.internal.HttpConstants.*;
  *
  * <p>Each registration is also recorded in the {@link ServiceRegistry} under the current
  * service ID so that {@link FaultEngine} can later generate matching fault stubs.
+ *
+ * <p>Stubs are named {@code cloudmock:<serviceId>:<matchKey>} so that
+ * {@code CloudMock.requestHistory()} can correlate serve events back to their service.
  */
 public final class WireMockStubRegistrar implements StubRegistrar {
 
@@ -39,14 +45,10 @@ public final class WireMockStubRegistrar implements StubRegistrar {
 
     @Override
     public void registerXmlFormStub(String actionName, String responseTemplate) {
-        // Match Action=<name> as a *complete* form parameter, not a substring. A plain
-        // containing("Action=Publish") would also match an "Action=PublishBatch" body, leaving
-        // correctness dependent on registration order + WireMock's last-wins tie-break. Anchoring
-        // the value to a parameter boundary (start-of-body or '&' on the left, '&' or end on the
-        // right) removes that fragility. Full-match semantics (RegexPattern), so anchor both sides.
         String actionPattern = "(?s)(.*&)?Action=" + Pattern.quote(actionName) + "(&.*)?";
         server.stubFor(post(anyUrl())
                 .withRequestBody(matching(actionPattern))
+                .withName(stubName(actionName))
                 .willReturn(aResponse()
                         .withStatus(HttpURLConnection.HTTP_OK)
                         .withHeader(HEADER_CONTENT_TYPE, CONTENT_TYPE_XML_UTF8)
@@ -62,6 +64,7 @@ public final class WireMockStubRegistrar implements StubRegistrar {
     public void registerJsonTargetStub(String target, String responseTemplate) {
         server.stubFor(post(anyUrl())
                 .withHeader(HEADER_AMZ_TARGET, equalTo(target))
+                .withName(stubName(target))
                 .willReturn(aResponse()
                         .withStatus(HttpURLConnection.HTTP_OK)
                         .withHeader(HEADER_CONTENT_TYPE, CONTENT_TYPE_AMZ_JSON_1_1)
@@ -75,14 +78,34 @@ public final class WireMockStubRegistrar implements StubRegistrar {
 
     @Override
     public void registerRestStub(HttpMethod method, String pathPattern, String responseTemplate) {
+        String matchKey = method.name() + " " + pathPattern;
         server.stubFor(request(method.name(), urlMatching(pathPattern))
+                .withName(stubName(matchKey))
                 .willReturn(aResponse()
                         .withStatus(HttpURLConnection.HTTP_OK)
                         .withBody(responseTemplate)));
         if (currentServiceId != null) {
             registry.record(currentServiceId, new StubRecord(
-                    StubProtocol.REST, method.name() + " " + pathPattern, responseTemplate,
+                    StubProtocol.REST, matchKey, responseTemplate,
                     "application/octet-stream", HttpURLConnection.HTTP_OK));
         }
+    }
+
+    /** Returns a live snapshot of all modules and their registered stubs. */
+    public List<ModuleStatus> moduleStatuses() {
+        return registry.allServiceIds().stream()
+                .sorted()
+                .map(id -> new ModuleStatus(
+                        id,
+                        registry.getStubs(id).stream()
+                                .map(r -> new StubInfo(r.protocol().name(), r.matchKey()))
+                                .toList()))
+                .toList();
+    }
+
+    private String stubName(String matchKey) {
+        return currentServiceId != null
+                ? "cloudmock:" + currentServiceId + ":" + matchKey
+                : "cloudmock:unknown:" + matchKey;
     }
 }
