@@ -46,7 +46,10 @@ subprojects {
     // Service modules may depend on cloudmock-core (the SPI lives there), but no service module
     // may depend on another service module at compile or runtime. Test code is exempt so that
     // integration test modules (e.g. cloudmock-junit6 tests) can combine multiple modules.
+    // cloudmock-standalone is also exempt: its entire purpose is to bundle all service modules
+    // into a single runnable fat JAR.
     afterEvaluate {
+        if (project.name == 'cloudmock-standalone') return
         ['compileClasspath', 'runtimeClasspath'].each { cfgName ->
             configurations.findByName(cfgName)?.allDependencies?.each { dep ->
                 if (dep.group == 'io.cloudmock' && dep.name != 'cloudmock-core') {
@@ -60,14 +63,16 @@ subprojects {
         }
     }
 
-    configurations.matching { !it.name.toLowerCase().contains('test') }.all {
-        resolutionStrategy.eachDependency { DependencyResolveDetails details ->
-            if (details.requested.group == 'io.cloudmock' && details.requested.name != 'cloudmock-core') {
-                throw new GradleException(
-                    "Module isolation violation in '${project.name}': " +
-                    "transitive dependency on '${details.requested.group}:${details.requested.name}' is forbidden. " +
-                    "cloudmock-* service modules must not depend on each other."
-                )
+    if (project.name != 'cloudmock-standalone') {
+        configurations.matching { !it.name.toLowerCase().contains('test') }.all {
+            resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+                if (details.requested.group == 'io.cloudmock' && details.requested.name != 'cloudmock-core') {
+                    throw new GradleException(
+                        "Module isolation violation in '${project.name}': " +
+                        "transitive dependency on '${details.requested.group}:${details.requested.name}' is forbidden. " +
+                        "cloudmock-* service modules must not depend on each other."
+                    )
+                }
             }
         }
     }

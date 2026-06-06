@@ -11,8 +11,10 @@ import io.cloudmock.core.internal.WireMockStubRegistrar;
 import io.cloudmock.core.spi.CloudMockService;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.ServiceLoader;
+import java.util.Set;
 
 /**
  * Entry point for the CloudMock framework.
@@ -45,6 +47,41 @@ public final class CloudMock implements AutoCloseable {
     private WireMockServer server;
     private FaultEngine faultEngine;
     private final List<CloudMockService> explicitServices = new ArrayList<>();
+    private int fixedPort = 0;
+    private Set<String> enabledServiceIds; // null = register every discovered module
+
+    /**
+     * Binds the server to a specific port instead of a random available one.
+     * Must be called before {@link #start()}.
+     *
+     * @throws CloudMockAlreadyStartedException if already started
+     */
+    public CloudMock withPort(int port) {
+        if (server != null) {
+            throw new CloudMockAlreadyStartedException();
+        }
+        this.fixedPort = port;
+        return this;
+    }
+
+    /**
+     * Restricts {@link ServiceLoader} discovery to the given service IDs. Only discovered
+     * modules whose {@link CloudMockService#serviceId()} is in {@code serviceIds} are
+     * registered; all others are ignored. Modules added via {@link #withService} are always
+     * registered and are not affected by this filter.
+     *
+     * <p>Passing {@code null} (the default) registers every discovered module. Must be called
+     * before {@link #start()}.
+     *
+     * @throws CloudMockAlreadyStartedException if the instance is already started
+     */
+    public CloudMock withEnabledServices(Collection<String> serviceIds) {
+        if (server != null) {
+            throw new CloudMockAlreadyStartedException();
+        }
+        this.enabledServiceIds = (serviceIds == null) ? null : Set.copyOf(serviceIds);
+        return this;
+    }
 
     /**
      * Registers a service module explicitly, in addition to any modules discovered via
@@ -178,6 +215,9 @@ public final class CloudMock implements AutoCloseable {
         faultEngine = registrar.newFaultEngine();
         ServiceLoader.load(CloudMockService.class, Thread.currentThread().getContextClassLoader())
                 .forEach(s -> {
+                    if (enabledServiceIds != null && !enabledServiceIds.contains(s.serviceId())) {
+                        return;
+                    }
                     registrar.setCurrentService(s.serviceId());
                     s.register(registrar);
                 });
@@ -187,10 +227,15 @@ public final class CloudMock implements AutoCloseable {
         });
     }
 
-    private static WireMockConfiguration wireMockConfig() {
-        return WireMockConfiguration.options()
-                .dynamicPort()
+    private WireMockConfiguration wireMockConfig() {
+        WireMockConfiguration config = WireMockConfiguration.options()
                 .globalTemplating(true)
                 .extensions(new Md5HandlebarsHelper(), new BrownoutTransformer());
+        if (fixedPort > 0) {
+            config.port(fixedPort);
+        } else {
+            config.dynamicPort();
+        }
+        return config;
     }
 }

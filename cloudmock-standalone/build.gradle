@@ -1,0 +1,32 @@
+apply plugin: 'com.github.johnrengelman.shadow'
+
+dependencies {
+    implementation project(':cloudmock-core')
+    runtimeOnly project(':cloudmock-sqs')
+    runtimeOnly project(':cloudmock-sns')
+    runtimeOnly project(':cloudmock-secretsmanager')
+    runtimeOnly project(':cloudmock-s3')
+
+    testImplementation project(':cloudmock-core')
+    testImplementation libs.aws.sqs
+    testImplementation libs.slf4j.simple
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'io.cloudmock.standalone.StandaloneMain'
+    }
+    archiveClassifier.set('original')
+}
+
+shadowJar {
+    archiveClassifier.set('')
+    archiveBaseName.set('cloudmock-standalone')
+    archiveVersion.set('')
+    mergeServiceFiles()
+}
+
+test {
+    dependsOn shadowJar
+    systemProperty 'cloudmock.standalone.jar', shadowJar.archiveFile.get().asFile.absolutePath
+}
