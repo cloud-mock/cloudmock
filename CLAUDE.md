@@ -29,6 +29,10 @@ Standard commands:
 ./gradlew publishToMavenLocal        # publish for local smoke testing
 ./gradlew :cloudmock-codegen:shadowJar                                 # build the codegen fat JAR
 java -jar cloudmock-codegen/build/libs/cloudmock-codegen.jar --model <path-or-url> [--output <dir>]  # stub generation
+./gradlew :cloudmock-standalone:shadowJar                              # build the standalone fat JAR
+java -jar cloudmock-standalone/build/libs/cloudmock-standalone.jar    # start on default port 4566
+java -jar cloudmock-standalone/build/libs/cloudmock-standalone.jar --port=4566   # explicit port
+CLOUDMOCK_PORT=4566 java -jar cloudmock-standalone/build/libs/cloudmock-standalone.jar  # via env var
 ```
 
 ### Subprojects
@@ -44,6 +48,7 @@ java -jar cloudmock-codegen/build/libs/cloudmock-codegen.jar --model <path-or-ur
 | `cloudmock-dynamodb` | Scaffolding only | Phase 3 — JSON/X-Amz-Target protocol |
 | `cloudmock-lambda` | Scaffolding only | Phase 3 — JSON/X-Amz-Target protocol |
 | `cloudmock-codegen` | Done | Smithy → CloudMockService stub generator |
+| `cloudmock-standalone` | Done | Runnable fat JAR; boots all service modules on port 4566 (default) for local dev |
 | `cloudmock-example` | Done | Spring Boot app + integration tests (CloudMockExtension) |
 
 ### Key dependency versions
@@ -68,6 +73,18 @@ Three layers, strictly in order of dependency:
 
 3. **WireMock (embedded)** — handles all networking, request matching, and Handlebars template processing. Completely
    hidden; no WireMock type is ever exposed in CloudMock's public API.
+
+## Standalone mode
+
+`cloudmock-standalone` is a thin launcher module that bundles `cloudmock-core` and all current service modules into a
+single runnable fat JAR. It is the drop-in replacement for LocalStack in local development scripts.
+
+- **Default port:** `4566` (matches LocalStack, so `AWS_ENDPOINT_URL=http://localhost:4566` works without changes)
+- **Port override:** `--port=<n>` CLI argument or `CLOUDMOCK_PORT` environment variable
+- **Module discovery:** `ServiceLoader` — the same mechanism as embedded mode; printed to stdout at startup
+- **Shutdown:** `Ctrl-C` / `SIGTERM` triggers a clean WireMock shutdown via a JVM shutdown hook, no stack trace
+- **Module isolation rule:** `cloudmock-standalone` is exempt from the inter-module isolation check in `build.gradle`
+  because its purpose is to bundle all modules; this exemption is intentional and must not be extended to other modules
 
 ## SPI contract (frozen)
 
