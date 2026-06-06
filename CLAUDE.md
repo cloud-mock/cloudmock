@@ -33,9 +33,10 @@ java -jar cloudmock-codegen/build/libs/cloudmock-codegen.jar --model <path-or-ur
 java -jar cloudmock-standalone/build/libs/cloudmock-standalone.jar    # start on default ports (4566 mock, 4567 API)
 java -jar cloudmock-standalone/build/libs/cloudmock-standalone.jar --port=4566 --api-port=4567   # explicit ports
 CLOUDMOCK_PORT=4566 CLOUDMOCK_API_PORT=4567 java -jar cloudmock-standalone/build/libs/cloudmock-standalone.jar  # via env vars
-./gradlew :cloudmock-cli:shadowJar                                     # build the CLI fat JAR
-./cloudmock-cli/bin/clm status                                         # drive a running standalone instance (clm / cloudmock)
 ```
+
+The `clm` / `cloudmock` CLI lives in its own repository (`cloud-mock/cloudmock-cli`), not in this
+monorepo — see the **CLI** section below.
 
 ### Subprojects
 
@@ -51,8 +52,10 @@ CLOUDMOCK_PORT=4566 CLOUDMOCK_API_PORT=4567 java -jar cloudmock-standalone/build
 | `cloudmock-lambda` | Scaffolding only | Phase 3 — JSON/X-Amz-Target protocol |
 | `cloudmock-codegen` | Done | Smithy → CloudMockService stub generator |
 | `cloudmock-standalone` | Done | Runnable fat JAR; boots all service modules on port 4566 (default) for local dev |
-| `cloudmock-cli` | Done | Thin HTTP client (`clm`/`cloudmock`); discovers `clm <service> <command>` from `/api/status`. No dependency on core/modules |
 | `cloudmock-example` | Done | Spring Boot app + integration tests (CloudMockExtension) |
+
+The `clm` / `cloudmock` CLI is **not** a subproject of this monorepo — it lives in a separate
+repository (`cloud-mock/cloudmock-cli`). See the **CLI** section.
 
 ### Key dependency versions
 
@@ -103,11 +106,13 @@ single runnable fat JAR. It is the drop-in replacement for LocalStack in local d
 
 ## CLI
 
-`cloudmock-cli` (`clm` / `cloudmock`, both via `cloudmock-cli/bin/`) is a thin HTTP client over the standalone REST API.
+`cloudmock-cli` (`clm` / `cloudmock`) is a thin HTTP client over the standalone REST API. It lives in its **own
+repository** (`cloud-mock/cloudmock-cli`, cloned locally at `../cloudmock-cli`), not in this monorepo — that placement
+is intentional and required by issue #0033. The notes below describe how it integrates with this repo's REST API.
 
 - **No dependencies on CloudMock:** depends only on picocli + jackson — *not* on `cloudmock-core`, WireMock, or any
-  service module. It must stay that way; it is the one module deliberately outside the SPI graph. It is NOT exempt from
-  the isolation check because it has no `io.cloudmock` dependencies to begin with.
+  service module. That zero-coupling is what lets it be a separate repo: it never imports a CloudMock type, it only
+  speaks HTTP to `/api/status` and `/api/<service>/…`.
 - **Runtime discovery:** built-in commands are `status` and `reset`; every other command is built at startup from the
   `routes` array of `GET /api/status`. A module route advertising a `service`, `command`, and `params` becomes
   `clm <service> <command>` with one option per param. Adding a module therefore adds CLI commands with no CLI change.

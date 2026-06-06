@@ -112,12 +112,12 @@ export AWS_ENDPOINT_URL=http://localhost:4566
 ```
 
 A companion CLI (`clm` / `cloudmock`) drives a running instance from the terminal — inspect status, send test data,
-reset services — without the AWS CLI. It is a thin HTTP client that discovers its commands from the server at runtime.
+reset services — without the AWS CLI. It is a thin HTTP client that discovers its commands from the server at runtime,
+and ships in its own repository: [cloud-mock/cloudmock-cli](https://github.com/cloud-mock/cloudmock-cli).
 
 ```
-./gradlew :cloudmock-cli:shadowJar
-./cloudmock-cli/bin/clm status
-./cloudmock-cli/bin/clm sqs send-message --queue orders --body "hello"
+clm status
+clm sqs send-message --queue orders --body "hello"
 ```
 
 > Standalone mode serves the same stateless, templated responses as embedded mode — it does not persist state across
@@ -140,7 +140,9 @@ reset services — without the AWS CLI. It is a thin HTTP client that discovers 
 | `cloudmock-junit6`  | JUnit 6 extension — `@ExtendWith` + fault injection                            |
 | `cloudmock-codegen` | Stub generator — produces a module skeleton from a Smithy model                |
 | `cloudmock-sdk-v1`  | AWS SDK v1 companion — one-line endpoint redirection for teams still on SDK v1 |
-| `cloudmock-cli`     | Command-line client (`clm` / `cloudmock`) for a running standalone instance    |
+
+The `clm` / `cloudmock` command-line client ships separately at
+[cloud-mock/cloudmock-cli](https://github.com/cloud-mock/cloudmock-cli).
 
 ## Scope and limitations
 

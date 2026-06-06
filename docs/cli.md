@@ -9,26 +9,32 @@ CloudMock internals, WireMock, or any service module, and it does not need the A
 discovers the available commands at runtime from `GET /api/status`, so a CloudMock instance with
 more modules loaded simply offers more commands — the CLI itself never changes.
 
-## Build
+## Install
+
+The CLI ships in its own repository, [cloud-mock/cloudmock-cli](https://github.com/cloud-mock/cloudmock-cli)
+— it has no dependency on CloudMock and is released independently. Build the fat JAR from a clone
+(requires Java 17+):
 
 ```
-./gradlew :cloudmock-cli:shadowJar
-# output: cloudmock-cli/build/libs/cloudmock-cli.jar
+git clone https://github.com/cloud-mock/cloudmock-cli
+cd cloudmock-cli
+./gradlew shadowJar
+# output: build/libs/cloudmock-cli.jar
 ```
 
-Run it via the bundled launcher scripts in `cloudmock-cli/bin/` (`cloudmock` is the binary, `clm`
-is an identical alias — both work), or directly with `java -jar`:
+Run it via the bundled launcher scripts in `bin/` (`cloudmock` is the binary, `clm` is an identical
+alias — both work; put `bin/` on your `PATH`), or directly with `java -jar`:
 
 === "Launcher script"
 
     ```
-    ./cloudmock-cli/bin/clm status
+    ./bin/clm status
     ```
 
 === "java -jar"
 
     ```
-    java -jar cloudmock-cli/build/libs/cloudmock-cli.jar status
+    java -jar build/libs/cloudmock-cli.jar status
     ```
 
 The examples below use `clm`.
