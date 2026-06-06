@@ -2,6 +2,10 @@ package io.cloudmock.core;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
+import com.github.tomakehurst.wiremock.stubbing.ServeEvent;
+import com.github.tomakehurst.wiremock.verification.LoggedRequest;
+import io.cloudmock.core.restapi.ModuleStatus;
+import io.cloudmock.core.restapi.RequestRecord;
 import io.cloudmock.core.exception.CloudMockAlreadyStartedException;
 import io.cloudmock.core.exception.CloudMockNotStartedException;
 import io.cloudmock.core.internal.BrownoutTransformer;
@@ -15,6 +19,7 @@ import io.cloudmock.core.spi.CloudMockService;
 import io.cloudmock.core.spi.StateStore;
 
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -50,8 +55,10 @@ public final class CloudMock implements AutoCloseable {
     private static final String ENDPOINT_PROPERTY = "aws.endpoint-url";
 
     private WireMockServer server;
+    private WireMockStubRegistrar registrar;
     private FaultEngine faultEngine;
     private StateStore stateStore;
+    private Instant startedAt;
     private final List<CloudMockService> explicitServices = new ArrayList<>();
     private int fixedPort = 0;
     private Set<String> enabledServiceIds; // null = register every discovered module
@@ -114,7 +121,7 @@ public final class CloudMock implements AutoCloseable {
      * <p>Useful in module-level tests where the test classpath structure may prevent
      * ServiceLoader from discovering the module under test automatically.
      *
-     * @throws CloudMockAlreadyStartedException if the instance is already started
+     * @throws CloudMockAlreadyStartedException if already started
      */
     public CloudMock withService(CloudMockService service) {
         if (server != null) {
@@ -136,6 +143,7 @@ public final class CloudMock implements AutoCloseable {
         }
         server = new WireMockServer(wireMockConfig());
         server.start();
+        startedAt = Instant.now();
         System.setProperty(ENDPOINT_PROPERTY, "http://localhost:" + server.port());
         stateStore = storeDirectory != null
                 ? new JsonFileStateStore(storeDirectory)
@@ -153,8 +161,10 @@ public final class CloudMock implements AutoCloseable {
         }
         server.stop();
         server = null;
+        registrar = null;
         faultEngine = null;
         stateStore = null;
+        startedAt = null;
         System.clearProperty(ENDPOINT_PROPERTY);
     }
 
@@ -173,6 +183,45 @@ public final class CloudMock implements AutoCloseable {
     public int port() {
         requireStarted();
         return server.port();
+    }
+
+    /** Returns the instant the server was started. Only valid after {@link #start()}. */
+    public Instant startedAt() {
+        requireStarted();
+        return startedAt;
+    }
+
+    /**
+     * Returns a live snapshot of all loaded modules and their registered stubs.
+     * Only valid after {@link #start()}.
+     */
+    public List<ModuleStatus> modules() {
+        requireStarted();
+        return registrar.moduleStatuses();
+    }
+
+    /**
+     * Returns all requests served since startup, newest first.
+     * Only valid after {@link #start()}.
+     */
+    public List<RequestRecord> requestHistory() {
+        requireStarted();
+        return server.getAllServeEvents().stream()
+                .map(this::toRequestRecord)
+                .toList();
+    }
+
+    /**
+     * Returns all requests served to the given service since startup, newest first.
+     * Unmatched requests (null serviceId) are excluded.
+     * Only valid after {@link #start()}.
+     */
+    public List<RequestRecord> requestHistory(String serviceId) {
+        requireStarted();
+        return server.getAllServeEvents().stream()
+                .map(this::toRequestRecord)
+                .filter(r -> serviceId.equals(r.serviceId()))
+                .toList();
     }
 
     /**
@@ -250,7 +299,7 @@ public final class CloudMock implements AutoCloseable {
     }
 
     private void loadAndRegisterServices() {
-        WireMockStubRegistrar registrar = new WireMockStubRegistrar(server);
+        registrar = new WireMockStubRegistrar(server);
         faultEngine = registrar.newFaultEngine();
         CloudMockContextImpl context = new CloudMockContextImpl(registrar, stateStore);
         ServiceLoader.load(CloudMockService.class, Thread.currentThread().getContextClassLoader())
@@ -277,5 +326,30 @@ public final class CloudMock implements AutoCloseable {
             config.dynamicPort();
         }
         return config;
+    }
+
+    private RequestRecord toRequestRecord(ServeEvent event) {
+        LoggedRequest req = event.getRequest();
+        String serviceId = null;
+        String operation = null;
+        if (event.getWasMatched() && event.getStubMapping() != null) {
+            String name = event.getStubMapping().getName();
+            if (name != null && name.startsWith("cloudmock:")) {
+                String[] parts = name.split(":", 3);
+                if (parts.length == 3) {
+                    serviceId = parts[1];
+                    operation = parts[2];
+                }
+            }
+        }
+        int statusCode = event.getResponse() != null ? event.getResponse().getStatus() : -1;
+        return new RequestRecord(
+                req.getLoggedDate().toInstant().toString(),
+                req.getMethod().value(),
+                req.getUrl(),
+                serviceId,
+                operation,
+                statusCode,
+                event.getWasMatched());
     }
 }

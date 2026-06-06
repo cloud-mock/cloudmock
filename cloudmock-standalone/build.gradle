@@ -2,6 +2,8 @@ apply plugin: 'com.github.johnrengelman.shadow'
 
 dependencies {
     implementation project(':cloudmock-core')
+    implementation libs.jackson.databind
+    runtimeOnly libs.slf4j.simple
     runtimeOnly project(':cloudmock-sqs')
     runtimeOnly project(':cloudmock-sns')
     runtimeOnly project(':cloudmock-secretsmanager')

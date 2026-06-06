@@ -75,10 +75,13 @@ silently missing service:
 [CloudMock] Available modules: sqs, sns, secretsmanager, s3
 [CloudMock] Enabled modules: sqs, secretsmanager
 CloudMock started on port 4566
+CloudMock API on port 4567
 ```
 
 The **Available** line lists every module bundled in the JAR; the **Enabled** line lists the ones actually serving
 requests. If a stub is not being served, check that its module appears on the Enabled line.
+
+The REST API is available at `http://localhost:4567` — see [REST API](rest-api.md) for the full reference.
 
 ## Point your application at it
 

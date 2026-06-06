@@ -1,16 +1,20 @@
 package io.cloudmock.standalone;
 
 import io.cloudmock.core.CloudMock;
+import io.cloudmock.core.spi.CloudMockApiService;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.ServiceLoader;
 import java.util.Set;
 
 public final class StandaloneMain {
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws Exception {
         int port = PortResolver.resolve(args);
+        int apiPort = ApiPortResolver.resolve(args);
         List<String> available = ServiceDiscovery.discoverServiceIds();
         Set<String> requested = ModuleSelector.resolve(args);
         List<String> enabled = resolveEnabled(available, requested);
@@ -29,13 +33,19 @@ public final class StandaloneMain {
             cloudMock.withStoreDirectory(storeDir);
         }
 
-        try (cloudMock) {
+        List<CloudMockApiService> apiServices = discoverApiServices();
+
+        try (cloudMock; ApiServer apiServer = new ApiServer(cloudMock, apiPort, apiServices)) {
             cloudMock.start();
+            apiServer.start();
+
             System.out.println("CloudMock started on port " + cloudMock.port());
+            System.out.println("CloudMock API on port " + apiPort);
             System.out.flush();
 
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 System.out.println("[CloudMock] Shutting down...");
+                apiServer.stop();
                 cloudMock.stop();
             }));
 
@@ -43,12 +53,6 @@ public final class StandaloneMain {
         }
     }
 
-    /**
-     * Resolves the effective set of modules to enable. When no filter is requested, all
-     * discovered modules are enabled. When a filter names a module that is not on the
-     * classpath, the process fails fast with a clear message rather than silently serving
-     * nothing for that module.
-     */
     private static List<String> resolveEnabled(List<String> available, Set<String> requested) {
         if (requested == null) {
             return available;
@@ -62,6 +66,14 @@ public final class StandaloneMain {
             System.exit(1);
         }
         return requested.stream().toList();
+    }
+
+    private static List<CloudMockApiService> discoverApiServices() {
+        List<CloudMockApiService> services = new ArrayList<>();
+        ServiceLoader.load(CloudMockApiService.class,
+                Thread.currentThread().getContextClassLoader())
+                .forEach(services::add);
+        return services;
     }
 
     private static String join(Collection<String> ids) {
