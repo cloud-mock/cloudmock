@@ -4,9 +4,11 @@
 
 ## Summary
 
-Once standalone mode and the state store exist, developers need a way to inspect and manipulate mock state from the
-terminal. The CLI lets users list resources, send test data, inspect state, and reset services without writing code
-or installing the AWS CLI. The binary ships as `cloudmock` with `clm` as a built-in alias.
+Once standalone mode and the state store exist, developers need a way to inspect and manipulate
+mock state from the terminal. The CLI lives in a separate repository `cloud-mock/cloudmock-cli`
+and connects to a running CloudMock standalone instance over the REST API. It lets users
+list resources, send test data, inspect state, and reset services without writing code or
+installing the AWS CLI. The binary ships as `cloudmock` with `clm` as a built-in alias.
 
 ## Initial commands
 
@@ -36,30 +38,34 @@ or installing the AWS CLI. The binary ships as `cloudmock` with `clm` as a built
 - `clm secrets get --name <secret-name>`
 - `clm secrets put --name <secret-name> --value <value>`
 
-Additional module commands are added as each module gains stateful support. The command structure follows the
-pattern `clm <service> <action>` so new modules plug in naturally.
+Additional module commands are added as each module gains stateful support. The command
+structure follows the pattern `clm <service> <action>` so new modules plug in naturally.
+The CLI discovers available commands from the `/api/status` endpoint at runtime — no
+hardcoded service list.
 
 ## Acceptance criteria
 
+- [ ] CLI lives in a separate repository `cloud-mock/cloudmock-cli`
 - [ ] Binary ships as `cloudmock` with `clm` as a built-in alias — both work
 - [ ] CLI can query running status and loaded modules
 - [ ] CLI supports the global commands listed above
 - [ ] CLI supports the SQS, S3, and Secrets Manager commands listed above
-- [ ] CLI communicates with standalone mode over HTTP via an admin API
+- [ ] CLI discovers available commands from `/api/status` — new modules expose new commands
+  automatically without any change to the CLI
+- [ ] CLI communicates with standalone mode over the REST API
 - [ ] CLI works without AWS SDK or AWS CLI installed
 - [ ] CLI returns clear error messages when CloudMock is not running or a service is not loaded
-- [ ] New module commands can be added without changing the CLI core
 
 ## Dependencies
 
 - 0021 (standalone mode)
 - 0024 (state store interface)
+- 0032 (REST API)
 
 ## Notes
 
-- The CLI is a thin HTTP client against an admin API exposed by standalone mode. The admin API and the state store
-  query interface from 0024 should be designed together.
-- Each module registers its own CLI commands following the same SPI pattern used for stub registration. The CLI
-  core discovers available commands at runtime based on which modules are loaded.
-- Consider whether this ships as part of the main JAR (`java -jar cloudmock.jar sqs list-queues`) or as a separate
-  native binary using GraalVM native-image for faster startup.
+- The CLI is a thin HTTP client against the REST API. It has no direct dependency on
+  CloudMock internals or WireMock.
+- Consider whether this ships as a native binary using GraalVM native-image for faster startup
+  or as a Java executable JAR. A native binary is the better developer experience — no JVM
+  required to run the CLI.
