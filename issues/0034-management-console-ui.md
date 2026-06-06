@@ -39,7 +39,7 @@ face of CloudMock.
 
 - 0021 (standalone mode)
 - 0024 (state store interface)
-- 0027 (admin REST API)
+- 0032 (admin REST API)
 
 ## Notes
 

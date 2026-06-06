@@ -116,12 +116,15 @@ lifecycle.
 
 This is the boundary that matters. The companion redirects the **endpoint**; it does not translate protocols.
 
-- CloudMock's first-party modules target the **SDK v2** protocol shape — JSON with an `X-Amz-Target` header.
-- SDK v1 SQS and SNS speak the **XML / QUERY** protocol, identifying the operation with an `Action` form-body parameter.
+- Most first-party modules — **SQS**, Secrets Manager, DynamoDB — target the **SDK v2** protocol shape: JSON with an
+  `X-Amz-Target` header. SDK v1 speaks the **XML / QUERY** protocol, identifying the operation with an `Action`
+  form-body parameter, so a v1 call to these services matches no first-party stub.
+- **SNS is the exception:** it uses the XML / QUERY protocol in *both* v1 and v2, so the first-party `cloudmock-sns`
+  module's `Action`-keyed stubs can already match a v1 SNS call — provided `cloudmock-sns` is on your classpath.
 
-A v1 call therefore arrives in a shape that no v2-targeted stub matches, so **WireMock returns 404** and the v1 client
-raises an `AmazonServiceException`. Connectivity is proven (you reached the server); response fidelity is not (no stub
-answered). The companion's own
+For the JSON/`X-Amz-Target` services, a v1 call therefore arrives in a shape that no first-party stub matches, so
+**WireMock returns 404** and the v1 client raises an `AmazonServiceException`. Connectivity is proven (you reached the
+server); response fidelity is not (no stub answered). The companion's own
 [`CloudMockV1EndpointsTest`](https://github.com/cloud-mock/cloud-mock/blob/main/cloudmock-sdk-v1/src/test/java/io/cloudmock/sdkv1/CloudMockV1EndpointsTest.java)
 asserts exactly this: a v1 `listQueues()` reaches CloudMock and gets an HTTP error response back, proving the connection
 without claiming a matched stub.
@@ -133,10 +136,15 @@ without claiming a matched stub.
 
 ## Bring your own stub
 
-To get a *populated* response for a v1 call, register a stub in the v1 (XML / QUERY) protocol yourself. You author a
-`CloudMockService` and register through `registerXmlFormStub(actionName, responseTemplate)` — keyed on the `Action`
-form parameter the v1 client sends. The full SPI walkthrough lives in the
-[Module Authoring guide](module-authoring.md); the short version for a v1 SNS `Publish`:
+To get a *populated* response for a v1 call against a JSON/`X-Amz-Target` service, register a stub in the v1
+(XML / QUERY) protocol yourself. You author a `CloudMockService` and register through
+`registerXmlFormStub(actionName, responseTemplate)` — keyed on the `Action` form parameter the v1 client sends. The
+full SPI walkthrough lives in the [Module Authoring guide](module-authoring.md).
+
+The short version below uses SNS `Publish`. SNS shares the XML / QUERY protocol across v1 and v2, so the first-party
+`cloudmock-sns` module would also serve this call; the example deliberately omits `cloudmock-sns` from its classpath to
+demonstrate the bring-your-own-stub path in isolation — the general escape hatch for any v1 operation no first-party
+module covers:
 
 ```java
 import io.cloudmock.core.spi.CloudMockService;
@@ -184,7 +192,7 @@ assertNotNull(result.getMessageId()); // populated — the XML/QUERY stub was se
 ```
 
 1. `withService(...)` installs the user-authored stub. The `cloudmock-sns` first-party module is not on the test
-   classpath, so no v2-shaped `Publish` stub competes with it. Plain `new CloudMock().withService(...)` works too if
+   classpath, so no other `Publish` stub competes with it. Plain `new CloudMock().withService(...)` works too if
    you are not using the JUnit 6 extension.
 
 Both files above are real, compiling code, exercised on every `./gradlew build`:

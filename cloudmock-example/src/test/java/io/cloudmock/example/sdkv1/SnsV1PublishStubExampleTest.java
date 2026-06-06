@@ -21,8 +21,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  * — proving the user-authored XML/QUERY stub is matched and served.
  *
  * <p>Uses {@link CloudMockExtension} with {@code withService(...)} to install the user-authored stub.
- * The {@code cloudmock-sns} first-party module is not on this test classpath, so there is no
- * v2-shaped {@code Publish} stub to compete with — the v1 QUERY stub is the only {@code Publish}
+ * The {@code cloudmock-sns} first-party module is not on this test classpath, so there is no other
+ * {@code Publish} stub to compete with — the user-authored QUERY stub is the only {@code Publish}
  * handler.
  */
 class SnsV1PublishStubExampleTest {

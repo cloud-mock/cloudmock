@@ -6,12 +6,14 @@ import io.cloudmock.core.spi.StubRegistrar;
 /**
  * Worked example of the <strong>bring-your-own-stub</strong> path for AWS SDK v1.
  *
- * <p>The {@code cloudmock-sdk-v1} companion only redirects the endpoint; first-party CloudMock
- * modules target the SDK v2 protocol shape (JSON / {@code X-Amz-Target}). SDK v1 SNS speaks the
- * XML/QUERY {@code Action}-form protocol, so a v1 call against a v2-shaped stub returns 404. A v1
- * user closes that gap by authoring their own {@link CloudMockService} and registering stubs via
- * {@link StubRegistrar#registerXmlFormStub(String, String)} — exactly as this class does for the
- * SNS {@code Publish} action.
+ * <p>The {@code cloudmock-sdk-v1} companion only redirects the endpoint. Most first-party CloudMock
+ * modules target the SDK v2 protocol shape (JSON / {@code X-Amz-Target}), which SDK v1's XML/QUERY
+ * {@code Action}-form requests do not match — so a v1 call against those services returns 404. (SNS
+ * is the exception: it uses XML/QUERY in both v1 and v2, so {@code cloudmock-sns} would also serve
+ * this call; it is deliberately kept off this test's classpath to isolate the bring-your-own-stub
+ * path.) A v1 user closes the gap by authoring their own {@link CloudMockService} and registering
+ * stubs via {@link StubRegistrar#registerXmlFormStub(String, String)} — exactly as this class does
+ * for the SNS {@code Publish} action.
  *
  * <p>Install it explicitly with {@code new CloudMockExtension().withService(new SnsV1PublishStubService())};
  * see {@code module-authoring.md} for the full SPI walkthrough.
