@@ -13,13 +13,13 @@ endpoint redirection via `aws.endpoint-url`.
 
 ## Acceptance criteria
 
-- [ ] A new `cloudmock-sdk-v1` subproject is added to `settings.gradle`
-- [ ] The subproject declares the AWS SDK v1 (`com.amazonaws:aws-java-sdk-core`) as a `compileOnly` dependency — it must not force SDK v1 onto consumers who do not need it
-- [ ] A `CloudMockV1Endpoints` utility class provides a static helper that returns an `EndpointConfiguration` (or equivalent) pointing at `http://localhost:<port>` with a dummy signing region
-- [ ] Usage requires exactly one extra line compared to a normal SDK v1 client setup — no XML, no properties file, no subclassing
-- [ ] `cloudmock-sdk-v1` has no compile dependency on any other `cloudmock-*` module; the isolation constraint from #0001 continues to pass
-- [ ] At least one integration test configures an SDK v1 client via the helper, sends a request to a running `CloudMock` instance, and asserts it reaches WireMock without a connection error
-- [ ] The README "Scope and limitations" note is updated to reflect that SDK v1 is supported via the companion library
+- [x] A new `cloudmock-sdk-v1` subproject is added to `settings.gradle`
+- [x] The subproject declares the AWS SDK v1 (`com.amazonaws:aws-java-sdk-core`) as a `compileOnly` dependency — it must not force SDK v1 onto consumers who do not need it
+- [x] A `CloudMockV1Endpoints` utility class provides a static helper that returns an `EndpointConfiguration` (or equivalent) pointing at `http://localhost:<port>` with a dummy signing region
+- [x] Usage requires exactly one extra line compared to a normal SDK v1 client setup — no XML, no properties file, no subclassing
+- [x] `cloudmock-sdk-v1` has no compile dependency on any other `cloudmock-*` module; the isolation constraint from #0001 continues to pass
+- [x] At least one integration test configures an SDK v1 client via the helper, sends a request to a running `CloudMock` instance, and asserts it reaches WireMock without a connection error
+- [x] The README "Scope and limitations" note is updated to reflect that SDK v1 is supported via the companion library
 
 ## Dependencies
 

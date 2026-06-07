@@ -13,17 +13,17 @@ path is demonstrated by real, compiling code rather than described in prose.
 
 ## Acceptance criteria
 
-- [ ] A new page `docs/sdk-v1.md` is created and registered under the **Guides** section of `mkdocs.yml` nav (alongside JUnit 6, Spring Boot, Fault Injection)
-- [ ] The page includes Gradle/Maven dependency snippets for `cloudmock-sdk-v1`, a service module, and the relevant `com.amazonaws:aws-java-sdk-*` client
-- [ ] The page shows the one-line redirection pattern: `CloudMockV1Endpoints.forPort(cloudMock.port())` passed to `.withEndpointConfiguration(...)`, with a full `@BeforeAll`/`@AfterAll` example
-- [ ] The page documents the **connectivity vs response fidelity** boundary: the companion only redirects the endpoint; first-party modules target the SDK v2 protocol shape (JSON / `X-Amz-Target`), while SDK v1 SQS/SNS speak the XML/QUERY `Action`-form protocol, so a v1 call against a v2-shaped stub returns 404
-- [ ] The page documents the **bring-your-own-stub** path: a v1 user authors a `CloudMockService` and registers stubs via `registerXmlFormStub(actionName, responseTemplate)`, linking to `module-authoring.md` for the full SPI walkthrough
-- [ ] A **runnable example** is delivered: a user-authored `CloudMockService` that registers one or more XML/QUERY stubs via `registerXmlFormStub` (e.g. an SNS `Publish` or SQS `SendMessage` `Action`), installed via `withService(...)`
-- [ ] An accompanying test drives that stub with a real **SDK v1** client and asserts a populated response (not merely connectivity) — proving the v1 stub is matched and served end-to-end
-- [ ] The example compiles and the test passes in `./gradlew build`; the docs page embeds (or links to) this exact code so the guide cannot drift from working code
-- [ ] The page notes that the AWS Java SDK v1 reached end-of-support on 2025-12-31, that the companion exists to support teams mid-migration, and that per-service first-party v1 stubs are explicitly a non-goal
-- [ ] The page explains the dummy signing region (`us-east-1`) and anonymous credentials are required by SDK v1 but have no effect on stub matching
-- [ ] The `docs/index.md` and/or `getting-started.md` cross-link to the new page where SDK version support is mentioned
+- [x] A new page `docs/sdk-v1.md` is created and registered under the **Guides** section of `mkdocs.yml` nav (alongside JUnit 6, Spring Boot, Fault Injection)
+- [x] The page includes Gradle/Maven dependency snippets for `cloudmock-sdk-v1`, a service module, and the relevant `com.amazonaws:aws-java-sdk-*` client
+- [x] The page shows the one-line redirection pattern: `CloudMockV1Endpoints.forPort(cloudMock.port())` passed to `.withEndpointConfiguration(...)`, with a full `@BeforeAll`/`@AfterAll` example
+- [x] The page documents the **connectivity vs response fidelity** boundary: the companion only redirects the endpoint; first-party modules target the SDK v2 protocol shape (JSON / `X-Amz-Target`), while SDK v1 SQS/SNS speak the XML/QUERY `Action`-form protocol, so a v1 call against a v2-shaped stub returns 404
+- [x] The page documents the **bring-your-own-stub** path: a v1 user authors a `CloudMockService` and registers stubs via `registerXmlFormStub(actionName, responseTemplate)`, linking to `module-authoring.md` for the full SPI walkthrough
+- [x] A **runnable example** is delivered: a user-authored `CloudMockService` that registers one or more XML/QUERY stubs via `registerXmlFormStub` (e.g. an SNS `Publish` or SQS `SendMessage` `Action`), installed via `withService(...)`
+- [x] An accompanying test drives that stub with a real **SDK v1** client and asserts a populated response (not merely connectivity) — proving the v1 stub is matched and served end-to-end
+- [x] The example compiles and the test passes in `./gradlew build`; the docs page embeds (or links to) this exact code so the guide cannot drift from working code
+- [x] The page notes that the AWS Java SDK v1 reached end-of-support on 2025-12-31, that the companion exists to support teams mid-migration, and that per-service first-party v1 stubs are explicitly a non-goal
+- [x] The page explains the dummy signing region (`us-east-1`) and anonymous credentials are required by SDK v1 but have no effect on stub matching
+- [x] The `docs/index.md` and/or `getting-started.md` cross-link to the new page where SDK version support is mentioned
 
 ## Dependencies
 

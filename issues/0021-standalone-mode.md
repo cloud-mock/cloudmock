@@ -13,14 +13,14 @@ dependency is required in this mode.
 
 ## Acceptance criteria
 
-- [ ] A new `cloudmock-standalone` subproject (or a `main` entry point in `cloudmock-core`) provides a `main` method that boots CloudMock and blocks until the process is stopped
-- [ ] The port is configurable via a CLI argument or environment variable; it defaults to `4566` to ease migration from LocalStack
-- [ ] Module discovery uses `ServiceLoader.load(CloudMockService.class)` — the same mechanism as the embedded mode; no new registration API is introduced
-- [ ] `./gradlew :cloudmock-standalone:shadowJar` (or equivalent) produces a runnable fat JAR
-- [ ] Running `java -jar cloudmock-standalone.jar` prints the bound port and "CloudMock started" (or similar) to stdout
-- [ ] A `Ctrl-C` / `SIGTERM` shuts the process down cleanly without a stack trace
-- [ ] At least one integration test starts the standalone JAR as a subprocess, sends a request using the AWS SDK v2, and asserts it is served correctly
-- [ ] CLAUDE.md is updated to document the standalone mode entry point and default port
+- [x] A new `cloudmock-standalone` subproject (or a `main` entry point in `cloudmock-core`) provides a `main` method that boots CloudMock and blocks until the process is stopped
+- [x] The port is configurable via a CLI argument or environment variable; it defaults to `4566` to ease migration from LocalStack
+- [x] Module discovery uses `ServiceLoader.load(CloudMockService.class)` — the same mechanism as the embedded mode; no new registration API is introduced
+- [x] `./gradlew :cloudmock-standalone:shadowJar` (or equivalent) produces a runnable fat JAR
+- [x] Running `java -jar cloudmock-standalone.jar` prints the bound port and "CloudMock started" (or similar) to stdout
+- [x] A `Ctrl-C` / `SIGTERM` shuts the process down cleanly without a stack trace
+- [x] At least one integration test starts the standalone JAR as a subprocess, sends a request using the AWS SDK v2, and asserts it is served correctly
+- [x] CLAUDE.md is updated to document the standalone mode entry point and default port
 
 ## Dependencies
 
