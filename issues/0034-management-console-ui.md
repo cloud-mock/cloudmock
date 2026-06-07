@@ -1,14 +1,16 @@
-# Management console web UI
+# CloudMock web UI
 
 **Type:** dx
 
 ## Summary
 
-A lightweight web interface served alongside the admin REST API in standalone mode. The console gives developers
-visual access to mock state without touching the CLI or writing code. It consumes only the admin REST API and
-uses the `/api/status` discovery endpoint to build its navigation — when a module is added or removed, the
-console reflects this automatically. The console should be polished and visually appealing — it is the public
-face of CloudMock.
+A lightweight web interface that connects to a running CloudMock standalone instance over the
+REST API. The console gives developers visual access to mock state without touching the CLI or
+writing code. It uses the `/api/status` discovery endpoint to build its navigation — when a
+module is added or removed, the console reflects this automatically. The console lives in a
+separate repository `cloud-mock/cloudmock-console` and is an optional install, not part of
+the core distribution. It should be polished and visually appealing — it is the public face
+of CloudMock.
 
 ## Features
 
@@ -16,14 +18,14 @@ face of CloudMock.
 - Per-service resource browser, dynamically built from discovered module routes
 - Payload inspection for messages, objects, and secrets with syntax highlighting
 - Request history timeline with filtering by service and operation
-- Ability to send test data through the API (push a message, upload an object, create a secret)
+- Ability to send test data through the REST API (push a message, upload an object, create a secret)
 - Reset controls per service and globally
 - Dark and light mode support
 
 ## Acceptance criteria
 
-- [ ] Console served as a static SPA on the same port as the admin REST API
-- [ ] Console consumes only the admin REST API — no direct state store access
+- [ ] Console lives in a separate repository `cloud-mock/cloudmock-console`
+- [ ] Console consumes only the CloudMock REST API — no direct state store access
 - [ ] Navigation is built dynamically from `/api/status` — no hardcoded service list
 - [ ] Adding or removing a module changes the console automatically
 - [ ] Design is modern, clean, and professional — not a bare-bones admin panel
@@ -31,20 +33,20 @@ face of CloudMock.
 - [ ] Responsive layout that works on different screen sizes
 - [ ] Dark and light mode
 - [ ] Payload viewer supports JSON syntax highlighting and formatting
-- [ ] Console works in any modern browser with no install
-- [ ] Console is bundled into the standalone JAR — no separate build or deploy step
-- [ ] No login, no setup — open the browser, see state
+- [ ] Works in any modern browser with no install
+- [ ] No login, no setup — open the browser, point it at your CloudMock instance, see state
 
 ## Dependencies
 
 - 0021 (standalone mode)
 - 0024 (state store interface)
-- 0032 (admin REST API)
+- 0032 (REST API)
 
 ## Notes
 
-- Built with Angular. Bundled as static assets inside the JAR so standalone mode serves everything from a
-  single artifact.
-- Look at Grafana, Linear, and the Stripe dashboard as design references — developer tools that are both
-  functional and well-crafted.
-- PrimeNG are good component library options for a polished result without heavy custom CSS.
+- Built with Angular and PrimeNG.
+- Separate repository means the console can be versioned independently from CloudMock core.
+  As long as the REST API contract does not change, any console version works with any
+  CloudMock version.
+- Look at Grafana, Linear, and the Stripe dashboard as design references — developer tools
+  that are both functional and well-crafted.

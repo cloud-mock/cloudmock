@@ -1,0 +1,23 @@
+package io.cloudmock.standalone;
+
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+class ApiPortResolverTest {
+
+    @Test
+    void defaultsTo4567() {
+        assertEquals(4567, ApiPortResolver.resolve(new String[0]));
+    }
+
+    @Test
+    void parsesLongFlagWithEquals() {
+        assertEquals(9000, ApiPortResolver.resolve(new String[]{"--api-port=9000"}));
+    }
+
+    @Test
+    void parsesLongFlagWithSpace() {
+        assertEquals(9001, ApiPortResolver.resolve(new String[]{"--api-port", "9001"}));
+    }
+}

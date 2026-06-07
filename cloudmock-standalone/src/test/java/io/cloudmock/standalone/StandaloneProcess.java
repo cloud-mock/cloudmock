@@ -29,7 +29,8 @@ final class StandaloneProcess implements AutoCloseable {
         String jarPath = System.getProperty("cloudmock.standalone.jar");
         assertNotNull(jarPath, "cloudmock.standalone.jar system property must be set");
 
-        List<String> command = new ArrayList<>(List.of("java", "-jar", jarPath, "--port=" + port));
+        List<String> command = new ArrayList<>(List.of("java", "-jar", jarPath,
+                "--port=" + port, "--api-port=" + (port + 1000)));
         command.addAll(List.of(extraArgs));
 
         ProcessBuilder pb = new ProcessBuilder(command);

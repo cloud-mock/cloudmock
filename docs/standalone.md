@@ -62,6 +62,26 @@ Modules not listed are not registered and will not serve any request.
 
 Module selection precedence: `--modules` flag → `CLOUDMOCK_MODULES` env var → all bundled modules.
 
+### Limit retained request history
+
+The REST API records served requests for `GET /api/history`. In a long-lived process this journal is
+capped at the last 1000 entries by default. Override the cap, or remove it entirely:
+
+=== "CLI flag"
+
+    ```
+    java -jar cloudmock-standalone/build/libs/cloudmock-standalone.jar --max-history=5000
+    ```
+
+=== "Environment variable"
+
+    ```
+    CLOUDMOCK_MAX_HISTORY=5000 java -jar cloudmock-standalone/build/libs/cloudmock-standalone.jar
+    ```
+
+History cap precedence: `--max-history` flag → `CLOUDMOCK_MAX_HISTORY` env var → default `1000`.
+Pass `unlimited` (or `none`) to retain every request.
+
 If you name a module that is not on the classpath, the server fails fast with a clear error instead of starting up with a
 silently missing service:
 
@@ -74,11 +94,16 @@ silently missing service:
 ```
 [CloudMock] Available modules: sqs, sns, secretsmanager, s3
 [CloudMock] Enabled modules: sqs, secretsmanager
+[CloudMock] State storage: persistent (.cloudmock)
+[CloudMock] Request history: last 1000 entries
 CloudMock started on port 4566
+CloudMock API on port 4567
 ```
 
 The **Available** line lists every module bundled in the JAR; the **Enabled** line lists the ones actually serving
 requests. If a stub is not being served, check that its module appears on the Enabled line.
+
+The REST API is available at `http://localhost:4567` — see [REST API](rest-api.md) for the full reference.
 
 ## Point your application at it
 

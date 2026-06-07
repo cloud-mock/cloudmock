@@ -30,9 +30,9 @@ Standard commands:
 ./gradlew :cloudmock-codegen:shadowJar                                 # build the codegen fat JAR
 java -jar cloudmock-codegen/build/libs/cloudmock-codegen.jar --model <path-or-url> [--output <dir>]  # stub generation
 ./gradlew :cloudmock-standalone:shadowJar                              # build the standalone fat JAR
-java -jar cloudmock-standalone/build/libs/cloudmock-standalone.jar    # start on default port 4566
-java -jar cloudmock-standalone/build/libs/cloudmock-standalone.jar --port=4566   # explicit port
-CLOUDMOCK_PORT=4566 java -jar cloudmock-standalone/build/libs/cloudmock-standalone.jar  # via env var
+java -jar cloudmock-standalone/build/libs/cloudmock-standalone.jar    # start on default ports (4566 mock, 4567 API)
+java -jar cloudmock-standalone/build/libs/cloudmock-standalone.jar --port=4566 --api-port=4567   # explicit ports
+CLOUDMOCK_PORT=4566 CLOUDMOCK_API_PORT=4567 java -jar cloudmock-standalone/build/libs/cloudmock-standalone.jar  # via env vars
 ```
 
 ### Subprojects
@@ -81,6 +81,11 @@ single runnable fat JAR. It is the drop-in replacement for LocalStack in local d
 
 - **Default port:** `4566` (matches LocalStack, so `AWS_ENDPOINT_URL=http://localhost:4566` works without changes)
 - **Port override:** `--port=<n>` CLI argument or `CLOUDMOCK_PORT` environment variable
+- **API port:** `4567` (default) — REST API served on a secondary port in the same process; override with `--api-port=<n>` or `CLOUDMOCK_API_PORT`
+- **Request history cap:** `--max-history=<n>` CLI argument or `CLOUDMOCK_MAX_HISTORY` env var bounds the in-memory
+  request journal exposed by `GET /api/history` (default `1000`; `unlimited`/`none`/`0` to disable). Backed by
+  `CloudMock.withMaxRequestHistory(int)`, which sets WireMock's `maxRequestJournalEntries`. A full `POST /api/reset`
+  (no `service`) also clears the history via `CloudMock.clearHistory()`; a single-service reset does not.
 - **Module discovery:** `ServiceLoader` — the same mechanism as embedded mode; printed to stdout at startup
 - **Module selection:** `--modules=<a,b>` CLI argument or `CLOUDMOCK_MODULES` env var enables only the listed service
   IDs (default: all bundled modules). Backed by `CloudMock.withEnabledServices(Collection<String>)` in core, which

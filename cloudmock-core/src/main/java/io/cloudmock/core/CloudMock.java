@@ -1,25 +1,26 @@
 package io.cloudmock.core;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
-import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import io.cloudmock.core.exception.CloudMockAlreadyStartedException;
 import io.cloudmock.core.exception.CloudMockNotStartedException;
-import io.cloudmock.core.internal.BrownoutTransformer;
-import io.cloudmock.core.internal.CloudMockContextImpl;
+import io.cloudmock.core.internal.AwsEndpointOverride;
+import io.cloudmock.core.internal.CloudMockSettings;
 import io.cloudmock.core.internal.FaultEngine;
-import io.cloudmock.core.internal.store.InMemoryStateStore;
-import io.cloudmock.core.internal.store.JsonFileStateStore;
-import io.cloudmock.core.internal.Md5HandlebarsHelper;
+import io.cloudmock.core.internal.ModuleInitializer;
+import io.cloudmock.core.internal.RequestHistory;
+import io.cloudmock.core.internal.WireMockServerFactory;
 import io.cloudmock.core.internal.WireMockStubRegistrar;
+import io.cloudmock.core.internal.store.StateStoreFactory;
+import io.cloudmock.core.restapi.ModuleStatus;
+import io.cloudmock.core.restapi.RequestRecord;
 import io.cloudmock.core.spi.CloudMockService;
 import io.cloudmock.core.spi.StateStore;
 
 import java.nio.file.Path;
-import java.util.ArrayList;
+import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 import java.util.ServiceLoader;
-import java.util.Set;
 
 /**
  * Entry point for the CloudMock framework.
@@ -27,6 +28,12 @@ import java.util.Set;
  * <p>Boots an embedded HTTP server on a random available port, redirects all AWS SDK v2
  * traffic to that port via the {@code aws.endpoint-url} system property, and invokes
  * every {@link CloudMockService} discovered on the classpath to register their stubs.
+ *
+ * <p>This class coordinates lifecycle and exposes the public API; the work of each concern is
+ * delegated to focused collaborators in {@code io.cloudmock.core.internal}: building the server
+ * ({@link WireMockServerFactory}), choosing the state store ({@link StateStoreFactory}),
+ * discovering and registering modules ({@link ModuleInitializer}), translating the request
+ * journal ({@link RequestHistory}), and the SDK endpoint override ({@link AwsEndpointOverride}).
  *
  * <p>Typical usage in a JUnit 6 test:
  * <pre>
@@ -47,15 +54,17 @@ import java.util.Set;
  */
 public final class CloudMock implements AutoCloseable {
 
-    private static final String ENDPOINT_PROPERTY = "aws.endpoint-url";
+    /** Default cap on retained request-history entries; bounds memory in long-lived processes. */
+    public static final int DEFAULT_MAX_REQUEST_HISTORY = 1000;
+
+    private final CloudMockSettings settings = new CloudMockSettings(DEFAULT_MAX_REQUEST_HISTORY);
 
     private WireMockServer server;
+    private WireMockStubRegistrar registrar;
     private FaultEngine faultEngine;
     private StateStore stateStore;
-    private final List<CloudMockService> explicitServices = new ArrayList<>();
-    private int fixedPort = 0;
-    private Set<String> enabledServiceIds; // null = register every discovered module
-    private Path storeDirectory; // null = in-memory store
+    private RequestHistory requestHistory;
+    private Instant startedAt;
 
     /**
      * Configures a directory for persistent state storage. State written to the store will
@@ -67,10 +76,22 @@ public final class CloudMock implements AutoCloseable {
      * @throws CloudMockAlreadyStartedException if already started
      */
     public CloudMock withStoreDirectory(Path directory) {
-        if (server != null) {
-            throw new CloudMockAlreadyStartedException();
-        }
-        this.storeDirectory = directory;
+        requireNotStarted();
+        settings.setStoreDirectory(directory);
+        return this;
+    }
+
+    /**
+     * Caps the number of request-history entries retained in memory. Older entries are discarded
+     * once the limit is reached, bounding memory use in a long-lived standalone process. A value
+     * of {@code 0} or less retains an unbounded history. Defaults to
+     * {@link #DEFAULT_MAX_REQUEST_HISTORY}. Must be called before {@link #start()}.
+     *
+     * @throws CloudMockAlreadyStartedException if already started
+     */
+    public CloudMock withMaxRequestHistory(int maxEntries) {
+        requireNotStarted();
+        settings.setMaxRequestHistory(maxEntries);
         return this;
     }
 
@@ -81,10 +102,8 @@ public final class CloudMock implements AutoCloseable {
      * @throws CloudMockAlreadyStartedException if already started
      */
     public CloudMock withPort(int port) {
-        if (server != null) {
-            throw new CloudMockAlreadyStartedException();
-        }
-        this.fixedPort = port;
+        requireNotStarted();
+        settings.setPort(port);
         return this;
     }
 
@@ -100,10 +119,8 @@ public final class CloudMock implements AutoCloseable {
      * @throws CloudMockAlreadyStartedException if the instance is already started
      */
     public CloudMock withEnabledServices(Collection<String> serviceIds) {
-        if (server != null) {
-            throw new CloudMockAlreadyStartedException();
-        }
-        this.enabledServiceIds = (serviceIds == null) ? null : Set.copyOf(serviceIds);
+        requireNotStarted();
+        settings.setEnabledServiceIds(serviceIds);
         return this;
     }
 
@@ -114,13 +131,11 @@ public final class CloudMock implements AutoCloseable {
      * <p>Useful in module-level tests where the test classpath structure may prevent
      * ServiceLoader from discovering the module under test automatically.
      *
-     * @throws CloudMockAlreadyStartedException if the instance is already started
+     * @throws CloudMockAlreadyStartedException if already started
      */
     public CloudMock withService(CloudMockService service) {
-        if (server != null) {
-            throw new CloudMockAlreadyStartedException();
-        }
-        explicitServices.add(service);
+        requireNotStarted();
+        settings.addExplicitService(service);
         return this;
     }
 
@@ -131,16 +146,16 @@ public final class CloudMock implements AutoCloseable {
      * @throws CloudMockAlreadyStartedException if this instance is already started
      */
     public void start() {
-        if (server != null) {
-            throw new CloudMockAlreadyStartedException();
-        }
-        server = new WireMockServer(wireMockConfig());
-        server.start();
-        System.setProperty(ENDPOINT_PROPERTY, "http://localhost:" + server.port());
-        stateStore = storeDirectory != null
-                ? new JsonFileStateStore(storeDirectory)
-                : new InMemoryStateStore();
-        loadAndRegisterServices();
+        requireNotStarted();
+        server = WireMockServerFactory.createStarted(settings);
+        startedAt = Instant.now();
+        AwsEndpointOverride.set(server.port());
+        stateStore = StateStoreFactory.create(settings.storeDirectory());
+
+        ModuleInitializer.Result modules = ModuleInitializer.initialize(server, settings, stateStore);
+        registrar = modules.registrar();
+        faultEngine = modules.faultEngine();
+        requestHistory = new RequestHistory(server);
     }
 
     /**
@@ -153,14 +168,17 @@ public final class CloudMock implements AutoCloseable {
         }
         server.stop();
         server = null;
+        registrar = null;
         faultEngine = null;
         stateStore = null;
-        System.clearProperty(ENDPOINT_PROPERTY);
+        requestHistory = null;
+        startedAt = null;
+        AwsEndpointOverride.clear();
     }
 
     /**
      * Returns the shared state store. Only valid after {@link #start()}.
-     * Exposed for direct state inspection in tests and for the admin REST API.
+     * Exposed for direct state inspection in tests and for the REST API.
      *
      * @throws CloudMockNotStartedException if not yet started
      */
@@ -173,6 +191,49 @@ public final class CloudMock implements AutoCloseable {
     public int port() {
         requireStarted();
         return server.port();
+    }
+
+    /** Returns the instant the server was started. Only valid after {@link #start()}. */
+    public Instant startedAt() {
+        requireStarted();
+        return startedAt;
+    }
+
+    /**
+     * Returns a live snapshot of all loaded modules and their registered stubs.
+     * Only valid after {@link #start()}.
+     */
+    public List<ModuleStatus> modules() {
+        requireStarted();
+        return registrar.moduleStatuses();
+    }
+
+    /**
+     * Returns all requests served since startup, newest first.
+     * Only valid after {@link #start()}.
+     */
+    public List<RequestRecord> requestHistory() {
+        requireStarted();
+        return requestHistory.all();
+    }
+
+    /**
+     * Returns all requests served to the given service since startup, newest first.
+     * Unmatched requests (null serviceId) are excluded.
+     * Only valid after {@link #start()}.
+     */
+    public List<RequestRecord> requestHistory(String serviceId) {
+        requireStarted();
+        return requestHistory.forService(serviceId);
+    }
+
+    /**
+     * Clears the captured request history, leaving registered stubs and stored state intact.
+     * Only valid after {@link #start()}.
+     */
+    public void clearHistory() {
+        requireStarted();
+        requestHistory.clear();
     }
 
     /**
@@ -249,33 +310,9 @@ public final class CloudMock implements AutoCloseable {
         }
     }
 
-    private void loadAndRegisterServices() {
-        WireMockStubRegistrar registrar = new WireMockStubRegistrar(server);
-        faultEngine = registrar.newFaultEngine();
-        CloudMockContextImpl context = new CloudMockContextImpl(registrar, stateStore);
-        ServiceLoader.load(CloudMockService.class, Thread.currentThread().getContextClassLoader())
-                .forEach(s -> {
-                    if (enabledServiceIds != null && !enabledServiceIds.contains(s.serviceId())) {
-                        return;
-                    }
-                    registrar.setCurrentService(s.serviceId());
-                    s.register(context);
-                });
-        explicitServices.forEach(s -> {
-            registrar.setCurrentService(s.serviceId());
-            s.register(context);
-        });
-    }
-
-    private WireMockConfiguration wireMockConfig() {
-        WireMockConfiguration config = WireMockConfiguration.options()
-                .globalTemplating(true)
-                .extensions(new Md5HandlebarsHelper(), new BrownoutTransformer());
-        if (fixedPort > 0) {
-            config.port(fixedPort);
-        } else {
-            config.dynamicPort();
+    private void requireNotStarted() {
+        if (server != null) {
+            throw new CloudMockAlreadyStartedException();
         }
-        return config;
     }
 }
