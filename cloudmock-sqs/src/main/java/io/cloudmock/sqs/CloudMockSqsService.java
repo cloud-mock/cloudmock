@@ -81,7 +81,7 @@ public class CloudMockSqsService implements CloudMockService {
 
     private StubResponse receiveMessage(StubRequest req, StateStore store) {
         String name = SqsJson.queueName(SqsJson.stringField(req.body(), "QueueUrl"));
-        int max = SqsJson.intField(req.body(), "MaxNumberOfMessages", 1);
+        int max = SqsJson.maxNumberOfMessages(req.body());
         List<String> keys = store.list(messagePrefix(name));
 
         StringBuilder messages = new StringBuilder();
@@ -90,8 +90,13 @@ public class CloudMockSqsService implements CloudMockService {
             if (count >= max) {
                 break;
             }
+            Object stored = store.get(key);
+            if (stored == null) {
+                // Concurrently deleted between list() and get(); skip rather than emit Body="null".
+                continue;
+            }
             String id = key.substring(key.lastIndexOf('/') + 1);
-            String body = String.valueOf(store.get(key));
+            String body = stored.toString();
             if (count > 0) {
                 messages.append(',');
             }
@@ -126,15 +131,18 @@ public class CloudMockSqsService implements CloudMockService {
     private StubResponse listQueues(StubRequest req, StateStore store) {
         StringBuilder urls = new StringBuilder();
         int count = 0;
-        for (String key : store.list("sqs/queues/")) {
-            // Queue marker keys have no further path segment; message keys do.
-            if (key.indexOf('/', "sqs/queues/".length()) >= 0) {
+        for (String key : store.list(QUEUES_PREFIX)) {
+            if (!isQueueMarkerKey(key)) {
+                continue;
+            }
+            Object url = store.get(key);
+            if (url == null) {
                 continue;
             }
             if (count > 0) {
                 urls.append(',');
             }
-            urls.append('"').append(SqsJson.escape(String.valueOf(store.get(key)))).append('"');
+            urls.append('"').append(SqsJson.escape(url.toString())).append('"');
             count++;
         }
         return StubResponse.json("{\"QueueUrls\":[" + urls + "]}");
@@ -152,15 +160,22 @@ public class CloudMockSqsService implements CloudMockService {
                 + "\"ReceiveMessageWaitTimeSeconds\":\"0\"}}");
     }
 
+    private static final String QUEUES_PREFIX = "sqs/queues/";
+
     private static String queueKey(String name) {
-        return "sqs/queues/" + name;
+        return QUEUES_PREFIX + name;
     }
 
     private static String messagePrefix(String name) {
-        return "sqs/queues/" + name + "/messages/";
+        return QUEUES_PREFIX + name + "/messages/";
     }
 
     private static String messageKey(String name, String id) {
         return messagePrefix(name) + id;
+    }
+
+    /** A queue marker key (e.g. {@code sqs/queues/demo}) has no further path segment; messages do. */
+    private static boolean isQueueMarkerKey(String key) {
+        return key.indexOf('/', QUEUES_PREFIX.length()) < 0;
     }
 }

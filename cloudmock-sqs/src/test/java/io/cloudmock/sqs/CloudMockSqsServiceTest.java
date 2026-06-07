@@ -23,6 +23,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class CloudMockSqsServiceTest {
 
+    // HttpClient is not AutoCloseable on the Java 17 baseline, so it is held as a shared field
+    // rather than a try-with-resources local.
+    static final HttpClient HTTP = HttpClient.newHttpClient();
+
     static CloudMock cloudMock;
     static SqsClient sqsClient;
 
@@ -53,8 +57,7 @@ class CloudMockSqsServiceTest {
     /** Sends a raw JSON request with X-Amz-Target — verifies stub registration and JSON matching. */
     @Test
     void rawJsonRequestMatchesStub() throws Exception {
-        HttpClient http = HttpClient.newHttpClient();
-        HttpResponse<String> response = http.send(
+        HttpResponse<String> response = HTTP.send(
                 HttpRequest.newBuilder()
                         .uri(URI.create("http://localhost:" + cloudMock.port() + "/"))
                         .POST(HttpRequest.BodyPublishers.ofString("{}"))
@@ -108,6 +111,19 @@ class CloudMockSqsServiceTest {
         assertNotNull(msg.receiptHandle());
         assertEquals("round-trip payload", msg.body(),
                 "stateful receive must return the body that was sent");
+    }
+
+    @Test
+    void messageBodyContainingHandlebarsRoundTripsVerbatim() {
+        // Guards that handler output is not re-processed by WireMock's global response templating:
+        // the stateful transformer fills the body after the template engine has already run.
+        String queueUrl = newQueue();
+        String payload = "danger {{request.url}} and {{md5 'x'}} end";
+        sqsClient.sendMessage(b -> b.queueUrl(queueUrl).messageBody(payload));
+
+        Message msg = sqsClient.receiveMessage(b -> b.queueUrl(queueUrl)).messages().get(0);
+        assertEquals(payload, msg.body(),
+                "handler body must not be re-evaluated as a Handlebars template");
     }
 
     @Test

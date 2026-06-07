@@ -41,8 +41,7 @@ class CloudMockSqsPersistenceTest {
                 .withService(new CloudMockSqsService())) {
             cloudMock.start();
             try (SqsClient sqs = client(cloudMock.port())) {
-                String url = queueUrl;
-                List<Message> messages = sqs.receiveMessage(b -> b.queueUrl(url)).messages();
+                List<Message> messages = sqs.receiveMessage(b -> b.queueUrl(queueUrl)).messages();
                 assertEquals(1, messages.size(), "message must survive a restart");
                 assertEquals("persisted payload", messages.get(0).body());
             }

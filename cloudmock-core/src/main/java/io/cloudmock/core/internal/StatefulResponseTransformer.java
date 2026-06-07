@@ -66,10 +66,14 @@ public class StatefulResponseTransformer implements ResponseTransformerV2 {
             return response;
         }
         StubResponse result = handler.handle(new WireMockStubRequest(serveEvent.getRequest()), stateStore);
+        HttpHeaders headers = new HttpHeaders(new HttpHeader(HEADER_CONTENT_TYPE, result.contentType()));
+        for (Map.Entry<String, String> header : result.headers().entrySet()) {
+            headers = headers.plus(new HttpHeader(header.getKey(), header.getValue()));
+        }
         return Response.Builder.like(response)
                 .but()
                 .status(result.status())
-                .headers(new HttpHeaders(new HttpHeader(HEADER_CONTENT_TYPE, result.contentType())))
+                .headers(headers)
                 .body(result.body())
                 .build();
     }

@@ -1,6 +1,7 @@
 package io.cloudmock.core.internal;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.client.MappingBuilder;
 import io.cloudmock.core.restapi.ModuleStatus;
 import io.cloudmock.core.restapi.StubInfo;
 import io.cloudmock.core.spi.HttpMethod;
@@ -96,51 +97,42 @@ public final class WireMockStubRegistrar implements StubRegistrar {
 
     @Override
     public void registerXmlFormStub(String actionName, StubHandler handler) {
-        String key = stubName(actionName);
-        stateful.register(key, handler);
         String actionPattern = "(?s)(.*&)?Action=" + Pattern.quote(actionName) + "(&.*)?";
-        server.stubFor(post(anyUrl())
-                .withRequestBody(matching(actionPattern))
-                .withName(key)
-                .willReturn(handlerResponse(key)));
-        recordHandlerStub(StubProtocol.FORM_URL, actionName, CONTENT_TYPE_XML_UTF8, key);
+        registerHandlerStub(StubProtocol.FORM_URL, actionName,
+                post(anyUrl()).withRequestBody(matching(actionPattern)),
+                CONTENT_TYPE_XML_UTF8, handler);
     }
 
     @Override
     public void registerJsonTargetStub(String target, StubHandler handler) {
-        String key = stubName(target);
-        stateful.register(key, handler);
-        server.stubFor(post(anyUrl())
-                .withHeader(HEADER_AMZ_TARGET, equalTo(target))
-                .withName(key)
-                .willReturn(handlerResponse(key)));
-        recordHandlerStub(StubProtocol.JSON_TARGET, target, CONTENT_TYPE_AMZ_JSON_1_1, key);
+        registerHandlerStub(StubProtocol.JSON_TARGET, target,
+                post(anyUrl()).withHeader(HEADER_AMZ_TARGET, equalTo(target)),
+                CONTENT_TYPE_AMZ_JSON_1_1, handler);
     }
 
     @Override
     public void registerRestStub(HttpMethod method, String pathPattern, StubHandler handler) {
-        String matchKey = method.name() + " " + pathPattern;
-        String key = stubName(matchKey);
-        stateful.register(key, handler);
-        server.stubFor(request(method.name(), urlMatching(pathPattern))
-                .withName(key)
-                .willReturn(handlerResponse(key)));
-        recordHandlerStub(StubProtocol.REST, matchKey, "application/octet-stream", key);
+        registerHandlerStub(StubProtocol.REST, method.name() + " " + pathPattern,
+                request(method.name(), urlMatching(pathPattern)),
+                "application/octet-stream", handler);
     }
 
     /**
-     * Base response for a handler stub: empty until the {@link StatefulResponseTransformer} replaces
-     * its body, status, and content type at request time. The {@code handlerKey} parameter selects
-     * which registered handler runs.
+     * Shared registration for all three stateful protocols: names the stub, registers the handler
+     * under that key, and points the stub at the {@link StatefulResponseTransformer}. The base
+     * response is empty — the transformer replaces its status, content type, and body at request
+     * time. {@code contentType} is recorded only for fault stubs (the live response sets its own).
      */
-    private static com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder handlerResponse(String key) {
-        return aResponse()
-                .withStatus(HttpURLConnection.HTTP_OK)
-                .withTransformers(StatefulResponseTransformer.NAME)
-                .withTransformerParameter(StatefulResponseTransformer.HANDLER_KEY_PARAM, key);
-    }
-
-    private void recordHandlerStub(StubProtocol protocol, String matchKey, String contentType, String key) {
+    private void registerHandlerStub(StubProtocol protocol, String matchKey, MappingBuilder matcher,
+                                     String contentType, StubHandler handler) {
+        String key = stubName(matchKey);
+        stateful.register(key, handler);
+        server.stubFor(matcher
+                .withName(key)
+                .willReturn(aResponse()
+                        .withStatus(HttpURLConnection.HTTP_OK)
+                        .withTransformers(StatefulResponseTransformer.NAME)
+                        .withTransformerParameter(StatefulResponseTransformer.HANDLER_KEY_PARAM, key)));
         if (currentServiceId != null) {
             registry.record(currentServiceId, new StubRecord(
                     protocol, matchKey, "", contentType, HttpURLConnection.HTTP_OK, key));
