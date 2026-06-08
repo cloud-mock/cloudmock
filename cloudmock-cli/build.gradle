@@ -1,0 +1,27 @@
+apply plugin: 'com.github.johnrengelman.shadow'
+
+dependencies {
+    implementation project(':cloudmock-core')
+    implementation libs.picocli
+    implementation libs.jackson.databind
+
+    // Service module CLI plugins discovered at runtime via ServiceLoader
+    runtimeOnly project(':cloudmock-sqs')
+    runtimeOnly project(':cloudmock-s3')
+    runtimeOnly project(':cloudmock-secretsmanager')
+    runtimeOnly project(':cloudmock-sns')
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'io.cloudmock.cli.ClmMain'
+    }
+    archiveClassifier.set('original')
+}
+
+shadowJar {
+    archiveClassifier.set('')
+    archiveBaseName.set('cloudmock-cli')
+    archiveVersion.set('')
+    mergeServiceFiles()
+}

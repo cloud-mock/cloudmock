@@ -1,5 +1,7 @@
 dependencies {
     compileOnly project(':cloudmock-core')
+    compileOnly libs.picocli
+    compileOnly libs.jackson.databind
     testImplementation project(':cloudmock-core')
     testImplementation libs.aws.secretsmanager
 }
