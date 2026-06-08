@@ -56,8 +56,6 @@ public class CloudMockSqsService implements CloudMockService {
             """
             {"Attributes":{"VisibilityTimeout":"30","ApproximateNumberOfMessages":"0","ApproximateNumberOfMessagesNotVisible":"0","MaximumMessageSize":"262144","MessageRetentionPeriod":"345600","ReceiveMessageWaitTimeSeconds":"0"}}""";
 
-    private static final String PURGE_QUEUE = "{}";
-
     @Override
     public String serviceId() {
         return SERVICE_ID;
@@ -74,6 +72,5 @@ public class CloudMockSqsService implements CloudMockService {
         registrar.registerJsonTargetStub(PREFIX + "DeleteQueue",        DELETE_QUEUE);
         registrar.registerJsonTargetStub(PREFIX + "ListQueues",         LIST_QUEUES);
         registrar.registerJsonTargetStub(PREFIX + "GetQueueAttributes", GET_QUEUE_ATTRIBUTES);
-        registrar.registerJsonTargetStub(PREFIX + "PurgeQueue",         PURGE_QUEUE);
     }
 }

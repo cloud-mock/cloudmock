@@ -1,6 +1,5 @@
 dependencies {
     compileOnly project(':cloudmock-core')
-    compileOnly libs.picocli
     testImplementation project(':cloudmock-core')
     testImplementation libs.aws.s3
 }

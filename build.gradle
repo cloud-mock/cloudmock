@@ -36,7 +36,7 @@ subprojects {
         publishing {
             publications {
                 mavenJava(MavenPublication) {
-                    from(components.findByName('shadow') ?: components.java)
+                    from(components.named('shadow') ?: components.java)
                     artifactId = project.name
                 }
             }
@@ -49,11 +49,9 @@ subprojects {
     // cloudmock-standalone is also exempt: its entire purpose is to bundle all service modules
     // into a single runnable fat JAR.
     afterEvaluate {
-        // cloudmock-standalone and cloudmock-cli are bundler modules whose explicit
-        // purpose is to aggregate service modules; the isolation check does not apply.
-        if (project.name == 'cloudmock-standalone' || project.name == 'cloudmock-cli') return
+        if (project.name == 'cloudmock-standalone') return
         ['compileClasspath', 'runtimeClasspath'].each { cfgName ->
-            configurations.findByName(cfgName)?.allDependencies?.each { dep ->
+            configurations.named(cfgName)?.allDependencies?.each { dep ->
                 if (dep.group == 'io.cloudmock' && dep.name != 'cloudmock-core') {
                     throw new GradleException(
                         "Module isolation violation in '${project.name}': " +
@@ -65,8 +63,8 @@ subprojects {
         }
     }
 
-    if (project.name != 'cloudmock-standalone' && project.name != 'cloudmock-cli') {
-        configurations.matching { !it.name.toLowerCase().contains('test') }.all {
+    if (project.name != 'cloudmock-standalone') {
+        configurations.matching { !it.name.toLowerCase().contains('test') }.configureEach {
             resolutionStrategy.eachDependency { DependencyResolveDetails details ->
                 if (details.requested.group == 'io.cloudmock' && details.requested.name != 'cloudmock-core') {
                     throw new GradleException(
