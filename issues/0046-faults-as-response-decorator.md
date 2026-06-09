@@ -25,18 +25,18 @@ new response features need no `FaultEngine` change at all.
 
 ## Acceptance criteria
 
-- [ ] Faults are applied as a decoration/transformation over the existing matched stub's response,
+- [x] Faults are applied as a decoration/transformation over the existing matched stub's response,
   rather than a re-declared parallel stub that duplicates the response definition
-- [ ] Adding a new response capability (headers, statefulness, etc.) requires no change to the fault
+- [x] Adding a new response capability (headers, statefulness, etc.) requires no change to the fault
   layer — the fault composes over whatever the normal path produced
-- [ ] `FaultEngine` no longer special-cases `handlerKey`; the stateful handler runs through the
+- [x] `FaultEngine` no longer special-cases `handlerKey`; the stateful handler runs through the
   normal response path, and the fault layer is unaware of it
-- [ ] A faulted stateful request runs its handler **at most once** (no double-execution from the
+- [x] A faulted stateful request runs its handler **at most once** (no double-execution from the
   fault path re-invoking the handler), and a hard fault (throttle, connection reset) does not run the
   handler at all where the body is discarded
-- [ ] Public fault API is unchanged: `CloudMock.simulateThrottle/simulateTimeout/simulateNetworkBrownout`,
+- [x] Public fault API is unchanged: `CloudMock.simulateThrottle/simulateTimeout/simulateNetworkBrownout`,
   `clearFaults`, `clearAllFaults`, and the `@Simulate*` annotations behave as before
-- [ ] Existing fault-injection tests (`cloudmock-junit6` `FaultInjectionTest`, `StatefulStubTest`)
+- [x] Existing fault-injection tests (`cloudmock-junit6` `FaultInjectionTest`, `StatefulStubTest`)
   pass unchanged; add coverage for timeout/brownout over a stateful stub
 
 ## Dependencies
