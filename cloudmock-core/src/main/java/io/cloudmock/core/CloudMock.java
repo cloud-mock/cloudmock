@@ -4,11 +4,12 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import io.cloudmock.core.exception.CloudMockAlreadyStartedException;
 import io.cloudmock.core.exception.CloudMockNotStartedException;
 import io.cloudmock.core.internal.AwsEndpointOverride;
+import io.cloudmock.core.internal.CloudMockResponseTransformer;
 import io.cloudmock.core.internal.CloudMockSettings;
 import io.cloudmock.core.internal.FaultEngine;
 import io.cloudmock.core.internal.ModuleInitializer;
 import io.cloudmock.core.internal.RequestHistory;
-import io.cloudmock.core.internal.StatefulResponseTransformer;
+import io.cloudmock.core.internal.ServiceRegistry;
 import io.cloudmock.core.internal.WireMockServerFactory;
 import io.cloudmock.core.internal.WireMockStubRegistrar;
 import io.cloudmock.core.internal.store.StateStoreFactory;
@@ -148,18 +149,20 @@ public final class CloudMock implements AutoCloseable {
      */
     public void start() {
         requireNotStarted();
-        // The store and its transformer must exist before the server, since the transformer is
-        // registered as a WireMock extension at server-build time.
+        // The store, registry, fault engine, and transformer must exist before the server, since the
+        // transformer is registered as a WireMock extension at server-build time. The transformer is
+        // the single response path: it runs stateful handlers and applies faults as a decoration
+        // over the response, so faults are not parallel shadow stubs.
         stateStore = StateStoreFactory.create(settings.storeDirectory());
-        StatefulResponseTransformer stateful = new StatefulResponseTransformer(stateStore);
-        server = WireMockServerFactory.createStarted(settings, stateful);
+        ServiceRegistry registry = new ServiceRegistry();
+        faultEngine = new FaultEngine();
+        CloudMockResponseTransformer transformer =
+                new CloudMockResponseTransformer(stateStore, registry, faultEngine);
+        server = WireMockServerFactory.createStarted(settings, transformer);
         startedAt = Instant.now();
         AwsEndpointOverride.set(server.port());
 
-        ModuleInitializer.Result modules =
-                ModuleInitializer.initialize(server, settings, stateStore, stateful);
-        registrar = modules.registrar();
-        faultEngine = modules.faultEngine();
+        registrar = ModuleInitializer.initialize(server, settings, stateStore, transformer, registry);
         requestHistory = new RequestHistory(server);
     }
 
