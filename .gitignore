@@ -34,3 +34,6 @@ bin/
 ### CloudMock ###
 # Standalone's default persistent state directory, written when running from the repo tree.
 .cloudmock/
+
+# MkDocs build output (site_dir).
+/site/
