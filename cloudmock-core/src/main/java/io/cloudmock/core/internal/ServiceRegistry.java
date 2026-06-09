@@ -8,10 +8,11 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Records which stubs each service module registered, so {@link FaultEngine} can generate
- * matching fault stubs for any service without coupling to its implementation.
+ * Records which stubs each service module registered, so {@link CloudMockResponseTransformer} can
+ * look up a matched stub's protocol when decorating its response with a fault, without coupling to
+ * the module's implementation.
  */
-class ServiceRegistry {
+public class ServiceRegistry {
 
     private final Map<String, List<StubRecord>> byService = new HashMap<>();
 
@@ -21,6 +22,16 @@ class ServiceRegistry {
 
     public List<StubRecord> getStubs(String serviceId) {
         return Collections.unmodifiableList(byService.getOrDefault(serviceId, List.of()));
+    }
+
+    /** The recorded stub for {@code serviceId} matching {@code matchKey}, or {@code null} if none. */
+    StubRecord find(String serviceId, String matchKey) {
+        for (StubRecord record : byService.getOrDefault(serviceId, List.of())) {
+            if (record.matchKey().equals(matchKey)) {
+                return record;
+            }
+        }
+        return null;
     }
 
     public Set<String> allServiceIds() {
