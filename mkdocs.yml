@@ -40,6 +40,7 @@ nav:
       - REST API: rest-api.md
       - CLI: cli.md
       - Console: console.md
+      - Logging: logging.md
       - SDK v1 Support: sdk-v1.md
   - Module Authoring: module-authoring.md
   - CloudMock Codegen: codegen.md

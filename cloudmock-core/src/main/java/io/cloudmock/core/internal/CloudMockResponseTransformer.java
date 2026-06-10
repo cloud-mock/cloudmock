@@ -100,21 +100,38 @@ public class CloudMockResponseTransformer implements ResponseTransformerV2 {
 
         FaultEngine.Fault fault = faultEngine.faultFor(serviceId);
         Response result;
+        String faultTag = null;
         if (fault == null) {
             result = runHandler(name, response, serveEvent);
         } else {
             result = switch (fault.type()) {
-                case THROTTLE -> throttle(registry.find(serviceId, operation), response);
-                case TIMEOUT -> Response.Builder.like(response).but()
-                        .incrementInitialDelay(TIMEOUT_DELAY_MS).build();
-                case BROWNOUT -> brownout(fault.rate(), name, response, serveEvent);
+                case THROTTLE -> {
+                    faultTag = "throttled";
+                    yield throttle(registry.find(serviceId, operation), response);
+                }
+                case TIMEOUT -> {
+                    faultTag = "timeout";
+                    yield Response.Builder.like(response).but()
+                            .incrementInitialDelay(TIMEOUT_DELAY_MS).build();
+                }
+                case BROWNOUT -> {
+                    faultTag = "brownout";
+                    yield brownout(fault.rate(), name, response, serveEvent);
+                }
             };
         }
-        log.info("{} {} -> {}", serviceId, operation, result.getStatus());
+        if (faultTag != null) {
+            log.info("{} {} -> {} [{}]", serviceId, operation, result.getStatus(), faultTag);
+        } else {
+            log.info("{} {} -> {}", serviceId, operation, result.getStatus());
+        }
         if (log.isDebugEnabled()) {
             Request req = serveEvent.getRequest();
             log.debug("  request body: {}", req.getBodyAsString());
-            log.debug("  response body: {}", result.getBodyAsString());
+            String body = result.getBodyAsString();
+            if (body != null) {
+                log.debug("  response body: {}", body);
+            }
         }
         return result;
     }
