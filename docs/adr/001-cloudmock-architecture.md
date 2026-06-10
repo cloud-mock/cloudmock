@@ -1,7 +1,7 @@
 # ADR-001: CloudMock — Ultra-Lightweight, Containerless AWS Mock Framework
 
 | Field             | Value               |
-|-------------------|---------------------|
+| ----------------- | ------------------- |
 | **Status**        | Accepted            |
 | **Date**          | 2026-06-01          |
 | **Authors**       | CloudMock Core Team |
@@ -329,7 +329,7 @@ the Docker dependency or startup time.
 ## Open questions
 
 | #     | Question                                                                                                                                                  | Owner      | Target  |
-|-------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|------------|---------|
+| ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- | ------- |
 | ~~1~~ | ~~Should `StubRegistrar` support raw WireMock `MappingBuilder` as an escape hatch for advanced module authors?~~ Resolved: No. See decision record below. | Core team  | Phase 1 |
 | ~~2~~ | ~~What is the versioning and compatibility policy between core and module JARs?~~ Resolved: manifest attribute. See decision record below.                | Core team  | Phase 1 |
 | 3     | Which services should follow SQS and Secrets Manager in Phase 3? (Candidates: S3, DynamoDB, Lambda)                                                       | Community  | Phase 2 |

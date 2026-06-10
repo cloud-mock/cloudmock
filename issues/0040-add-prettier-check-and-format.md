@@ -10,12 +10,12 @@ format job that automatically fixes formatting issues.
 
 ## Acceptance criteria
 
-- [ ] `.github/workflows/prettier.yml` added to the repository
-- [ ] Workflow runs on push to `main` and on pull requests
-- [ ] Check job fails the pull request if any markdown file is not formatted correctly
-- [ ] Format job runs Prettier and commits the result automatically
-- [ ] Prettier configuration file added to the repository root
-- [ ] All existing README and markdown files pass Prettier on merge
+- [x] `.github/workflows/prettier.yml` added to the repository
+- [x] Workflow runs on push to `main` and on pull requests
+- [x] Check job fails the pull request if any markdown file is not formatted correctly
+- [x] Format job runs Prettier and commits the result automatically
+- [x] Prettier configuration file added to the repository root
+- [x] All existing README and markdown files pass Prettier on merge
 
 ## Notes
 
