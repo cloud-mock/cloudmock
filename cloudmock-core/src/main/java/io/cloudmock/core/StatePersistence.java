@@ -11,9 +11,9 @@ package io.cloudmock.core;
 public enum StatePersistence {
 
     /**
-     * Append-only log with periodic compaction (the default). Each mutation appends a single record,
-     * so write cost scales with the change rather than the size of the whole store, and a burst of
-     * writes is not quadratic in I/O.
+     * Append-only log with periodic compaction (the default). Each mutation appends a single
+     * record, so write cost scales with the change rather than the size of the whole store, and a
+     * burst of writes is not quadratic in I/O.
      */
     APPEND_LOG,
 

@@ -1,5 +1,7 @@
 package io.cloudmock.standalone;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -10,11 +12,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
 /**
- * Launches the standalone fat JAR as a subprocess and waits until it is accepting
- * connections. Captures the process stdout so tests can assert on startup log lines.
+ * Launches the standalone fat JAR as a subprocess and waits until it is accepting connections.
+ * Captures the process stdout so tests can assert on startup log lines.
  */
 final class StandaloneProcess implements AutoCloseable {
 
@@ -29,8 +29,14 @@ final class StandaloneProcess implements AutoCloseable {
         String jarPath = System.getProperty("cloudmock.standalone.jar");
         assertNotNull(jarPath, "cloudmock.standalone.jar system property must be set");
 
-        List<String> command = new ArrayList<>(List.of("java", "-jar", jarPath,
-                "--port=" + port, "--api-port=" + (port + 1000)));
+        List<String> command =
+                new ArrayList<>(
+                        List.of(
+                                "java",
+                                "-jar",
+                                jarPath,
+                                "--port=" + port,
+                                "--api-port=" + (port + 1000)));
         command.addAll(List.of(extraArgs));
 
         ProcessBuilder pb = new ProcessBuilder(command);
@@ -65,16 +71,22 @@ final class StandaloneProcess implements AutoCloseable {
     }
 
     private void drainOutput() {
-        Thread drainer = new Thread(() -> {
-            try (BufferedReader r = new BufferedReader(
-                    new InputStreamReader(process.getInputStream()))) {
-                r.lines().forEach(line -> {
-                    output.add(line);
-                    System.out.println("[standalone] " + line);
-                });
-            } catch (IOException ignored) {
-            }
-        }, "standalone-output-drainer");
+        Thread drainer =
+                new Thread(
+                        () -> {
+                            try (BufferedReader r =
+                                    new BufferedReader(
+                                            new InputStreamReader(process.getInputStream()))) {
+                                r.lines()
+                                        .forEach(
+                                                line -> {
+                                                    output.add(line);
+                                                    System.out.println("[standalone] " + line);
+                                                });
+                            } catch (IOException ignored) {
+                            }
+                        },
+                        "standalone-output-drainer");
         drainer.setDaemon(true);
         drainer.start();
     }
@@ -84,7 +96,9 @@ final class StandaloneProcess implements AutoCloseable {
         while (System.currentTimeMillis() < deadline) {
             if (!process.isAlive()) {
                 throw new IllegalStateException(
-                        "Standalone process exited unexpectedly (exit=" + process.exitValue() + ")");
+                        "Standalone process exited unexpectedly (exit="
+                                + process.exitValue()
+                                + ")");
             }
             try (Socket s = new Socket("localhost", port)) {
                 return; // connected — server is ready

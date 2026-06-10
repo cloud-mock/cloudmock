@@ -1,19 +1,18 @@
 package io.cloudmock.core;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import io.cloudmock.core.exception.CloudMockStateException;
 import io.cloudmock.core.internal.store.AppendLogStateStore;
 import io.cloudmock.core.internal.store.InMemoryStateStore;
 import io.cloudmock.core.internal.store.JsonFileStateStore;
 import io.cloudmock.core.spi.StateStore;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
-
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 class StateStoreTest {
 
@@ -278,7 +277,8 @@ class StateStoreTest {
         Path notADir = tmp.resolve("blocker");
         Files.createFile(notADir);
 
-        assertThrows(CloudMockStateException.class,
+        assertThrows(
+                CloudMockStateException.class,
                 () -> new AppendLogStateStore(notADir.resolve("nested")));
     }
 
@@ -321,7 +321,8 @@ class StateStoreTest {
         // 3000 appends, but compaction rewrote the log back down toward the live size; the log is
         // bounded near the compaction floor (COMPACTION_MIN_RECORDS = 1000), far below 3000.
         long records = countRecords(logFile);
-        assertTrue(records <= 1_000,
+        assertTrue(
+                records <= 1_000,
                 "expected compaction to bound the log, found " + records + " records");
 
         StateStore reloaded = new AppendLogStateStore(tmp);
@@ -352,7 +353,9 @@ class StateStoreTest {
 
         // Simulate a crash mid-append by appending a half-written record (invalid JSON).
         Path logFile = tmp.resolve("cloudmock-state.log");
-        Files.writeString(logFile, "{\"op\":\"put\",\"key\":\"k3\",\"va",
+        Files.writeString(
+                logFile,
+                "{\"op\":\"put\",\"key\":\"k3\",\"va",
                 java.nio.file.StandardOpenOption.APPEND);
 
         StateStore reloaded = new AppendLogStateStore(tmp);
@@ -369,7 +372,9 @@ class StateStoreTest {
         // A structurally-valid JSON line missing its "key"/"val" must not abort startup — it is
         // skipped, mirroring JsonFileStateStore's "corrupt file starts empty rather than failing".
         Path logFile = tmp.resolve("cloudmock-state.log");
-        Files.writeString(logFile, "{\"op\":\"put\",\"key\":\"k2\"}\n",
+        Files.writeString(
+                logFile,
+                "{\"op\":\"put\",\"key\":\"k2\"}\n",
                 java.nio.file.StandardOpenOption.APPEND);
         store.put("k3", "v3");
 

@@ -9,11 +9,11 @@ Add a CI pipeline (GitHub Actions) that runs on every push and pull request to `
 
 ## Acceptance criteria
 
-- [ ] A GitHub Actions workflow file (`.github/workflows/ci.yml`) is added
-- [ ] The workflow triggers on `push` and `pull_request` targeting `main`
-- [ ] The workflow runs `./gradlew build` from the repository root
-- [ ] The workflow fails if the module isolation constraint is violated (this is already enforced by the build; the pipeline just needs to run it)
-- [ ] Java 17 is used in the CI environment
+- [x] A GitHub Actions workflow file (`.github/workflows/ci.yml`) is added
+- [x] The workflow triggers on `push` and `pull_request` targeting `main`
+- [x] The workflow runs `./gradlew build` from the repository root
+- [x] The workflow fails if the module isolation constraint is violated (this is already enforced by the build; the pipeline just needs to run it)
+- [x] Java 17 is used in the CI environment
 
 ## Dependencies
 

@@ -1,6 +1,9 @@
 package io.cloudmock.example.junit5;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import io.cloudmock.junit.CloudMockExtension;
+import java.net.URI;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -9,13 +12,9 @@ import software.amazon.awssdk.auth.credentials.AnonymousCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.sqs.SqsClient;
 
-import java.net.URI;
-
-import static org.junit.jupiter.api.Assertions.*;
-
 /**
- * Demonstrates {@code @ExtendWith(CloudMockExtension.class)} with JUnit 5.
- * CloudMock sets {@code aws.endpoint-url} before any test runs.
+ * Demonstrates {@code @ExtendWith(CloudMockExtension.class)} with JUnit 5. CloudMock sets {@code
+ * aws.endpoint-url} before any test runs.
  */
 @ExtendWith(CloudMockExtension.class)
 class ExtendWithTest {
@@ -24,11 +23,12 @@ class ExtendWithTest {
 
     @BeforeAll
     static void buildClient() {
-        sqsClient = SqsClient.builder()
-                .endpointOverride(URI.create(System.getProperty("aws.endpoint-url")))
-                .credentialsProvider(AnonymousCredentialsProvider.create())
-                .region(Region.US_EAST_1)
-                .build();
+        sqsClient =
+                SqsClient.builder()
+                        .endpointOverride(URI.create(System.getProperty("aws.endpoint-url")))
+                        .credentialsProvider(AnonymousCredentialsProvider.create())
+                        .region(Region.US_EAST_1)
+                        .build();
     }
 
     @AfterAll

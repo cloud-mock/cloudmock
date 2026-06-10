@@ -1,18 +1,17 @@
 package io.cloudmock.sqs;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import io.cloudmock.core.CloudMock;
+import java.net.URI;
+import java.nio.file.Path;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import software.amazon.awssdk.auth.credentials.AnonymousCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.Message;
-
-import java.net.URI;
-import java.nio.file.Path;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Verifies that SQS state written through the AWS SDK survives a full CloudMock restart when a
@@ -25,9 +24,10 @@ class CloudMockSqsPersistenceTest {
         String queueUrl;
 
         // First boot: send a message, then shut down.
-        try (CloudMock cloudMock = new CloudMock()
-                .withStoreDirectory(storeDir)
-                .withService(new CloudMockSqsService())) {
+        try (CloudMock cloudMock =
+                new CloudMock()
+                        .withStoreDirectory(storeDir)
+                        .withService(new CloudMockSqsService())) {
             cloudMock.start();
             try (SqsClient sqs = client(cloudMock.port())) {
                 queueUrl = sqs.createQueue(b -> b.queueName("durable")).queueUrl();
@@ -36,9 +36,10 @@ class CloudMockSqsPersistenceTest {
         }
 
         // Second boot against the same directory: the message must still be there.
-        try (CloudMock cloudMock = new CloudMock()
-                .withStoreDirectory(storeDir)
-                .withService(new CloudMockSqsService())) {
+        try (CloudMock cloudMock =
+                new CloudMock()
+                        .withStoreDirectory(storeDir)
+                        .withService(new CloudMockSqsService())) {
             cloudMock.start();
             try (SqsClient sqs = client(cloudMock.port())) {
                 List<Message> messages = sqs.receiveMessage(b -> b.queueUrl(queueUrl)).messages();

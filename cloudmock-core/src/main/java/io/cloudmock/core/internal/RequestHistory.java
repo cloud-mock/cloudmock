@@ -4,16 +4,15 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.stubbing.ServeEvent;
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 import io.cloudmock.core.restapi.RequestRecord;
-
 import java.util.List;
 
 /**
- * Read/clear view over the WireMock request journal, translated into CloudMock's
- * {@link RequestRecord} domain model.
+ * Read/clear view over the WireMock request journal, translated into CloudMock's {@link
+ * RequestRecord} domain model.
  *
  * <p>Encapsulates the {@code cloudmock:<serviceId>:<operation>} stub-naming convention used to
- * correlate a served request back to the module that handled it, keeping that knowledge out of
- * the engine entry point.
+ * correlate a served request back to the module that handled it, keeping that knowledge out of the
+ * engine entry point.
  */
 public final class RequestHistory {
 
@@ -27,9 +26,7 @@ public final class RequestHistory {
 
     /** All served requests, newest first. */
     public List<RequestRecord> all() {
-        return server.getAllServeEvents().stream()
-                .map(RequestHistory::toRecord)
-                .toList();
+        return server.getAllServeEvents().stream().map(RequestHistory::toRecord).toList();
     }
 
     /** Served requests handled by {@code serviceId}, newest first; unmatched requests excluded. */

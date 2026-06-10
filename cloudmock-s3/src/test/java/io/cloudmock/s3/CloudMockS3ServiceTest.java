@@ -1,6 +1,12 @@
 package io.cloudmock.s3;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import io.cloudmock.core.CloudMock;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -14,35 +20,30 @@ import software.amazon.awssdk.services.s3.S3Configuration;
 import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
 
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-
-import static org.junit.jupiter.api.Assertions.*;
-
 class CloudMockS3ServiceTest {
 
     static CloudMock cloudMock;
     static S3Client s3;
 
     static final String BUCKET = "test-bucket";
-    static final String KEY    = "test-key";
+    static final String KEY = "test-key";
 
     @BeforeAll
     static void start() {
         cloudMock = new CloudMock().withService(new CloudMockS3Service());
         cloudMock.start();
 
-        s3 = S3Client.builder()
-                .endpointOverride(URI.create("http://localhost:" + cloudMock.port()))
-                .serviceConfiguration(S3Configuration.builder()
-                        .pathStyleAccessEnabled(true)
-                        .checksumValidationEnabled(false)
-                        .build())
-                .credentialsProvider(AnonymousCredentialsProvider.create())
-                .region(Region.US_EAST_1)
-                .build();
+        s3 =
+                S3Client.builder()
+                        .endpointOverride(URI.create("http://localhost:" + cloudMock.port()))
+                        .serviceConfiguration(
+                                S3Configuration.builder()
+                                        .pathStyleAccessEnabled(true)
+                                        .checksumValidationEnabled(false)
+                                        .build())
+                        .credentialsProvider(AnonymousCredentialsProvider.create())
+                        .region(Region.US_EAST_1)
+                        .build();
     }
 
     @AfterAll
@@ -58,16 +59,17 @@ class CloudMockS3ServiceTest {
 
     @Test
     void putObjectCompletesWithoutException() {
-        assertDoesNotThrow(() -> s3.putObject(
-                b -> b.bucket(BUCKET).key(KEY),
-                RequestBody.fromString("hello from cloudmock")));
+        assertDoesNotThrow(
+                () ->
+                        s3.putObject(
+                                b -> b.bucket(BUCKET).key(KEY),
+                                RequestBody.fromString("hello from cloudmock")));
     }
 
     @Test
     void getObjectReturnsNonEmptyBody() {
-        ResponseBytes<GetObjectResponse> response = s3.getObject(
-                b -> b.bucket(BUCKET).key(KEY),
-                ResponseTransformer.toBytes());
+        ResponseBytes<GetObjectResponse> response =
+                s3.getObject(b -> b.bucket(BUCKET).key(KEY), ResponseTransformer.toBytes());
         assertNotNull(response);
         assertTrue(response.asByteArray().length > 0);
     }
@@ -92,8 +94,8 @@ class CloudMockS3ServiceTest {
 
     /**
      * Regression for issue #0019 review (finding #1): a ListObjectsV2 call carrying a prefix sends
-     * {@code ?list-type=2&prefix=...}, which the old end-anchored pattern did not match — the request
-     * fell through to the ListObjects (v1) catch-all and returned the wrong response shape.
+     * {@code ?list-type=2&prefix=...}, which the old end-anchored pattern did not match — the
+     * request fell through to the ListObjects (v1) catch-all and returned the wrong response shape.
      */
     @Test
     void listObjectsV2WithPrefixReturnsValidResponse() {
@@ -106,50 +108,68 @@ class CloudMockS3ServiceTest {
     /** Finding #1, broader: multiple extra query params must still route to ListObjectsV2. */
     @Test
     void listObjectsV2WithMultipleParamsReturnsValidResponse() {
-        ListObjectsV2Response response = s3.listObjectsV2(b -> b
-                .bucket(BUCKET)
-                .prefix("logs/")
-                .maxKeys(10)
-                .startAfter("logs/a"));
+        ListObjectsV2Response response =
+                s3.listObjectsV2(
+                        b -> b.bucket(BUCKET).prefix("logs/").maxKeys(10).startAfter("logs/a"));
         assertNotNull(response);
         assertFalse(response.isTruncated());
         assertNotNull(response.contents());
     }
 
     /**
-     * Regression for issue #0019 review (finding #2): the {@code GET /<bucket>} ListObjects catch-all
-     * must not shadow bucket-level GET sub-resources. A {@code GET /bucket?acl} must be served by the
-     * GetBucketAcl stub, not the ListObjects (v1) stub. Asserted at the routing level (raw HTTP),
-     * since the sub-resource templates are placeholders the SDK cannot deserialize.
+     * Regression for issue #0019 review (finding #2): the {@code GET /<bucket>} ListObjects
+     * catch-all must not shadow bucket-level GET sub-resources. A {@code GET /bucket?acl} must be
+     * served by the GetBucketAcl stub, not the ListObjects (v1) stub. Asserted at the routing level
+     * (raw HTTP), since the sub-resource templates are placeholders the SDK cannot deserialize.
      */
     @Test
     void bucketSubResourceGetDoesNotLeakToListObjects() throws Exception {
-        HttpResponse<String> response = HttpClient.newHttpClient().send(
-                HttpRequest.newBuilder()
-                        .uri(URI.create("http://localhost:" + cloudMock.port() + "/" + BUCKET + "?acl"))
-                        .GET()
-                        .build(),
-                HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response =
+                HttpClient.newHttpClient()
+                        .send(
+                                HttpRequest.newBuilder()
+                                        .uri(
+                                                URI.create(
+                                                        "http://localhost:"
+                                                                + cloudMock.port()
+                                                                + "/"
+                                                                + BUCKET
+                                                                + "?acl"))
+                                        .GET()
+                                        .build(),
+                                HttpResponse.BodyHandlers.ofString());
 
         assertEquals(200, response.statusCode());
-        assertTrue(response.body().contains("GetBucketAclOutput"),
+        assertTrue(
+                response.body().contains("GetBucketAclOutput"),
                 "GET /bucket?acl should be served by the GetBucketAcl stub");
-        assertFalse(response.body().contains("ListObjectsOutput"),
+        assertFalse(
+                response.body().contains("ListObjectsOutput"),
                 "GET /bucket?acl must not fall through to the ListObjects catch-all");
     }
 
-    /** Plain {@code GET /bucket} (no list-type=2, no sub-resource) still routes to ListObjects (v1). */
+    /**
+     * Plain {@code GET /bucket} (no list-type=2, no sub-resource) still routes to ListObjects (v1).
+     */
     @Test
     void plainBucketGetRoutesToListObjects() throws Exception {
-        HttpResponse<String> response = HttpClient.newHttpClient().send(
-                HttpRequest.newBuilder()
-                        .uri(URI.create("http://localhost:" + cloudMock.port() + "/" + BUCKET))
-                        .GET()
-                        .build(),
-                HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response =
+                HttpClient.newHttpClient()
+                        .send(
+                                HttpRequest.newBuilder()
+                                        .uri(
+                                                URI.create(
+                                                        "http://localhost:"
+                                                                + cloudMock.port()
+                                                                + "/"
+                                                                + BUCKET))
+                                        .GET()
+                                        .build(),
+                                HttpResponse.BodyHandlers.ofString());
 
         assertEquals(200, response.statusCode());
-        assertTrue(response.body().contains("ListObjectsOutput"),
+        assertTrue(
+                response.body().contains("ListObjectsOutput"),
                 "plain GET /bucket should be served by the ListObjects (v1) catch-all");
     }
 }

@@ -7,7 +7,4 @@ package io.cloudmock.core.internal;
  *
  * <p>For REST stubs, {@code matchKey} encodes both method and path as {@code "METHOD pathPattern"}.
  */
-record StubRecord(
-        StubProtocol protocol,
-        String matchKey
-) {}
+record StubRecord(StubProtocol protocol, String matchKey) {}

@@ -9,13 +9,13 @@ Configure `publishToMavenLocal` for all subprojects and write a minimal smoke te
 
 ## Acceptance criteria
 
-- [ ] `./gradlew publishToMavenLocal` publishes `cloudmock-core` (and any other ready subprojects) with correct group, artifact ID, version, and POM metadata
-- [ ] A smoke test (in `cloudmock-core` or a dedicated test subproject) starts `CloudMock` and uses an AWS SDK v2 client with `EndpointOverride` pointing at the CloudMock port
-- [ ] The smoke test sends at least one AWS SDK request and asserts that no `SdkClientException` caused by a connection failure is thrown
-- [ ] The smoke test passes with zero `cloudmock-*` modules on the classpath beyond `cloudmock-core`
-- [ ] A WireMock 404 for an unregistered path is treated as a pass — the test only asserts the networking layer is alive, not that a meaningful AWS response is returned
-- [ ] The smoke test is included in `./gradlew test` and causes a build failure if it regresses
-- [ ] A CI workflow (GitHub Actions or equivalent) runs `./gradlew build` on every push to `main` and on every pull request
+- [x] `./gradlew publishToMavenLocal` publishes `cloudmock-core` (and any other ready subprojects) with correct group, artifact ID, version, and POM metadata
+- [x] A smoke test (in `cloudmock-core` or a dedicated test subproject) starts `CloudMock` and uses an AWS SDK v2 client with `EndpointOverride` pointing at the CloudMock port
+- [x] The smoke test sends at least one AWS SDK request and asserts that no `SdkClientException` caused by a connection failure is thrown
+- [x] The smoke test passes with zero `cloudmock-*` modules on the classpath beyond `cloudmock-core`
+- [x] A WireMock 404 for an unregistered path is treated as a pass — the test only asserts the networking layer is alive, not that a meaningful AWS response is returned
+- [x] The smoke test is included in `./gradlew test` and causes a build failure if it regresses
+- [x] A CI workflow (GitHub Actions or equivalent) runs `./gradlew build` on every push to `main` and on every pull request
 
 ## Dependencies
 

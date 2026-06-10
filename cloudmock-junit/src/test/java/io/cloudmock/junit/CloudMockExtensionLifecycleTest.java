@@ -1,20 +1,18 @@
 package io.cloudmock.junit;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.net.Socket;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import java.net.Socket;
-
-import static org.junit.jupiter.api.Assertions.*;
-
 /**
- * Verifies that {@link CloudMockExtension} starts and stops CloudMock around the test class
- * and that the port is accessible via {@code @RegisterExtension}.
+ * Verifies that {@link CloudMockExtension} starts and stops CloudMock around the test class and
+ * that the port is accessible via {@code @RegisterExtension}.
  */
 class CloudMockExtensionLifecycleTest {
 
-    @RegisterExtension
-    static CloudMockExtension cloudMock = new CloudMockExtension();
+    @RegisterExtension static CloudMockExtension cloudMock = new CloudMockExtension();
 
     @Test
     void portIsPositiveAfterStart() {

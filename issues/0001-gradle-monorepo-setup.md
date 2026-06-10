@@ -9,14 +9,14 @@ Establish the Gradle multi-project build that all subsequent work depends on. Th
 
 ## Acceptance criteria
 
-- [ ] `settings.gradle` declares the initial subprojects: `cloudmock-core`, `cloudmock-sqs`, `cloudmock-secretsmanager`
-- [ ] Root `build.gradle` sets Java 17 source and target compatibility across all subprojects
-- [ ] A build-level constraint prevents any `cloudmock-*` module from declaring a compile or runtime dependency on another `cloudmock-*` module; `./gradlew build` fails if this constraint is violated
-- [ ] `./gradlew build` from the repository root compiles all subprojects successfully
-- [ ] `./gradlew test` runs all subproject test suites
-- [ ] The `maven-publish` plugin is applied to all subprojects with coordinates following `io.cloudmock:cloudmock-<name>`
-- [ ] `.gitignore` is updated to exclude `.gradle/` and all `build/` directories
-- [ ] Subprojects that have no code yet contain a minimal `build.gradle` so the directory structure is established
+- [x] `settings.gradle` declares the initial subprojects: `cloudmock-core`, `cloudmock-sqs`, `cloudmock-secretsmanager`
+- [x] Root `build.gradle` sets Java 17 source and target compatibility across all subprojects
+- [x] A build-level constraint prevents any `cloudmock-*` module from declaring a compile or runtime dependency on another `cloudmock-*` module; `./gradlew build` fails if this constraint is violated
+- [x] `./gradlew build` from the repository root compiles all subprojects successfully
+- [x] `./gradlew test` runs all subproject test suites
+- [x] The `maven-publish` plugin is applied to all subprojects with coordinates following `io.cloudmock:cloudmock-<name>`
+- [x] `.gitignore` is updated to exclude `.gradle/` and all `build/` directories
+- [x] Subprojects that have no code yet contain a minimal `build.gradle` so the directory structure is established
 
 ## Dependencies
 

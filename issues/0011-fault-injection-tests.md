@@ -9,15 +9,15 @@ Validate that each fault injection annotation produces the correct AWS SDK behav
 
 ## Acceptance criteria
 
-- [ ] `@SimulateThrottle` on an SQS operation causes `SqsClient` to throw `SqsException` with error code `ThrottlingException`
-- [ ] `@SimulateThrottle` on a Secrets Manager operation causes `SecretsManagerException` with error code `ThrottlingException`
-- [ ] `@SimulateTimeout` causes the SDK call to throw `ApiCallTimeoutException` or `SdkClientException` within a test-configured short timeout
-- [ ] `@SimulateNetworkBrownout(rate = 1.0)` causes every request to fail with a connection error
-- [ ] `@SimulateNetworkBrownout(rate = 0.0)` causes every request to succeed normally
-- [ ] A test method immediately following a `@SimulateThrottle`-annotated method completes successfully with a normal response (no fault leak)
-- [ ] A test method immediately following a `@SimulateTimeout`-annotated method completes within the normal timeout (no fault leak)
-- [ ] Tests are tagged (e.g. `@Tag("fault-injection")`) so they can be excluded from fast local runs if desired
-- [ ] All tests run as part of `./gradlew test`
+- [x] `@SimulateThrottle` on an SQS operation causes `SqsClient` to throw `SqsException` with error code `ThrottlingException`
+- [x] `@SimulateThrottle` on a Secrets Manager operation causes `SecretsManagerException` with error code `ThrottlingException`
+- [x] `@SimulateTimeout` causes the SDK call to throw `ApiCallTimeoutException` or `SdkClientException` within a test-configured short timeout
+- [x] `@SimulateNetworkBrownout(rate = 1.0)` causes every request to fail with a connection error
+- [x] `@SimulateNetworkBrownout(rate = 0.0)` causes every request to succeed normally
+- [x] A test method immediately following a `@SimulateThrottle`-annotated method completes successfully with a normal response (no fault leak)
+- [x] A test method immediately following a `@SimulateTimeout`-annotated method completes within the normal timeout (no fault leak)
+- [x] Tests are tagged (e.g. `@Tag("fault-injection")`) so they can be excluded from fast local runs if desired
+- [x] All tests run as part of `./gradlew test`
 
 ## Dependencies
 

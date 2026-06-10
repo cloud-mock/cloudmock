@@ -1,7 +1,6 @@
 package io.cloudmock.standalone;
 
 import io.cloudmock.core.spi.CloudMockService;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ServiceLoader;

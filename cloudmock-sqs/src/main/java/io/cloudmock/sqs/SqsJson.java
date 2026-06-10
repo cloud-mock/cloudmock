@@ -5,10 +5,10 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 /**
- * SQS-specific helpers for building responses and computing checksums. Request-body field extraction
- * now lives in core ({@link io.cloudmock.core.spi.StubRequest#jsonField}), so this class holds only
- * what is genuinely SQS-shaped: JSON string escaping for hand-built response bodies, the message MD5
- * checksum, and queue-name extraction from a queue URL. Dependency-free (JDK only).
+ * SQS-specific helpers for building responses and computing checksums. Request-body field
+ * extraction now lives in core ({@link io.cloudmock.core.spi.StubRequest#jsonField}), so this class
+ * holds only what is genuinely SQS-shaped: JSON string escaping for hand-built response bodies, the
+ * message MD5 checksum, and queue-name extraction from a queue URL. Dependency-free (JDK only).
  */
 final class SqsJson {
 
@@ -20,7 +20,7 @@ final class SqsJson {
         for (int i = 0; i < value.length(); i++) {
             char c = value.charAt(i);
             switch (c) {
-                case '"'  -> sb.append("\\\"");
+                case '"' -> sb.append("\\\"");
                 case '\\' -> sb.append("\\\\");
                 case '\n' -> sb.append("\\n");
                 case '\r' -> sb.append("\\r");
@@ -42,8 +42,8 @@ final class SqsJson {
     /** Lowercase hex MD5 digest of {@code value}, used for SQS message checksums. */
     static String md5(String value) {
         try {
-            byte[] digest = MessageDigest.getInstance("MD5")
-                    .digest(value.getBytes(StandardCharsets.UTF_8));
+            byte[] digest =
+                    MessageDigest.getInstance("MD5").digest(value.getBytes(StandardCharsets.UTF_8));
             StringBuilder hex = new StringBuilder(digest.length * 2);
             for (byte b : digest) {
                 hex.append(Character.forDigit((b >> 4) & 0xF, 16));

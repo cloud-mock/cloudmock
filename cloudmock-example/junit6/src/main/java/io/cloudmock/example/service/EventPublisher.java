@@ -1,14 +1,11 @@
 package io.cloudmock.example.service;
 
+import java.util.List;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.Message;
 
-import java.util.List;
-
-/**
- * Publishes events to an SQS queue, creating it on first use.
- */
+/** Publishes events to an SQS queue, creating it on first use. */
 @Service
 public class EventPublisher {
 
@@ -21,7 +18,10 @@ public class EventPublisher {
         this.queueName = "events";
     }
 
-    /** Creates the queue if this is the first call, then sends {@code payload}. Returns the message ID. */
+    /**
+     * Creates the queue if this is the first call, then sends {@code payload}. Returns the message
+     * ID.
+     */
     public String publish(String payload) {
         if (queueUrl == null) {
             queueUrl = sqs.createQueue(b -> b.queueName(queueName)).queueUrl();
@@ -34,9 +34,11 @@ public class EventPublisher {
         if (queueUrl == null) {
             return List.of();
         }
-        return sqs.receiveMessage(b -> b.queueUrl(queueUrl).maxNumberOfMessages(10))
-                  .messages().stream()
-                  .map(Message::body)
-                  .toList();
+        return sqs
+                .receiveMessage(b -> b.queueUrl(queueUrl).maxNumberOfMessages(10))
+                .messages()
+                .stream()
+                .map(Message::body)
+                .toList();
     }
 }

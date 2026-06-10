@@ -1,5 +1,7 @@
 package io.cloudmock.core.internal;
 
+import static io.cloudmock.core.internal.HttpConstants.*;
+
 import com.github.tomakehurst.wiremock.extension.ResponseTransformerV2;
 import com.github.tomakehurst.wiremock.http.Fault;
 import com.github.tomakehurst.wiremock.http.HttpHeader;
@@ -11,15 +13,12 @@ import com.github.tomakehurst.wiremock.stubbing.StubMapping;
 import io.cloudmock.core.spi.StateStore;
 import io.cloudmock.core.spi.StubHandler;
 import io.cloudmock.core.spi.StubResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.net.HttpURLConnection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
-
-import static io.cloudmock.core.internal.HttpConstants.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The single global response transformer: it produces a matched stub's real response — running its
@@ -28,20 +27,25 @@ import static io.cloudmock.core.internal.HttpConstants.*;
  * response.
  *
  * <p>Whether a fault runs the underlying handler depends on the fault type:
+ *
  * <ul>
  *   <li><b>Throttle</b> replaces the body with an error and <b>timeout</b> only delays it; the SDK
- *       discards the body in both cases, so the handler is <em>not</em> run.</li>
- *   <li>A full-rate <b>brownout</b> always resets the connection, so the handler is not run.</li>
+ *       discards the body in both cases, so the handler is <em>not</em> run.
+ *   <li>A full-rate <b>brownout</b> always resets the connection, so the handler is not run.
  *   <li>A probabilistic <b>brownout</b> runs the handler, since requests that are not reset must
- *       return real data; a reset request that already wrote to the store leaves that write in place.</li>
+ *       return real data; a reset request that already wrote to the store leaves that write in
+ *       place.
  * </ul>
+ *
  * The handler runs at most once per request.
  */
 public class CloudMockResponseTransformer implements ResponseTransformerV2 {
 
     public static final String NAME = "cloudmock-response";
 
-    /** Prefix shared with {@link WireMockStubRegistrar} stub names: {@code cloudmock:<id>:<key>}. */
+    /**
+     * Prefix shared with {@link WireMockStubRegistrar} stub names: {@code cloudmock:<id>:<key>}.
+     */
     static final String STUB_NAME_PREFIX = "cloudmock:";
 
     private static final Logger log = LoggerFactory.getLogger(CloudMockResponseTransformer.class);
@@ -51,16 +55,16 @@ public class CloudMockResponseTransformer implements ResponseTransformerV2 {
     private static final String THROTTLE_JSON_BODY =
             "{\"__type\":\"ThrottlingException\",\"message\":\"Rate exceeded\"}";
     private static final String THROTTLE_XML_BODY =
-            "<ErrorResponse><Error><Code>ThrottlingException</Code>" +
-            "<Message>Rate exceeded</Message></Error></ErrorResponse>";
+            "<ErrorResponse><Error><Code>ThrottlingException</Code>"
+                    + "<Message>Rate exceeded</Message></Error></ErrorResponse>";
 
     private final StateStore stateStore;
     private final ServiceRegistry registry;
     private final FaultEngine faultEngine;
     private final Map<String, StubHandler> handlers = new ConcurrentHashMap<>();
 
-    public CloudMockResponseTransformer(StateStore stateStore, ServiceRegistry registry,
-                                        FaultEngine faultEngine) {
+    public CloudMockResponseTransformer(
+            StateStore stateStore, ServiceRegistry registry, FaultEngine faultEngine) {
         this.stateStore = stateStore;
         this.registry = registry;
         this.faultEngine = faultEngine;
@@ -104,21 +108,24 @@ public class CloudMockResponseTransformer implements ResponseTransformerV2 {
         if (fault == null) {
             result = runHandler(name, response, serveEvent);
         } else {
-            result = switch (fault.type()) {
-                case THROTTLE -> {
-                    faultTag = "throttled";
-                    yield throttle(registry.find(serviceId, operation), response);
-                }
-                case TIMEOUT -> {
-                    faultTag = "timeout";
-                    yield Response.Builder.like(response).but()
-                            .incrementInitialDelay(TIMEOUT_DELAY_MS).build();
-                }
-                case BROWNOUT -> {
-                    faultTag = "brownout";
-                    yield brownout(fault.rate(), name, response, serveEvent);
-                }
-            };
+            result =
+                    switch (fault.type()) {
+                        case THROTTLE -> {
+                            faultTag = "throttled";
+                            yield throttle(registry.find(serviceId, operation), response);
+                        }
+                        case TIMEOUT -> {
+                            faultTag = "timeout";
+                            yield Response.Builder.like(response)
+                                    .but()
+                                    .incrementInitialDelay(TIMEOUT_DELAY_MS)
+                                    .build();
+                        }
+                        case BROWNOUT -> {
+                            faultTag = "brownout";
+                            yield brownout(fault.rate(), name, response, serveEvent);
+                        }
+                    };
         }
         if (faultTag != null) {
             log.info("{} {} -> {} [{}]", serviceId, operation, result.getStatus(), faultTag);
@@ -142,8 +149,12 @@ public class CloudMockResponseTransformer implements ResponseTransformerV2 {
         }
         String target = req.getHeader(HEADER_AMZ_TARGET);
         String contentType = req.getHeader(HEADER_CONTENT_TYPE);
-        log.warn("Unmatched request: {} {} (X-Amz-Target: {}, Content-Type: {})",
-                req.getMethod().value(), req.getUrl(), target, contentType);
+        log.warn(
+                "Unmatched request: {} {} (X-Amz-Target: {}, Content-Type: {})",
+                req.getMethod().value(),
+                req.getUrl(),
+                target,
+                contentType);
         if (log.isDebugEnabled()) {
             log.debug("  request body: {}", req.getBodyAsString());
         }
@@ -159,8 +170,10 @@ public class CloudMockResponseTransformer implements ResponseTransformerV2 {
         if (handler == null) {
             return response;
         }
-        StubResponse result = handler.handle(new WireMockStubRequest(serveEvent.getRequest()), stateStore);
-        HttpHeaders headers = new HttpHeaders(new HttpHeader(HEADER_CONTENT_TYPE, result.contentType()));
+        StubResponse result =
+                handler.handle(new WireMockStubRequest(serveEvent.getRequest()), stateStore);
+        HttpHeaders headers =
+                new HttpHeaders(new HttpHeader(HEADER_CONTENT_TYPE, result.contentType()));
         for (Map.Entry<String, String> header : result.headers().entrySet()) {
             headers = headers.plus(new HttpHeader(header.getKey(), header.getValue()));
         }
@@ -172,7 +185,10 @@ public class CloudMockResponseTransformer implements ResponseTransformerV2 {
                 .build();
     }
 
-    /** Replaces the response with a protocol-appropriate ThrottlingException; never runs the handler. */
+    /**
+     * Replaces the response with a protocol-appropriate ThrottlingException; never runs the
+     * handler.
+     */
     private Response throttle(StubRecord record, Response response) {
         boolean xml = record != null && record.protocol() == StubProtocol.FORM_URL;
         String contentType = xml ? CONTENT_TYPE_XML_UTF8 : CONTENT_TYPE_AMZ_JSON_1_1;
@@ -186,16 +202,13 @@ public class CloudMockResponseTransformer implements ResponseTransformerV2 {
 
     private Response brownout(double rate, String name, Response response, ServeEvent serveEvent) {
         if (rate >= 1.0) {
-            return connectionReset();   // always resets: no point running the handler
+            return connectionReset(); // always resets: no point running the handler
         }
         Response normal = runHandler(name, response, serveEvent);
         return ThreadLocalRandom.current().nextDouble() < rate ? connectionReset() : normal;
     }
 
     private Response connectionReset() {
-        return Response.response()
-                .configured(true)
-                .fault(Fault.CONNECTION_RESET_BY_PEER)
-                .build();
+        return Response.response().configured(true).fault(Fault.CONNECTION_RESET_BY_PEER).build();
     }
 }

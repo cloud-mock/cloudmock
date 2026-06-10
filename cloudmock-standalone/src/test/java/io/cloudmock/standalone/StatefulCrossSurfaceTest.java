@@ -1,9 +1,17 @@
 package io.cloudmock.standalone;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cloudmock.core.CloudMock;
 import io.cloudmock.core.spi.CloudMockApiService;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.util.List;
+import java.util.ServiceLoader;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,15 +19,6 @@ import software.amazon.awssdk.auth.credentials.AnonymousCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.Message;
-
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.util.List;
-import java.util.ServiceLoader;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * The two front doors share one state store: data sent through the AWS-SDK path (mock port) is
@@ -41,17 +40,20 @@ class StatefulCrossSurfaceTest {
         cloudMock = new CloudMock();
         cloudMock.start();
         // Discover the module API services from the (runtime) classpath, as StandaloneMain does.
-        List<CloudMockApiService> apiServices = ServiceLoader.load(CloudMockApiService.class)
-                .stream().map(ServiceLoader.Provider::get).toList();
+        List<CloudMockApiService> apiServices =
+                ServiceLoader.load(CloudMockApiService.class).stream()
+                        .map(ServiceLoader.Provider::get)
+                        .toList();
         apiServer = new ApiServer(cloudMock, 0, apiServices);
         apiServer.start();
         apiPort = apiServer.port();
 
-        sqs = SqsClient.builder()
-                .endpointOverride(URI.create("http://localhost:" + cloudMock.port()))
-                .credentialsProvider(AnonymousCredentialsProvider.create())
-                .region(Region.US_EAST_1)
-                .build();
+        sqs =
+                SqsClient.builder()
+                        .endpointOverride(URI.create("http://localhost:" + cloudMock.port()))
+                        .credentialsProvider(AnonymousCredentialsProvider.create())
+                        .region(Region.US_EAST_1)
+                        .build();
     }
 
     @AfterEach
@@ -76,9 +78,10 @@ class StatefulCrossSurfaceTest {
     void messageSentViaRestApiIsVisibleToTheAwsSdk() throws Exception {
         post("/api/sqs/send-message?queue=invoices&body=hello%20from%20rest");
 
-        Message msg = sqs.receiveMessage(b -> b
-                        .queueUrl("http://localhost/000000000000/invoices"))
-                .messages().get(0);
+        Message msg =
+                sqs.receiveMessage(b -> b.queueUrl("http://localhost/000000000000/invoices"))
+                        .messages()
+                        .get(0);
         assertEquals("hello from rest", msg.body(), "AWS SDK must see the REST-sent message");
     }
 
@@ -98,7 +101,8 @@ class StatefulCrossSurfaceTest {
     // send-message is registered as POST; the API server reads params from the query string, so the
     // request body is unused.
     private void post(String path) throws Exception {
-        http.send(HttpRequest.newBuilder()
+        http.send(
+                HttpRequest.newBuilder()
                         .uri(URI.create("http://localhost:" + apiPort + path))
                         .POST(HttpRequest.BodyPublishers.noBody())
                         .build(),
@@ -106,10 +110,13 @@ class StatefulCrossSurfaceTest {
     }
 
     private JsonNode getJson(String path) throws Exception {
-        HttpResponse<String> resp = http.send(HttpRequest.newBuilder()
-                        .uri(URI.create("http://localhost:" + apiPort + path))
-                        .GET().build(),
-                HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> resp =
+                http.send(
+                        HttpRequest.newBuilder()
+                                .uri(URI.create("http://localhost:" + apiPort + path))
+                                .GET()
+                                .build(),
+                        HttpResponse.BodyHandlers.ofString());
         return mapper.readTree(resp.body());
     }
 }

@@ -1,6 +1,12 @@
 package io.cloudmock.sns;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import io.cloudmock.core.CloudMock;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -10,13 +16,6 @@ import software.amazon.awssdk.services.sns.SnsClient;
 import software.amazon.awssdk.services.sns.model.CreateTopicResponse;
 import software.amazon.awssdk.services.sns.model.PublishResponse;
 import software.amazon.awssdk.services.sns.model.SubscribeResponse;
-
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class CloudMockSNSServiceTest {
 
@@ -30,11 +29,12 @@ class CloudMockSNSServiceTest {
         cloudMock = new CloudMock().withService(new CloudMockSNSService());
         cloudMock.start();
 
-        sns = SnsClient.builder()
-                .endpointOverride(URI.create("http://localhost:" + cloudMock.port()))
-                .credentialsProvider(AnonymousCredentialsProvider.create())
-                .region(Region.US_EAST_1)
-                .build();
+        sns =
+                SnsClient.builder()
+                        .endpointOverride(URI.create("http://localhost:" + cloudMock.port()))
+                        .credentialsProvider(AnonymousCredentialsProvider.create())
+                        .region(Region.US_EAST_1)
+                        .build();
     }
 
     @AfterAll
@@ -45,23 +45,33 @@ class CloudMockSNSServiceTest {
 
     /**
      * Sends a raw HTTP POST with an {@code Action} form body parameter and asserts it is matched by
-     * a stub registered via {@code registerXmlFormStub}. Primary validation that the XML/Form routing
-     * code path works end-to-end through the core engine — the main goal of issue #0020.
+     * a stub registered via {@code registerXmlFormStub}. Primary validation that the XML/Form
+     * routing code path works end-to-end through the core engine — the main goal of issue #0020.
      */
     @Test
     void rawXmlFormRequestMatchesStub() throws Exception {
-        HttpResponse<String> response = HttpClient.newHttpClient().send(
-                HttpRequest.newBuilder()
-                        .uri(URI.create("http://localhost:" + cloudMock.port() + "/"))
-                        .POST(HttpRequest.BodyPublishers.ofString(
-                                "Action=ListTopics&Version=2010-03-31"))
-                        .header("Content-Type", "application/x-www-form-urlencoded")
-                        .build(),
-                HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response =
+                HttpClient.newHttpClient()
+                        .send(
+                                HttpRequest.newBuilder()
+                                        .uri(
+                                                URI.create(
+                                                        "http://localhost:"
+                                                                + cloudMock.port()
+                                                                + "/"))
+                                        .POST(
+                                                HttpRequest.BodyPublishers.ofString(
+                                                        "Action=ListTopics&Version=2010-03-31"))
+                                        .header("Content-Type", "application/x-www-form-urlencoded")
+                                        .build(),
+                                HttpResponse.BodyHandlers.ofString());
 
-        assertEquals(200, response.statusCode(),
+        assertEquals(
+                200,
+                response.statusCode(),
                 "XML/Form stub did not match — check registerXmlFormStub routing");
-        assertTrue(response.body().contains("ListTopicsResponse"),
+        assertTrue(
+                response.body().contains("ListTopicsResponse"),
                 "response should be well-formed SNS XML");
     }
 
@@ -74,19 +84,20 @@ class CloudMockSNSServiceTest {
 
     @Test
     void publishReturnsNonNullMessageId() {
-        PublishResponse response = sns.publish(b -> b
-                .topicArn(TOPIC_ARN)
-                .message("hello from cloudmock"));
+        PublishResponse response =
+                sns.publish(b -> b.topicArn(TOPIC_ARN).message("hello from cloudmock"));
         assertNotNull(response.messageId());
         assertFalse(response.messageId().isBlank());
     }
 
     @Test
     void subscribeReturnsNonNullSubscriptionArn() {
-        SubscribeResponse response = sns.subscribe(b -> b
-                .topicArn(TOPIC_ARN)
-                .protocol("sqs")
-                .endpoint("arn:aws:sqs:us-east-1:000000000000:my-queue"));
+        SubscribeResponse response =
+                sns.subscribe(
+                        b ->
+                                b.topicArn(TOPIC_ARN)
+                                        .protocol("sqs")
+                                        .endpoint("arn:aws:sqs:us-east-1:000000000000:my-queue"));
         assertNotNull(response.subscriptionArn());
         assertFalse(response.subscriptionArn().isBlank());
     }
@@ -103,7 +114,12 @@ class CloudMockSNSServiceTest {
 
     @Test
     void unsubscribeCompletesWithoutException() {
-        assertDoesNotThrow(() -> sns.unsubscribe(b -> b.subscriptionArn(
-                TOPIC_ARN + ":00000000-0000-0000-0000-000000000000")));
+        assertDoesNotThrow(
+                () ->
+                        sns.unsubscribe(
+                                b ->
+                                        b.subscriptionArn(
+                                                TOPIC_ARN
+                                                        + ":00000000-0000-0000-0000-000000000000")));
     }
 }
