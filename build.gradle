@@ -45,7 +45,7 @@ subprojects {
 
     // Service modules may depend on cloudmock-core (the SPI lives there), but no service module
     // may depend on another service module at compile or runtime. Test code is exempt so that
-    // integration test modules (e.g. cloudmock-junit6 tests) can combine multiple modules.
+    // integration test modules (e.g. cloudmock-junit tests) can combine multiple modules.
     // cloudmock-standalone is also exempt: its entire purpose is to bundle all service modules
     // into a single runnable fat JAR.
     afterEvaluate {
