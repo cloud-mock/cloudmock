@@ -3,7 +3,7 @@ site_description: Embedded, containerless AWS mock for JVM integration tests
 site_url: https://cloud-mock.github.io/cloudmock/
 repo_url: https://github.com/cloud-mock/cloudmock
 repo_name: cloud-mock/cloudmock
-edit_uri: edit/main/gh-pages/
+edit_uri: edit/main/docs/gh-pages/
 docs_dir: gh-pages
 
 theme:
