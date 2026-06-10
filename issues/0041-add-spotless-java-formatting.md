@@ -10,13 +10,13 @@ codebase consistent without relying on individual editor settings.
 
 ## Acceptance criteria
 
-- [ ] Spotless plugin added to the root Gradle build
-- [ ] Google Java Format configured as the formatting standard
-- [ ] `./gradlew spotlessApply` reformats all Java source files
-- [ ] `./gradlew spotlessCheck` fails if any Java source file is unformatted
-- [ ] CI pipeline runs `spotlessCheck` on every pull request
-- [ ] All existing Java source files pass Spotless on merge
-- [ ] Import ordering enforced — unused imports are flagged
+- [x] Spotless plugin added to the root Gradle build
+- [x] Google Java Format configured as the formatting standard
+- [x] `./gradlew spotlessApply` reformats all Java source files
+- [x] `./gradlew spotlessCheck` fails if any Java source file is unformatted
+- [x] CI pipeline runs `spotlessCheck` on every pull request
+- [x] All existing Java source files pass Spotless on merge
+- [x] Import ordering enforced — unused imports are flagged
 
 ## Notes
 

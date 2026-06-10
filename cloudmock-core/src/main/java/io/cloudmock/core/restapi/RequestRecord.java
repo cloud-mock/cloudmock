@@ -8,5 +8,4 @@ public record RequestRecord(
         String serviceId,
         String operation,
         int statusCode,
-        boolean matched
-) {}
+        boolean matched) {}

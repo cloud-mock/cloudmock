@@ -6,14 +6,13 @@ import com.sun.net.httpserver.HttpServer;
 import io.cloudmock.core.CloudMock;
 import io.cloudmock.core.restapi.ModuleStatus;
 import io.cloudmock.core.restapi.RequestRecord;
+import io.cloudmock.core.spi.CloudMockApiService;
+import io.cloudmock.core.spi.StateStore;
 import io.cloudmock.core.spi.restapi.ApiParam;
 import io.cloudmock.core.spi.restapi.ApiRequest;
 import io.cloudmock.core.spi.restapi.ApiResponse;
 import io.cloudmock.core.spi.restapi.ApiRouteRegistrar;
 import io.cloudmock.core.spi.restapi.CloudMockApiContext;
-import io.cloudmock.core.spi.CloudMockApiService;
-import io.cloudmock.core.spi.StateStore;
-
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -32,15 +31,16 @@ import java.util.concurrent.Executors;
 /**
  * Lightweight REST API server for standalone mode.
  *
- * <p>Serves on a secondary port (default {@value ApiPortResolver#DEFAULT_API_PORT}) so API
- * traffic is always separate from the AWS mock port. Routes:
+ * <p>Serves on a secondary port (default {@value ApiPortResolver#DEFAULT_API_PORT}) so API traffic
+ * is always separate from the AWS mock port. Routes:
+ *
  * <ul>
- *   <li>{@code GET  /api/status}           — port, uptime, loaded modules and their stubs, all routes
- *   <li>{@code POST /api/reset}             — clear all state
- *   <li>{@code POST /api/reset?service=X}   — clear state for service X
- *   <li>{@code GET  /api/history}           — all captured requests
- *   <li>{@code GET  /api/history?service=X} — requests filtered by service
- *   <li>{@code GET  /api/openapi.json}      — OpenAPI 3.0 spec auto-generated from registered routes
+ *   <li>{@code GET /api/status} — port, uptime, loaded modules and their stubs, all routes
+ *   <li>{@code POST /api/reset} — clear all state
+ *   <li>{@code POST /api/reset?service=X} — clear state for service X
+ *   <li>{@code GET /api/history} — all captured requests
+ *   <li>{@code GET /api/history?service=X} — requests filtered by service
+ *   <li>{@code GET /api/openapi.json} — OpenAPI 3.0 spec auto-generated from registered routes
  * </ul>
  *
  * <p>Modules register additional routes by implementing {@link CloudMockApiService}.
@@ -72,11 +72,13 @@ public final class ApiServer implements Closeable {
         registerCoreRoutes();
         registerModuleRoutes();
 
-        server.setExecutor(Executors.newSingleThreadExecutor(r -> {
-            Thread t = new Thread(r, "cloudmock-api");
-            t.setDaemon(true);
-            return t;
-        }));
+        server.setExecutor(
+                Executors.newSingleThreadExecutor(
+                        r -> {
+                            Thread t = new Thread(r, "cloudmock-api");
+                            t.setDaemon(true);
+                            return t;
+                        }));
         server.start();
     }
 
@@ -104,76 +106,115 @@ public final class ApiServer implements Closeable {
     // Route registration
     // -------------------------------------------------------------------------
 
-    private static final QueryParam SERVICE_PARAM = new QueryParam(
-            "service", "Service ID to target (e.g. sqs, s3). Omit to apply to all services.");
+    private static final QueryParam SERVICE_PARAM =
+            new QueryParam(
+                    "service",
+                    "Service ID to target (e.g. sqs, s3). Omit to apply to all services.");
 
     private void registerCoreRoutes() {
-        addRoute("GET",  "/api/status",  "Running instance info: port, uptime, modules, routes",
-                List.of(), this::handleStatus);
-        addRoute("POST", "/api/reset",   "Clear all state, or a single service with ?service=X",
-                List.of(SERVICE_PARAM), this::handleReset);
-        addRoute("GET",  "/api/history", "Captured request log, optionally filtered with ?service=X",
-                List.of(SERVICE_PARAM), this::handleHistory);
-        addRoute("GET",  "/api/openapi.json", "OpenAPI 3.0 spec auto-generated from registered routes",
-                List.of(), req -> new ApiResponse(200, buildOpenApiSpec()));
+        addRoute(
+                "GET",
+                "/api/status",
+                "Running instance info: port, uptime, modules, routes",
+                List.of(),
+                this::handleStatus);
+        addRoute(
+                "POST",
+                "/api/reset",
+                "Clear all state, or a single service with ?service=X",
+                List.of(SERVICE_PARAM),
+                this::handleReset);
+        addRoute(
+                "GET",
+                "/api/history",
+                "Captured request log, optionally filtered with ?service=X",
+                List.of(SERVICE_PARAM),
+                this::handleHistory);
+        addRoute(
+                "GET",
+                "/api/openapi.json",
+                "OpenAPI 3.0 spec auto-generated from registered routes",
+                List.of(),
+                req -> new ApiResponse(200, buildOpenApiSpec()));
     }
 
     private void registerModuleRoutes() {
         StateStore stateStore = cloudMock.stateStore();
         for (CloudMockApiService svc : moduleServices) {
-            ApiRouteRegistrar registrar = (method, path, command, description, params, handler) -> {
-                String fullPath = "/api/" + svc.serviceId() + path;
-                routes.add(RouteDescriptor.module(method.name(), fullPath, svc.serviceId(),
-                        command, description, params));
-                bind(method.name(), fullPath, handler::handle);
-            };
+            ApiRouteRegistrar registrar =
+                    (method, path, command, description, params, handler) -> {
+                        String fullPath = "/api/" + svc.serviceId() + path;
+                        routes.add(
+                                RouteDescriptor.module(
+                                        method.name(),
+                                        fullPath,
+                                        svc.serviceId(),
+                                        command,
+                                        description,
+                                        params));
+                        bind(method.name(), fullPath, handler::handle);
+                    };
             svc.registerRoutes(new ModuleApiContext(registrar, stateStore));
         }
     }
 
-    /** Hands each module its route registrar plus the shared store (the same instance its stubs use). */
+    /**
+     * Hands each module its route registrar plus the shared store (the same instance its stubs
+     * use).
+     */
     private record ModuleApiContext(ApiRouteRegistrar registrar, StateStore stateStore)
             implements CloudMockApiContext {}
 
-    private void addRoute(String method, String path, String description,
-                          List<QueryParam> queryParams, RouteHandler handler) {
+    private void addRoute(
+            String method,
+            String path,
+            String description,
+            List<QueryParam> queryParams,
+            RouteHandler handler) {
         routes.add(RouteDescriptor.core(method, path, description, queryParams));
         bind(method, path, handler);
     }
 
     private void bind(String method, String path, RouteHandler handler) {
-        server.createContext(path, exchange -> {
-            // Allow cross-origin requests so the CloudMock Console (or any browser client)
-            // can call the API from a different origin without a proxy.
-            exchange.getResponseHeaders().set("Access-Control-Allow-Origin", "*");
-            exchange.getResponseHeaders().set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS");
-            exchange.getResponseHeaders().set("Access-Control-Allow-Headers", "Content-Type");
+        server.createContext(
+                path,
+                exchange -> {
+                    // Allow cross-origin requests so the CloudMock Console (or any browser client)
+                    // can call the API from a different origin without a proxy.
+                    exchange.getResponseHeaders().set("Access-Control-Allow-Origin", "*");
+                    exchange.getResponseHeaders()
+                            .set(
+                                    "Access-Control-Allow-Methods",
+                                    "GET, POST, PUT, DELETE, PATCH, OPTIONS");
+                    exchange.getResponseHeaders()
+                            .set("Access-Control-Allow-Headers", "Content-Type");
 
-            // Handle CORS pre-flight.
-            if ("OPTIONS".equals(exchange.getRequestMethod())) {
-                exchange.sendResponseHeaders(204, -1);
-                return;
-            }
+                    // Handle CORS pre-flight.
+                    if ("OPTIONS".equals(exchange.getRequestMethod())) {
+                        exchange.sendResponseHeaders(204, -1);
+                        return;
+                    }
 
-            // HttpServer contexts match by path prefix; require an exact path so that, e.g.,
-            // /api/statusEXTRA does not fall through to the /api/status handler.
-            if (!path.equals(exchange.getRequestURI().getPath())) {
-                sendError(exchange, 404, "Not Found");
-                return;
-            }
-            if (!method.equals(exchange.getRequestMethod())) {
-                sendError(exchange, 405, "Method Not Allowed");
-                return;
-            }
-            Map<String, String> reqParams = parseQuery(exchange.getRequestURI().getQuery());
-            ApiRequest req = new ApiRequest(method, path, reqParams);
-            try {
-                ApiResponse resp = handler.handle(req);
-                sendJson(exchange, resp.statusCode(), resp.body());
-            } catch (Exception e) {
-                sendError(exchange, 500, e.getMessage());
-            }
-        });
+                    // HttpServer contexts match by path prefix; require an exact path so that,
+                    // e.g.,
+                    // /api/statusEXTRA does not fall through to the /api/status handler.
+                    if (!path.equals(exchange.getRequestURI().getPath())) {
+                        sendError(exchange, 404, "Not Found");
+                        return;
+                    }
+                    if (!method.equals(exchange.getRequestMethod())) {
+                        sendError(exchange, 405, "Method Not Allowed");
+                        return;
+                    }
+                    Map<String, String> reqParams = parseQuery(exchange.getRequestURI().getQuery());
+                    ApiRequest req = new ApiRequest(method, path, reqParams);
+                    try {
+                        ApiResponse resp = handler.handle(req);
+                        sendJson(exchange, resp.statusCode(), resp.body());
+                    } catch (Exception e) {
+                        sendError(exchange, 500, e.getMessage());
+                    }
+                });
     }
 
     // -------------------------------------------------------------------------
@@ -210,13 +251,12 @@ public final class ApiServer implements Closeable {
 
     private ApiResponse handleHistory(ApiRequest req) {
         String service = req.queryParams().get("service");
-        List<RequestRecord> records = service != null && !service.isBlank()
-                ? cloudMock.requestHistory(service)
-                : cloudMock.requestHistory();
+        List<RequestRecord> records =
+                service != null && !service.isBlank()
+                        ? cloudMock.requestHistory(service)
+                        : cloudMock.requestHistory();
 
-        List<Map<String, Object>> items = records.stream()
-                .map(this::serializeRecord)
-                .toList();
+        List<Map<String, Object>> items = records.stream().map(this::serializeRecord).toList();
 
         return new ApiResponse(200, Map.of("requests", items));
     }
@@ -226,43 +266,72 @@ public final class ApiServer implements Closeable {
     // -------------------------------------------------------------------------
 
     private List<Map<String, Object>> serializeModules(List<ModuleStatus> modules) {
-        return modules.stream().map(m -> {
-            Map<String, Object> mod = new LinkedHashMap<>();
-            mod.put("id", m.id());
-            mod.put("stubs", m.stubs().stream()
-                    .map(s -> Map.of("protocol", s.protocol(), "matchKey", s.matchKey()))
-                    .toList());
-            return mod;
-        }).toList();
+        return modules.stream()
+                .map(
+                        m -> {
+                            Map<String, Object> mod = new LinkedHashMap<>();
+                            mod.put("id", m.id());
+                            mod.put(
+                                    "stubs",
+                                    m.stubs().stream()
+                                            .map(
+                                                    s ->
+                                                            Map.of(
+                                                                    "protocol",
+                                                                    s.protocol(),
+                                                                    "matchKey",
+                                                                    s.matchKey()))
+                                            .toList());
+                            return mod;
+                        })
+                .toList();
     }
 
     private List<Map<String, Object>> serializeRoutes() {
-        return routes.stream().map(r -> {
-            Map<String, Object> route = new LinkedHashMap<>();
-            route.put("method", r.method());
-            route.put("path", r.path());
-            route.put("description", r.description());
-            // Module routes carry a service + command + parameter list so a generic client
-            // (the CLI) can build `<service> <command>` with typed options at runtime.
-            if (r.service() != null) {
-                route.put("service", r.service());
-                route.put("command", r.command());
-            }
-            if (!r.params().isEmpty()) {
-                route.put("params", r.params().stream()
-                        .map(p -> Map.of(
-                                "name", p.name(),
-                                "required", p.required(),
-                                "description", p.description()))
-                        .toList());
-            }
-            if (!r.queryParams().isEmpty()) {
-                route.put("queryParams", r.queryParams().stream()
-                        .map(p -> Map.of("name", p.name(), "description", p.description()))
-                        .toList());
-            }
-            return route;
-        }).toList();
+        return routes.stream()
+                .map(
+                        r -> {
+                            Map<String, Object> route = new LinkedHashMap<>();
+                            route.put("method", r.method());
+                            route.put("path", r.path());
+                            route.put("description", r.description());
+                            // Module routes carry a service + command + parameter list so a generic
+                            // client
+                            // (the CLI) can build `<service> <command>` with typed options at
+                            // runtime.
+                            if (r.service() != null) {
+                                route.put("service", r.service());
+                                route.put("command", r.command());
+                            }
+                            if (!r.params().isEmpty()) {
+                                route.put(
+                                        "params",
+                                        r.params().stream()
+                                                .map(
+                                                        p ->
+                                                                Map.of(
+                                                                        "name", p.name(),
+                                                                        "required", p.required(),
+                                                                        "description",
+                                                                                p.description()))
+                                                .toList());
+                            }
+                            if (!r.queryParams().isEmpty()) {
+                                route.put(
+                                        "queryParams",
+                                        r.queryParams().stream()
+                                                .map(
+                                                        p ->
+                                                                Map.of(
+                                                                        "name",
+                                                                        p.name(),
+                                                                        "description",
+                                                                        p.description()))
+                                                .toList());
+                            }
+                            return route;
+                        })
+                .toList();
     }
 
     private Map<String, Object> serializeRecord(RequestRecord r) {
@@ -304,7 +373,8 @@ public final class ApiServer implements Closeable {
         return spec;
     }
 
-    private static Map<String, Object> openApiParam(String name, boolean required, String description) {
+    private static Map<String, Object> openApiParam(
+            String name, boolean required, String description) {
         Map<String, Object> param = new LinkedHashMap<>();
         param.put("name", name);
         param.put("in", "query");
@@ -370,22 +440,34 @@ public final class ApiServer implements Closeable {
     private record QueryParam(String name, String description) {}
 
     /**
-     * A registered route. Core routes (status/reset/…) leave {@code service}/{@code command}
-     * null and may carry {@code queryParams}; module routes set {@code service}/{@code command}
-     * and may carry {@code params}. The two parameter lists are mutually exclusive in practice.
+     * A registered route. Core routes (status/reset/…) leave {@code service}/{@code command} null
+     * and may carry {@code queryParams}; module routes set {@code service}/{@code command} and may
+     * carry {@code params}. The two parameter lists are mutually exclusive in practice.
      */
-    private record RouteDescriptor(String method, String path, String service, String command,
-                                   String description, List<QueryParam> queryParams,
-                                   List<ApiParam> params) {
+    private record RouteDescriptor(
+            String method,
+            String path,
+            String service,
+            String command,
+            String description,
+            List<QueryParam> queryParams,
+            List<ApiParam> params) {
 
-        static RouteDescriptor core(String method, String path, String description,
-                                    List<QueryParam> queryParams) {
-            return new RouteDescriptor(method, path, null, null, description, queryParams, List.of());
+        static RouteDescriptor core(
+                String method, String path, String description, List<QueryParam> queryParams) {
+            return new RouteDescriptor(
+                    method, path, null, null, description, queryParams, List.of());
         }
 
-        static RouteDescriptor module(String method, String path, String service, String command,
-                                      String description, List<ApiParam> params) {
-            return new RouteDescriptor(method, path, service, command, description, List.of(), params);
+        static RouteDescriptor module(
+                String method,
+                String path,
+                String service,
+                String command,
+                String description,
+                List<ApiParam> params) {
+            return new RouteDescriptor(
+                    method, path, service, command, description, List.of(), params);
         }
     }
 }

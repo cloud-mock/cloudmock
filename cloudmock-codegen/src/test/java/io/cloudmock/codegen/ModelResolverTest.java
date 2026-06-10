@@ -1,18 +1,16 @@
 package io.cloudmock.codegen;
 
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 class ModelResolverTest {
 
-    @TempDir
-    Path tempDir;
+    @TempDir Path tempDir;
 
     @Test
     void ofReturnsLocalResolverForFilePath() {
@@ -21,19 +19,22 @@ class ModelResolverTest {
 
     @Test
     void ofReturnsHttpsResolverForHttpsUrl() {
-        assertInstanceOf(HttpsModelResolver.class, ModelResolver.of("https://example.com/model.json"));
+        assertInstanceOf(
+                HttpsModelResolver.class, ModelResolver.of("https://example.com/model.json"));
     }
 
     @Test
     void ofReturnsHttpResolverForHttpUrl() {
-        assertInstanceOf(HttpModelResolver.class, ModelResolver.of("http://example.com/model.json"));
+        assertInstanceOf(
+                HttpModelResolver.class, ModelResolver.of("http://example.com/model.json"));
     }
 
     // --- HttpModelResolver ---
 
     @Test
     void httpResolverAlwaysThrows() {
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(
+                IllegalArgumentException.class,
                 ModelResolver.of("http://example.com/model.json")::resolve);
     }
 
@@ -47,7 +48,8 @@ class ModelResolverTest {
 
     @Test
     void localResolverRejectsMissingFile() {
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(
+                IllegalArgumentException.class,
                 ModelResolver.of(tempDir.resolve("missing.json").toString())::resolve);
     }
 

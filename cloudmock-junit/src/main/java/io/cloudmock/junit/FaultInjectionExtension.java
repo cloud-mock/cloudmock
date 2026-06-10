@@ -1,19 +1,17 @@
 package io.cloudmock.junit;
 
 import io.cloudmock.core.CloudMock;
+import java.lang.reflect.Method;
 import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.extension.AfterTestExecutionCallback;
 import org.junit.jupiter.api.extension.BeforeTestExecutionCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
-import java.lang.reflect.Method;
-
 /**
  * Standalone JUnit 6 extension that applies fault injection annotations to test methods.
  *
- * <p>Use this extension when you manage the {@link CloudMock} lifecycle yourself (e.g.
- * via {@code @BeforeAll} / {@code @AfterAll}) rather than through
- * {@link CloudMockExtension}.
+ * <p>Use this extension when you manage the {@link CloudMock} lifecycle yourself (e.g. via
+ * {@code @BeforeAll} / {@code @AfterAll}) rather than through {@link CloudMockExtension}.
  *
  * <pre>
  * static CloudMock cloudMock = new CloudMock();
@@ -32,11 +30,12 @@ import java.lang.reflect.Method;
  * void throttleTest() { ... }
  * </pre>
  *
- * <p>Fault state is always cleaned up after each test method, even if the test throws.
- * If you use {@link CloudMockExtension}, fault annotation support is built in — you do
- * not need this extension as well.
+ * <p>Fault state is always cleaned up after each test method, even if the test throws. If you use
+ * {@link CloudMockExtension}, fault annotation support is built in — you do not need this extension
+ * as well.
  */
-public final class FaultInjectionExtension implements BeforeTestExecutionCallback, AfterTestExecutionCallback {
+public final class FaultInjectionExtension
+        implements BeforeTestExecutionCallback, AfterTestExecutionCallback {
 
     private final CloudMock cloudMock;
 
@@ -61,7 +60,8 @@ public final class FaultInjectionExtension implements BeforeTestExecutionCallbac
         for (SimulateTimeout ann : method.getAnnotationsByType(SimulateTimeout.class)) {
             cloudMock.simulateTimeout(ann.service());
         }
-        for (SimulateNetworkBrownout ann : method.getAnnotationsByType(SimulateNetworkBrownout.class)) {
+        for (SimulateNetworkBrownout ann :
+                method.getAnnotationsByType(SimulateNetworkBrownout.class)) {
             cloudMock.simulateNetworkBrownout(ann.service(), ann.rate());
         }
     }

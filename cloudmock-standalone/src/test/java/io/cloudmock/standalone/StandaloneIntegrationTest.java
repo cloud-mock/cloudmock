@@ -1,5 +1,9 @@
 package io.cloudmock.standalone;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.net.URI;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -8,11 +12,6 @@ import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.ListQueuesResponse;
-
-import java.net.URI;
-
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class StandaloneIntegrationTest {
 
@@ -33,12 +32,14 @@ class StandaloneIntegrationTest {
 
     @Test
     void sqsListQueuesIsServedByStandaloneProcess() {
-        try (SqsClient sqs = SqsClient.builder()
-                .endpointOverride(URI.create("http://localhost:" + PORT))
-                .region(Region.US_EAST_1)
-                .credentialsProvider(StaticCredentialsProvider.create(
-                        AwsBasicCredentials.create("test", "test")))
-                .build()) {
+        try (SqsClient sqs =
+                SqsClient.builder()
+                        .endpointOverride(URI.create("http://localhost:" + PORT))
+                        .region(Region.US_EAST_1)
+                        .credentialsProvider(
+                                StaticCredentialsProvider.create(
+                                        AwsBasicCredentials.create("test", "test")))
+                        .build()) {
 
             ListQueuesResponse response = sqs.listQueues();
             assertNotNull(response);

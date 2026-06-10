@@ -1,29 +1,31 @@
 package io.cloudmock.standalone;
 
-import org.junit.jupiter.api.Test;
-
-import java.nio.file.Path;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+
+import java.nio.file.Path;
+import org.junit.jupiter.api.Test;
 
 class StoreDirectoryResolverTest {
 
     @Test
     void defaultsToPersistentStoreDirectory() {
-        assertEquals(Path.of(StoreDirectoryResolver.DEFAULT_STORE_DIR),
+        assertEquals(
+                Path.of(StoreDirectoryResolver.DEFAULT_STORE_DIR),
                 StoreDirectoryResolver.resolve(new String[] {"--port=4566"}));
     }
 
     @Test
     void parsesEqualsFormFlag() {
-        assertEquals(Path.of("/tmp/cm-state"),
+        assertEquals(
+                Path.of("/tmp/cm-state"),
                 StoreDirectoryResolver.resolve(new String[] {"--store-dir=/tmp/cm-state"}));
     }
 
     @Test
     void parsesSpaceSeparatedFlag() {
-        assertEquals(Path.of("state-dir"),
+        assertEquals(
+                Path.of("state-dir"),
                 StoreDirectoryResolver.resolve(new String[] {"--store-dir", "state-dir"}));
     }
 

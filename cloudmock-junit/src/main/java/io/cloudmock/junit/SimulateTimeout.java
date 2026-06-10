@@ -7,11 +7,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Causes all stubs for the named service to delay their response beyond the AWS SDK's call
- * timeout, triggering a timeout exception at the SDK level.
+ * Causes all stubs for the named service to delay their response beyond the AWS SDK's call timeout,
+ * triggering a timeout exception at the SDK level.
  *
- * <p>Configure the SDK client under test with a short {@code apiCallTimeout} (e.g. 500 ms)
- * so the test completes quickly rather than waiting for the full 30-second server delay.
+ * <p>Configure the SDK client under test with a short {@code apiCallTimeout} (e.g. 500 ms) so the
+ * test completes quickly rather than waiting for the full 30-second server delay.
  *
  * <p>Fault state is always cleaned up after the test, even if it throws.
  */

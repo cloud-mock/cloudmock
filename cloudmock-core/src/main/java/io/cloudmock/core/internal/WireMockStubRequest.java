@@ -10,8 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Adapts a WireMock {@link Request} to the public {@link StubRequest} SPI view, so that
- * {@link io.cloudmock.core.spi.StubHandler}s never see a WireMock or JSON-library type.
+ * Adapts a WireMock {@link Request} to the public {@link StubRequest} SPI view, so that {@link
+ * io.cloudmock.core.spi.StubHandler}s never see a WireMock or JSON-library type.
  *
  * <p>The body string and its parsed JSON tree are read/parsed lazily and cached, so a handler that
  * pulls several fields out of one request pays for the read and parse only once.
@@ -21,9 +21,9 @@ final class WireMockStubRequest implements StubRequest {
     private static final Logger log = LoggerFactory.getLogger(WireMockStubRequest.class);
 
     /**
-     * A plain, read-only mapper shared across requests; thread-safe for {@code readTree}. Deliberately
-     * NOT the one in {@code JsonFileStateStore}, whose default typing would mis-parse plain request
-     * bodies.
+     * A plain, read-only mapper shared across requests; thread-safe for {@code readTree}.
+     * Deliberately NOT the one in {@code JsonFileStateStore}, whose default typing would mis-parse
+     * plain request bodies.
      */
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
@@ -96,8 +96,10 @@ final class WireMockStubRequest implements StubRequest {
                     bodyTree = MAPPER.readTree(raw);
                 } catch (Exception e) {
                     // A non-JSON or malformed body is not an error — handlers just get null. Log at
-                    // debug so a developer chasing a stateful round-trip can see why a field was empty.
-                    log.debug("Request body is not valid JSON; jsonField will return null: {}",
+                    // debug so a developer chasing a stateful round-trip can see why a field was
+                    // empty.
+                    log.debug(
+                            "Request body is not valid JSON; jsonField will return null: {}",
                             e.getMessage());
                     bodyTree = null;
                 }

@@ -6,7 +6,6 @@ import io.cloudmock.core.spi.restapi.ApiParam;
 import io.cloudmock.core.spi.restapi.ApiRequest;
 import io.cloudmock.core.spi.restapi.ApiResponse;
 import io.cloudmock.core.spi.restapi.CloudMockApiContext;
-
 import java.util.List;
 import java.util.Map;
 
@@ -32,15 +31,34 @@ public class CloudMockS3ApiService implements CloudMockApiService {
     @Override
     public void registerRoutes(CloudMockApiContext context) {
         var r = context.registrar();
-        r.register(HttpMethod.GET, "/list-buckets", "list-buckets",
-                "List S3 buckets", List.of(), this::listBuckets);
-        r.register(HttpMethod.GET, "/list-objects", "list-objects",
-                "List objects in an S3 bucket", List.of(BUCKET), this::listObjects);
-        r.register(HttpMethod.PUT, "/put-object", "put-object",
+        r.register(
+                HttpMethod.GET,
+                "/list-buckets",
+                "list-buckets",
+                "List S3 buckets",
+                List.of(),
+                this::listBuckets);
+        r.register(
+                HttpMethod.GET,
+                "/list-objects",
+                "list-objects",
+                "List objects in an S3 bucket",
+                List.of(BUCKET),
+                this::listObjects);
+        r.register(
+                HttpMethod.PUT,
+                "/put-object",
+                "put-object",
                 "Upload an object to an S3 bucket",
-                List.of(BUCKET, KEY, new ApiParam("body", false, "Object content")), this::putObject);
-        r.register(HttpMethod.GET, "/get-object", "get-object",
-                "Download an object from an S3 bucket", List.of(BUCKET, KEY), this::getObject);
+                List.of(BUCKET, KEY, new ApiParam("body", false, "Object content")),
+                this::putObject);
+        r.register(
+                HttpMethod.GET,
+                "/get-object",
+                "get-object",
+                "Download an object from an S3 bucket",
+                List.of(BUCKET, KEY),
+                this::getObject);
     }
 
     private ApiResponse listBuckets(ApiRequest req) {
@@ -48,22 +66,28 @@ public class CloudMockS3ApiService implements CloudMockApiService {
     }
 
     private ApiResponse listObjects(ApiRequest req) {
-        return new ApiResponse(200, Map.of(
-                "bucket", req.queryParams().getOrDefault("bucket", ""),
-                "objects", List.of()));
+        return new ApiResponse(
+                200,
+                Map.of(
+                        "bucket", req.queryParams().getOrDefault("bucket", ""),
+                        "objects", List.of()));
     }
 
     private ApiResponse putObject(ApiRequest req) {
-        return new ApiResponse(200, Map.of(
-                "status", "uploaded",
-                "bucket", req.queryParams().getOrDefault("bucket", ""),
-                "key", req.queryParams().getOrDefault("key", "")));
+        return new ApiResponse(
+                200,
+                Map.of(
+                        "status", "uploaded",
+                        "bucket", req.queryParams().getOrDefault("bucket", ""),
+                        "key", req.queryParams().getOrDefault("key", "")));
     }
 
     private ApiResponse getObject(ApiRequest req) {
-        return new ApiResponse(200, Map.of(
-                "bucket", req.queryParams().getOrDefault("bucket", ""),
-                "key", req.queryParams().getOrDefault("key", ""),
-                "body", "cloudmock-synthetic-object"));
+        return new ApiResponse(
+                200,
+                Map.of(
+                        "bucket", req.queryParams().getOrDefault("bucket", ""),
+                        "key", req.queryParams().getOrDefault("key", ""),
+                        "body", "cloudmock-synthetic-object"));
     }
 }

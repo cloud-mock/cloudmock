@@ -35,7 +35,9 @@ compile or runtime dependency on another service module. CI validates this on ev
 Standard commands:
 
 ```
-./gradlew build                      # compile + test all subprojects
+./gradlew build                      # compile + test all subprojects (runs spotlessCheck)
+./gradlew spotlessApply              # reformat all Java sources (run before pushing)
+./gradlew spotlessCheck              # fail if any Java source is unformatted
 ./gradlew :cloudmock-core:test       # single subproject tests
 ./gradlew publishToMavenLocal        # publish for local smoke testing
 ./gradlew :cloudmock-codegen:shadowJar                                 # build the codegen fat JAR
@@ -45,6 +47,15 @@ java -jar cloudmock-standalone/build/libs/cloudmock-standalone.jar    # start on
 java -jar cloudmock-standalone/build/libs/cloudmock-standalone.jar --port=4566 --api-port=4567   # explicit ports
 CLOUDMOCK_PORT=4566 CLOUDMOCK_API_PORT=4567 java -jar cloudmock-standalone/build/libs/cloudmock-standalone.jar  # via env vars
 ```
+
+### Code formatting
+
+Java sources are formatted with Spotless using Google Java Format's **AOSP** variant (4-space
+indentation). The plugin is applied to all subprojects from the root `build.gradle`, so modules need
+no per-module configuration. Run `./gradlew spotlessApply` before pushing; `spotlessCheck` is wired
+into `check`/`build` and CI fails on unformatted sources. Spotless also enforces import ordering,
+removes unused imports, trims trailing whitespace, and ensures files end with a newline. Sources
+under `**/build/**` and `**/generated/**` (codegen output) are excluded.
 
 The `clm` / `cloudmock` CLI lives in its own repository (`cloud-mock/cloudmock-cli`), not in this
 monorepo — see the **CLI** section below.

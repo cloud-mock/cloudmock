@@ -1,16 +1,16 @@
 package io.cloudmock.sdkv1;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import com.amazonaws.AmazonServiceException;
-import com.amazonaws.auth.AnonymousAWSCredentials;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.AnonymousAWSCredentials;
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.AmazonSQSClientBuilder;
 import io.cloudmock.core.CloudMock;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class CloudMockV1EndpointsTest {
 
@@ -22,10 +22,12 @@ class CloudMockV1EndpointsTest {
         cloudMock = new CloudMock();
         cloudMock.start();
 
-        sqsClient = AmazonSQSClientBuilder.standard()
-                .withEndpointConfiguration(CloudMockV1Endpoints.forPort(cloudMock.port()))
-                .withCredentials(new AWSStaticCredentialsProvider(new AnonymousAWSCredentials()))
-                .build();
+        sqsClient =
+                AmazonSQSClientBuilder.standard()
+                        .withEndpointConfiguration(CloudMockV1Endpoints.forPort(cloudMock.port()))
+                        .withCredentials(
+                                new AWSStaticCredentialsProvider(new AnonymousAWSCredentials()))
+                        .build();
     }
 
     @AfterAll

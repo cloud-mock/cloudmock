@@ -12,8 +12,8 @@ import java.util.Set;
 
 /**
  * Helpers shared by the {@link io.cloudmock.core.spi.StateStore} backends, so the in-memory and the
- * persistent stores agree on prefix semantics and on how a file is durably replaced rather than each
- * re-implementing them.
+ * persistent stores agree on prefix semantics and on how a file is durably replaced rather than
+ * each re-implementing them.
  */
 final class StateStoreSupport {
 
@@ -42,8 +42,11 @@ final class StateStoreSupport {
         Path tmp = target.resolveSibling(target.getFileName().toString() + ".tmp");
         try {
             writer.writeTo(tmp);
-            Files.move(tmp, target,
-                    StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+            Files.move(
+                    tmp,
+                    target,
+                    StandardCopyOption.REPLACE_EXISTING,
+                    StandardCopyOption.ATOMIC_MOVE);
         } finally {
             // No-op after a successful move; cleans up a half-written temp file otherwise.
             Files.deleteIfExists(tmp);
