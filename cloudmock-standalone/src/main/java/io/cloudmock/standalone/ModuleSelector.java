@@ -7,14 +7,16 @@ import java.util.Set;
  * Resolves which service modules the standalone server should enable.
  *
  * <p>Precedence: {@code --modules=<a,b>} CLI flag, then {@code CLOUDMOCK_MODULES} environment
- * variable. When neither is set (or the value is blank), {@code null} is returned, meaning
- * "enable every module discovered on the classpath".
+ * variable. When neither is set (or the value is blank), {@code null} is returned, meaning "enable
+ * every module discovered on the classpath".
  */
 final class ModuleSelector {
 
     private ModuleSelector() {}
 
-    /** @return the requested module IDs, or {@code null} to enable all discovered modules. */
+    /**
+     * @return the requested module IDs, or {@code null} to enable all discovered modules.
+     */
     static Set<String> resolve(String[] args) {
         for (int i = 0; i < args.length; i++) {
             if (args[i].startsWith("--modules=")) {

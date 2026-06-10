@@ -1,7 +1,10 @@
 package io.cloudmock.example.junit5;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import io.cloudmock.junit.CloudMockExtension;
 import io.cloudmock.sqs.CloudMockSqsService;
+import java.net.URI;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -10,29 +13,26 @@ import software.amazon.awssdk.auth.credentials.AnonymousCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.sqs.SqsClient;
 
-import java.net.URI;
-
-import static org.junit.jupiter.api.Assertions.*;
-
 /**
- * Demonstrates {@code @RegisterExtension} with JUnit 5 — gives direct port access and
- * allows explicit service registration rather than relying on ServiceLoader.
+ * Demonstrates {@code @RegisterExtension} with JUnit 5 — gives direct port access and allows
+ * explicit service registration rather than relying on ServiceLoader.
  */
 class RegisterExtensionTest {
 
     @RegisterExtension
-    static CloudMockExtension cloudMock = new CloudMockExtension()
-            .withService(new CloudMockSqsService());
+    static CloudMockExtension cloudMock =
+            new CloudMockExtension().withService(new CloudMockSqsService());
 
     static SqsClient sqsClient;
 
     @BeforeAll
     static void buildClient() {
-        sqsClient = SqsClient.builder()
-                .endpointOverride(URI.create("http://localhost:" + cloudMock.port()))
-                .credentialsProvider(AnonymousCredentialsProvider.create())
-                .region(Region.US_EAST_1)
-                .build();
+        sqsClient =
+                SqsClient.builder()
+                        .endpointOverride(URI.create("http://localhost:" + cloudMock.port()))
+                        .credentialsProvider(AnonymousCredentialsProvider.create())
+                        .region(Region.US_EAST_1)
+                        .build();
     }
 
     @AfterAll

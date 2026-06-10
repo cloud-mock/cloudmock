@@ -9,15 +9,15 @@ Cover every operation stubbed in `cloudmock-secretsmanager` with an AWS SDK v2 i
 
 ## Acceptance criteria
 
-- [ ] Each of the five operations from ticket 0007 has at least one corresponding test
-- [ ] Tests use `SecretsManagerClient` (AWS SDK v2) with `AnonymousCredentialsProvider` and `EndpointOverride` pointing at the CloudMock port — no raw HTTP
-- [ ] A `CloudMock` instance is started in `@BeforeAll` and stopped in `@AfterAll`
-- [ ] `CreateSecret` test asserts the returned `ARN` is non-null and the `Name` matches the input
-- [ ] `GetSecretValue` test asserts `SecretString` is non-null and non-empty
-- [ ] `PutSecretValue` test asserts a non-null `VersionId` is returned
-- [ ] `DeleteSecret` test asserts the call completes without exception and returns a non-null `ARN`
-- [ ] `ListSecrets` test asserts the response is non-null
-- [ ] All tests run as part of `./gradlew :cloudmock-secretsmanager:test` and are included in the root `./gradlew test`
+- [x] Each of the five operations from ticket 0007 has at least one corresponding test
+- [x] Tests use `SecretsManagerClient` (AWS SDK v2) with `AnonymousCredentialsProvider` and `EndpointOverride` pointing at the CloudMock port — no raw HTTP
+- [x] A `CloudMock` instance is started in `@BeforeAll` and stopped in `@AfterAll`
+- [x] `CreateSecret` test asserts the returned `ARN` is non-null and the `Name` matches the input
+- [x] `GetSecretValue` test asserts `SecretString` is non-null and non-empty
+- [x] `PutSecretValue` test asserts a non-null `VersionId` is returned
+- [x] `DeleteSecret` test asserts the call completes without exception and returns a non-null `ARN`
+- [x] `ListSecrets` test asserts the response is non-null
+- [x] All tests run as part of `./gradlew :cloudmock-secretsmanager:test` and are included in the root `./gradlew test`
 
 ## Dependencies
 

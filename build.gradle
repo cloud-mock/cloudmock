@@ -1,10 +1,32 @@
 buildscript {
     repositories { gradlePluginPortal() }
-    dependencies { classpath 'com.github.johnrengelman:shadow:8.1.1' }
+    dependencies {
+        classpath 'com.github.johnrengelman:shadow:8.1.1'
+        classpath 'com.diffplug.spotless:spotless-plugin-gradle:6.25.0'
+    }
 }
 
 subprojects {
     apply plugin: 'java'
+    apply plugin: 'com.diffplug.spotless'
+
+    // Google Java Format is the enforced formatting standard for all Java sources. Applied from
+    // the root so module authors do not configure it per module. `spotlessApply` reformats;
+    // `spotlessCheck` (wired into `check`, and therefore `build`) fails on unformatted sources.
+    spotless {
+        java {
+            target 'src/**/*.java'
+            // Generated sources (e.g. codegen output) are excluded: the formatter may alter
+            // template-driven structure.
+            targetExclude '**/build/**', '**/generated/**'
+            // AOSP variant of Google Java Format: 4-space block indentation.
+            googleJavaFormat('1.22.0').aosp()
+            importOrder()
+            removeUnusedImports()
+            trimTrailingWhitespace()
+            endWithNewline()
+        }
+    }
 
     group = 'io.cloudmock'
     version = '0.1.0-SNAPSHOT'

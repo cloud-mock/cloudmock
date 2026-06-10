@@ -11,14 +11,15 @@ import software.amazon.smithy.model.shapes.ServiceShape;
  * Detects the AWS wire protocol for a service by inspecting its Smithy protocol traits.
  *
  * <p>Detection order mirrors CloudMock's routing table:
+ *
  * <ol>
- *   <li>JSON / X-Amz-Target — {@code @aws.protocols#awsJson1_0} or {@code #awsJson1_1}</li>
- *   <li>XML / Form URL — {@code @aws.protocols#query} (Action-based: SQS, SNS)</li>
- *   <li>REST path — {@code @aws.protocols#restXml} or {@code #restJson1} (S3, API Gateway…)</li>
+ *   <li>JSON / X-Amz-Target — {@code @aws.protocols#awsJson1_0} or {@code #awsJson1_1}
+ *   <li>XML / Form URL — {@code @aws.protocols#query} (Action-based: SQS, SNS)
+ *   <li>REST path — {@code @aws.protocols#restXml} or {@code #restJson1} (S3, API Gateway…)
  * </ol>
  *
- * <p>If none of the above traits is present, the detector falls back to
- * {@link Protocol#JSON_TARGET} and prints a warning.
+ * <p>If none of the above traits is present, the detector falls back to {@link
+ * Protocol#JSON_TARGET} and prints a warning.
  */
 class ProtocolDetector {
 
@@ -37,9 +38,11 @@ class ProtocolDetector {
         if (service.hasTrait(RestJson1Trait.class)) {
             return Protocol.REST_JSON;
         }
-        System.err.println("WARNING: no known protocol trait found on "
-                + service.getId() + " — defaulting to JSON_TARGET. "
-                + "Set the protocol explicitly if this is wrong.");
+        System.err.println(
+                "WARNING: no known protocol trait found on "
+                        + service.getId()
+                        + " — defaulting to JSON_TARGET. "
+                        + "Set the protocol explicitly if this is wrong.");
         return Protocol.JSON_TARGET;
     }
 }

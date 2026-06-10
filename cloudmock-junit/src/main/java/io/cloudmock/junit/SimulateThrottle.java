@@ -7,10 +7,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Causes all stubs for the named service to return a {@code ThrottlingException} (HTTP 400)
- * for the duration of the annotated test method.
+ * Causes all stubs for the named service to return a {@code ThrottlingException} (HTTP 400) for the
+ * duration of the annotated test method.
  *
  * <p>Repeatable — multiple services can be throttled simultaneously:
+ *
  * <pre>
  * {@literal @}SimulateThrottle(service = "sqs")
  * {@literal @}SimulateThrottle(service = "secretsmanager")

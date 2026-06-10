@@ -9,16 +9,16 @@ Cover every operation stubbed in `cloudmock-sqs` with an AWS SDK v2 integration 
 
 ## Acceptance criteria
 
-- [ ] Each of the seven operations from ticket 0005 has at least one corresponding test
-- [ ] Tests use `SqsClient` (AWS SDK v2) with `AnonymousCredentialsProvider` and `EndpointOverride` pointing at the CloudMock port — no raw HTTP
-- [ ] A `CloudMock` instance is started in `@BeforeAll` and stopped in `@AfterAll`
-- [ ] `CreateQueue` test asserts the returned `QueueUrl` is non-null and contains the queue name
-- [ ] `GetQueueUrl` test asserts a non-null `QueueUrl` is returned
-- [ ] `SendMessage` test asserts a non-null, non-empty `MessageId` is returned
-- [ ] `ReceiveMessage` test asserts at least one message is returned and each has a non-null `MessageId`, `ReceiptHandle`, and `Body`
-- [ ] `DeleteMessage` and `DeleteQueue` tests assert the call completes without exception
-- [ ] `ListQueues` test asserts the response is non-null (queue list may be empty for a stateless stub)
-- [ ] All tests run as part of `./gradlew :cloudmock-sqs:test` and are included in the root `./gradlew test`
+- [x] Each of the seven operations from ticket 0005 has at least one corresponding test
+- [x] Tests use `SqsClient` (AWS SDK v2) with `AnonymousCredentialsProvider` and `EndpointOverride` pointing at the CloudMock port — no raw HTTP
+- [x] A `CloudMock` instance is started in `@BeforeAll` and stopped in `@AfterAll`
+- [x] `CreateQueue` test asserts the returned `QueueUrl` is non-null and contains the queue name
+- [x] `GetQueueUrl` test asserts a non-null `QueueUrl` is returned
+- [x] `SendMessage` test asserts a non-null, non-empty `MessageId` is returned
+- [x] `ReceiveMessage` test asserts at least one message is returned and each has a non-null `MessageId`, `ReceiptHandle`, and `Body`
+- [x] `DeleteMessage` and `DeleteQueue` tests assert the call completes without exception
+- [x] `ListQueues` test asserts the response is non-null (queue list may be empty for a stateless stub)
+- [x] All tests run as part of `./gradlew :cloudmock-sqs:test` and are included in the root `./gradlew test`
 
 ## Dependencies
 

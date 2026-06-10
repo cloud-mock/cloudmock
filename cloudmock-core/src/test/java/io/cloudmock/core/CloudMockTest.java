@@ -1,11 +1,11 @@
 package io.cloudmock.core;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import io.cloudmock.core.exception.CloudMockAlreadyStartedException;
 import io.cloudmock.core.exception.CloudMockNotStartedException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class CloudMockTest {
 
@@ -67,7 +67,8 @@ class CloudMockTest {
     @Test
     void withEnabledServicesAfterStartThrowsCloudMockAlreadyStartedException() {
         cloudMock.start();
-        assertThrows(CloudMockAlreadyStartedException.class,
+        assertThrows(
+                CloudMockAlreadyStartedException.class,
                 () -> cloudMock.withEnabledServices(java.util.Set.of("sqs")));
     }
 

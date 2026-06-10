@@ -16,14 +16,15 @@ import io.cloudmock.core.spi.StubRegistrar;
  * stubs via {@link StubRegistrar#registerXmlFormStub(String, String)} — exactly as this class does
  * for the SNS {@code Publish} action.
  *
- * <p>Install it explicitly with {@code new CloudMockExtension().withService(new SnsV1PublishStubService())};
- * see {@code module-authoring.md} for the full SPI walkthrough.
+ * <p>Install it explicitly with {@code new CloudMockExtension().withService(new
+ * SnsV1PublishStubService())}; see {@code module-authoring.md} for the full SPI walkthrough.
  */
 public final class SnsV1PublishStubService implements CloudMockService {
 
     // The QUERY-protocol XML response shape AWS SDK v1 SNS expects from a Publish call. The
     // {{randomValue}} Handlebars helper yields a fresh MessageId per request.
-    private static final String PUBLISH_RESPONSE = """
+    private static final String PUBLISH_RESPONSE =
+            """
             <PublishResponse xmlns="http://sns.amazonaws.com/doc/2010-03-31/">
               <PublishResult>
                 <MessageId>{{randomValue type='UUID'}}</MessageId>

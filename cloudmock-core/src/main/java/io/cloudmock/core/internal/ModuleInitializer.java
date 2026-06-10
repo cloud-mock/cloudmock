@@ -3,11 +3,10 @@ package io.cloudmock.core.internal;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import io.cloudmock.core.spi.CloudMockService;
 import io.cloudmock.core.spi.StateStore;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.ServiceLoader;
 import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Discovers and registers all {@link CloudMockService} modules against a running server.
@@ -22,28 +21,35 @@ public final class ModuleInitializer {
 
     private ModuleInitializer() {}
 
-    public static WireMockStubRegistrar initialize(WireMockServer server, CloudMockSettings settings,
-                                                   StateStore stateStore,
-                                                   CloudMockResponseTransformer transformer,
-                                                   ServiceRegistry registry) {
+    public static WireMockStubRegistrar initialize(
+            WireMockServer server,
+            CloudMockSettings settings,
+            StateStore stateStore,
+            CloudMockResponseTransformer transformer,
+            ServiceRegistry registry) {
         WireMockStubRegistrar registrar = new WireMockStubRegistrar(server, transformer, registry);
         CloudMockContextImpl context = new CloudMockContextImpl(registrar, stateStore);
 
         Set<String> enabled = settings.enabledServiceIds();
         ServiceLoader.load(CloudMockService.class, Thread.currentThread().getContextClassLoader())
-                .forEach(service -> {
-                    if (enabled != null && !enabled.contains(service.serviceId())) {
-                        return;
-                    }
-                    register(registrar, context, service, registry);
-                });
-        settings.explicitServices().forEach(service -> register(registrar, context, service, registry));
+                .forEach(
+                        service -> {
+                            if (enabled != null && !enabled.contains(service.serviceId())) {
+                                return;
+                            }
+                            register(registrar, context, service, registry);
+                        });
+        settings.explicitServices()
+                .forEach(service -> register(registrar, context, service, registry));
 
         return registrar;
     }
 
-    private static void register(WireMockStubRegistrar registrar, CloudMockContextImpl context,
-                                 CloudMockService service, ServiceRegistry registry) {
+    private static void register(
+            WireMockStubRegistrar registrar,
+            CloudMockContextImpl context,
+            CloudMockService service,
+            ServiceRegistry registry) {
         String id = service.serviceId();
         registrar.setCurrentService(id);
         service.register(context);

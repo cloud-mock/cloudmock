@@ -24,7 +24,9 @@ public class ServiceRegistry {
         return Collections.unmodifiableList(byService.getOrDefault(serviceId, List.of()));
     }
 
-    /** The recorded stub for {@code serviceId} matching {@code matchKey}, or {@code null} if none. */
+    /**
+     * The recorded stub for {@code serviceId} matching {@code matchKey}, or {@code null} if none.
+     */
     StubRecord find(String serviceId, String matchKey) {
         for (StubRecord record : byService.getOrDefault(serviceId, List.of())) {
             if (record.matchKey().equals(matchKey)) {

@@ -6,8 +6,8 @@ import io.cloudmock.core.CloudMock;
  * Resolves the cap on retained request-history entries for the long-lived standalone process.
  *
  * <p>Precedence: {@code --max-history=<n>} CLI flag, then {@code CLOUDMOCK_MAX_HISTORY} environment
- * variable, then {@link CloudMock#DEFAULT_MAX_REQUEST_HISTORY}. A value of {@code 0} (or
- * {@code unlimited} / {@code none}) retains an unbounded history.
+ * variable, then {@link CloudMock#DEFAULT_MAX_REQUEST_HISTORY}. A value of {@code 0} (or {@code
+ * unlimited} / {@code none}) retains an unbounded history.
  */
 final class MaxHistoryResolver {
 

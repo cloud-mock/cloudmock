@@ -4,9 +4,6 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cloudmock.core.exception.CloudMockStateException;
 import io.cloudmock.core.spi.StateStore;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -15,13 +12,16 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Persistent {@link StateStore} that serialises state to a JSON file on every mutation.
  *
  * <p>Reads the existing file on construction (if present) so state survives a CloudMock restart.
- * Writes are flushed synchronously — {@code put} returns only once the value has been written via an
- * atomic temp-file rename to {@code {storeDir}/cloudmock-state.json}, which prevents partial writes.
+ * Writes are flushed synchronously — {@code put} returns only once the value has been written via
+ * an atomic temp-file rename to {@code {storeDir}/cloudmock-state.json}, which prevents partial
+ * writes.
  *
  * <p><strong>Type fidelity:</strong> the mapper records each value's concrete type, so a value
  * stored as a {@code Foo} is read back as a {@code Foo} after a restart — not as a generic map.
@@ -94,8 +94,10 @@ public final class JsonFileStateStore implements StateStore {
             return new ConcurrentHashMap<>(loaded);
         } catch (IOException e) {
             // A corrupt or unreadable file should not prevent startup; begin with an empty store.
-            log.warn("CloudMock state file at {} is unreadable, starting with empty store: {}",
-                    storeFile, e.getMessage());
+            log.warn(
+                    "CloudMock state file at {} is unreadable, starting with empty store: {}",
+                    storeFile,
+                    e.getMessage());
             return new ConcurrentHashMap<>();
         }
     }
@@ -104,8 +106,11 @@ public final class JsonFileStateStore implements StateStore {
         synchronized (writeLock) {
             try {
                 // Snapshot under the lock; TreeMap gives deterministic, diff-friendly key order.
-                StateStoreSupport.atomicReplace(storeFile,
-                        tmp -> MAPPER.writerFor(MAP_TYPE).writeValue(tmp.toFile(), new TreeMap<>(data)));
+                StateStoreSupport.atomicReplace(
+                        storeFile,
+                        tmp ->
+                                MAPPER.writerFor(MAP_TYPE)
+                                        .writeValue(tmp.toFile(), new TreeMap<>(data)));
             } catch (IOException e) {
                 // Persistence is a hard requirement — surface the failure instead of swallowing it.
                 throw new CloudMockStateException(

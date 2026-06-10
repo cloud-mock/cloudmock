@@ -9,16 +9,16 @@ Implement the three responsibilities of `cloudmock-core`: start and stop an embe
 
 ## Acceptance criteria
 
-- [ ] A `CloudMock` class exposes `start()` and `stop()` methods as the public lifecycle API
-- [ ] `start()` boots an embedded WireMock server bound to a random available port (port 0 binding)
-- [ ] `start()` sets the `aws.endpoint-url` system property to `http://localhost:<actual-port>`
-- [ ] `stop()` shuts down WireMock cleanly and removes the `aws.endpoint-url` system property
-- [ ] `start()` calls `ServiceLoader.load(CloudMockService.class)` using the context class loader and invokes `register(StubRegistrar)` on every discovered service
-- [ ] The `StubRegistrar` implementation passed to modules delegates to the live WireMock instance
-- [ ] WireMock is declared as an `implementation` (not `api`) dependency so it does not appear on the API classpath of consumers
-- [ ] Calling `start()` on an already-started instance throws `IllegalStateException` with a clear message rather than silently opening a second port
-- [ ] `stop()` on an instance that was never started is a no-op
-- [ ] Unit tests cover: normal start/stop cycle, double-start guard, stop-before-start no-op, and that the system property is set after start and absent after stop
+- [x] A `CloudMock` class exposes `start()` and `stop()` methods as the public lifecycle API
+- [x] `start()` boots an embedded WireMock server bound to a random available port (port 0 binding)
+- [x] `start()` sets the `aws.endpoint-url` system property to `http://localhost:<actual-port>`
+- [x] `stop()` shuts down WireMock cleanly and removes the `aws.endpoint-url` system property
+- [x] `start()` calls `ServiceLoader.load(CloudMockService.class)` using the context class loader and invokes `register(StubRegistrar)` on every discovered service
+- [x] The `StubRegistrar` implementation passed to modules delegates to the live WireMock instance
+- [x] WireMock is declared as an `implementation` (not `api`) dependency so it does not appear on the API classpath of consumers
+- [x] Calling `start()` on an already-started instance throws `IllegalStateException` with a clear message rather than silently opening a second port
+- [x] `stop()` on an instance that was never started is a no-op
+- [x] Unit tests cover: normal start/stop cycle, double-start guard, stop-before-start no-op, and that the system property is set after start and absent after stop
 
 ## Dependencies
 

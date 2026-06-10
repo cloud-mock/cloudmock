@@ -1,14 +1,13 @@
 package io.cloudmock.core.internal.store;
 
 import io.cloudmock.core.spi.StateStore;
-
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Thread-safe in-memory {@link StateStore}. State is lost when the JVM exits.
- * Used as the default store in embedded test mode.
+ * Thread-safe in-memory {@link StateStore}. State is lost when the JVM exits. Used as the default
+ * store in embedded test mode.
  */
 public final class InMemoryStateStore implements StateStore {
 

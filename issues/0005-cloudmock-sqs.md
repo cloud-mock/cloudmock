@@ -9,9 +9,9 @@ Build the first reference service module, implementing XML/Form URL stubs for th
 
 ## Acceptance criteria
 
-- [ ] `cloudmock-sqs` is registered via `META-INF/services/io.cloudmock.core.spi.CloudMockService`
-- [ ] `serviceId()` returns `"sqs"`
-- [ ] The following operations are stubbed and return well-formed XML responses that `SqsClient` (AWS SDK v2) parses without error:
+- [x] `cloudmock-sqs` is registered via `META-INF/services/io.cloudmock.core.spi.CloudMockService`
+- [x] `serviceId()` returns `"sqs"`
+- [x] The following operations are stubbed and return well-formed XML responses that `SqsClient` (AWS SDK v2) parses without error:
   - `CreateQueue` → returns `QueueUrl`
   - `GetQueueUrl` → returns `QueueUrl`
   - `SendMessage` → returns `MessageId`, `MD5OfMessageBody`
@@ -19,11 +19,11 @@ Build the first reference service module, implementing XML/Form URL stubs for th
   - `DeleteMessage` → returns HTTP 200 with empty body
   - `DeleteQueue` → returns HTTP 200 with empty body
   - `ListQueues` → returns a `QueueUrl` list
-- [ ] Response templates use Handlebars to generate or echo back all correlation identifiers required by the SDK
-- [ ] `QueueUrl` in responses is a plausible URL (e.g. `http://localhost:<port>/000000000000/<QueueName>`) that the SDK accepts
-- [ ] Stub registration uses only `StubRegistrar` — no WireMock type is referenced in module source
-- [ ] `cloudmock-sqs` has no compile dependency on any other `cloudmock-*` module
-- [ ] The build constraint from ticket 0001 passes with `cloudmock-sqs` present
+- [x] Response templates use Handlebars to generate or echo back all correlation identifiers required by the SDK
+- [x] `QueueUrl` in responses is a plausible URL (e.g. `http://localhost:<port>/000000000000/<QueueName>`) that the SDK accepts
+- [x] Stub registration uses only `StubRegistrar` — no WireMock type is referenced in module source
+- [x] `cloudmock-sqs` has no compile dependency on any other `cloudmock-*` module
+- [x] The build constraint from ticket 0001 passes with `cloudmock-sqs` present
 
 ## Dependencies
 

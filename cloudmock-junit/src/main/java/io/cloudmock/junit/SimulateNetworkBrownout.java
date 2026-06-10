@@ -7,12 +7,12 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Causes approximately {@code rate} fraction of requests to the named service to fail with
- * a connection reset; the remainder are served normally.
+ * Causes approximately {@code rate} fraction of requests to the named service to fail with a
+ * connection reset; the remainder are served normally.
  *
  * <p>Use {@code rate = 1.0} for "always fail" or {@code rate = 0.0} for "never fail" in
- * deterministic test assertions. Fractional rates are statistical and unsuitable for
- * exact-count assertions.
+ * deterministic test assertions. Fractional rates are statistical and unsuitable for exact-count
+ * assertions.
  *
  * <p>Fault state is always cleaned up after the test, even if it throws.
  */
@@ -25,8 +25,8 @@ public @interface SimulateNetworkBrownout {
     String service();
 
     /**
-     * Fraction of requests to fail, in [0.0, 1.0].
-     * Defaults to {@code 0.5} (approximately half of requests fail).
+     * Fraction of requests to fail, in [0.0, 1.0]. Defaults to {@code 0.5} (approximately half of
+     * requests fail).
      */
     double rate() default 0.5;
 

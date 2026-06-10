@@ -9,18 +9,18 @@ Build the first version of the stub generation agent: a tool that accepts an AWS
 
 ## Acceptance criteria
 
-- [ ] Agent accepts a `.smithy` model file (or directory) as input via CLI (`--model <path>`)
-- [ ] Agent identifies the service protocol from Smithy protocol traits: `aws.protocols#query` / `restXml` → XML/Form, `aws.protocols#awsJson1_0` / `awsJson1_1` → JSON/Target, `aws.protocols#restJson1` → REST path
-- [ ] For each operation in the model, agent generates a `StubRegistrar` call using the appropriate `register*Stub` method
-- [ ] Response templates are generated with placeholder Handlebars expressions for all required output shape fields, derived from the Smithy model
-- [ ] Generated output includes:
+- [x] Agent accepts a `.smithy` model file (or directory) as input via CLI (`--model <path>`)
+- [x] Agent identifies the service protocol from Smithy protocol traits: `aws.protocols#query` / `restXml` → XML/Form, `aws.protocols#awsJson1_0` / `awsJson1_1` → JSON/Target, `aws.protocols#restJson1` → REST path
+- [x] For each operation in the model, agent generates a `StubRegistrar` call using the appropriate `register*Stub` method
+- [x] Response templates are generated with placeholder Handlebars expressions for all required output shape fields, derived from the Smithy model
+- [x] Generated output includes:
   - `build.gradle` with `cloudmock-core` dependency and correct module coordinates
   - `CloudMockService` implementation with `serviceId()` derived from the model service name
   - `META-INF/services/io.cloudmock.core.spi.CloudMockService` registration file
   - One Handlebars response template file per operation
   - A test skeleton class with one `@Test` method stub per operation
-- [ ] The generated module compiles against the published `cloudmock-core` without modification
-- [ ] Agent is runnable as a standalone executable JAR (`java -jar cloudmock-agent.jar --model ...`)
+- [x] The generated module compiles against the published `cloudmock-core` without modification
+- [x] Agent is runnable as a standalone executable JAR (`java -jar cloudmock-agent.jar --model ...`)
 
 ## Dependencies
 

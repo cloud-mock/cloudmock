@@ -1,5 +1,10 @@
 package io.cloudmock.standalone;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cloudmock.core.CloudMock;
@@ -7,10 +12,6 @@ import io.cloudmock.core.spi.CloudMockApiService;
 import io.cloudmock.core.spi.HttpMethod;
 import io.cloudmock.core.spi.restapi.ApiResponse;
 import io.cloudmock.core.spi.restapi.CloudMockApiContext;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -18,11 +19,9 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 class ApiServerIntegrationTest {
 
@@ -198,12 +197,13 @@ class ApiServerIntegrationTest {
 
     @Test
     void wrongMethodReturns405() throws Exception {
-        HttpResponse<String> resp = http.send(
-                HttpRequest.newBuilder()
-                        .uri(uri("/api/status"))
-                        .POST(HttpRequest.BodyPublishers.noBody())
-                        .build(),
-                HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> resp =
+                http.send(
+                        HttpRequest.newBuilder()
+                                .uri(uri("/api/status"))
+                                .POST(HttpRequest.BodyPublishers.noBody())
+                                .build(),
+                        HttpResponse.BodyHandlers.ofString());
         assertEquals(405, resp.statusCode());
     }
 
@@ -219,13 +219,16 @@ class ApiServerIntegrationTest {
     }
 
     private void sendSqsSendMessage() throws IOException, InterruptedException {
-        HttpResponse<String> resp = http.send(
-                HttpRequest.newBuilder()
-                        .uri(URI.create("http://localhost:" + cloudMock.port() + "/"))
-                        .header("X-Amz-Target", "AmazonSQS.SendMessage")
-                        .POST(HttpRequest.BodyPublishers.ofString("{\"MessageBody\":\"hi\"}"))
-                        .build(),
-                HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> resp =
+                http.send(
+                        HttpRequest.newBuilder()
+                                .uri(URI.create("http://localhost:" + cloudMock.port() + "/"))
+                                .header("X-Amz-Target", "AmazonSQS.SendMessage")
+                                .POST(
+                                        HttpRequest.BodyPublishers.ofString(
+                                                "{\"MessageBody\":\"hi\"}"))
+                                .build(),
+                        HttpResponse.BodyHandlers.ofString());
         assertEquals(200, resp.statusCode());
     }
 
@@ -235,7 +238,8 @@ class ApiServerIntegrationTest {
                 HttpResponse.BodyHandlers.ofString());
     }
 
-    private HttpResponse<String> post(String pathAndQuery) throws IOException, InterruptedException {
+    private HttpResponse<String> post(String pathAndQuery)
+            throws IOException, InterruptedException {
         return http.send(
                 HttpRequest.newBuilder()
                         .uri(uri(pathAndQuery))
@@ -262,10 +266,18 @@ class ApiServerIntegrationTest {
         @Override
         public void registerRoutes(CloudMockApiContext context) {
             var registrar = context.registrar();
-            registrar.register(HttpMethod.GET, "/echo", "echo ok",
+            registrar.register(
+                    HttpMethod.GET,
+                    "/echo",
+                    "echo ok",
                     req -> new ApiResponse(200, Map.of("ok", true)));
-            registrar.register(HttpMethod.GET, "/boom", "always fails",
-                    req -> { throw new RuntimeException(); }); // null message — exercises sendError guard
+            registrar.register(
+                    HttpMethod.GET,
+                    "/boom",
+                    "always fails",
+                    req -> {
+                        throw new RuntimeException();
+                    }); // null message — exercises sendError guard
         }
     }
 }

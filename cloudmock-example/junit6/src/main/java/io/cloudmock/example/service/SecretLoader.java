@@ -3,9 +3,7 @@ package io.cloudmock.example.service;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
 
-/**
- * Stores and retrieves secrets from AWS Secrets Manager.
- */
+/** Stores and retrieves secrets from AWS Secrets Manager. */
 @Service
 public class SecretLoader {
 

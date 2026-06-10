@@ -9,8 +9,8 @@ import java.util.Objects;
  * body string, and any additional response headers the networking driver should send back. No
  * WireMock type is exposed.
  *
- * <p>Use the {@link #json(String)} / {@link #xml(String)} factories for the common AWS wire formats,
- * or {@link #of(int, String, String)} for full control over status and content type. Add
+ * <p>Use the {@link #json(String)} / {@link #xml(String)} factories for the common AWS wire
+ * formats, or {@link #of(int, String, String)} for full control over status and content type. Add
  * protocol-specific headers (e.g. an S3 {@code ETag}) with {@link #withHeader(String, String)}.
  */
 public final class StubResponse {

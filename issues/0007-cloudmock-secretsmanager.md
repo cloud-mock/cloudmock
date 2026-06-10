@@ -9,19 +9,19 @@ Build the second reference service module, implementing JSON/X-Amz-Target stubs 
 
 ## Acceptance criteria
 
-- [ ] `cloudmock-secretsmanager` is registered via `META-INF/services/io.cloudmock.core.spi.CloudMockService`
-- [ ] `serviceId()` returns `"secretsmanager"`
-- [ ] The following operations are stubbed and return well-formed JSON responses that `SecretsManagerClient` (AWS SDK v2) parses without error:
+- [x] `cloudmock-secretsmanager` is registered via `META-INF/services/io.cloudmock.core.spi.CloudMockService`
+- [x] `serviceId()` returns `"secretsmanager"`
+- [x] The following operations are stubbed and return well-formed JSON responses that `SecretsManagerClient` (AWS SDK v2) parses without error:
   - `CreateSecret` → returns `ARN`, `Name`, `VersionId`
   - `GetSecretValue` → returns `ARN`, `Name`, `SecretString`, `VersionId`
   - `PutSecretValue` → returns `ARN`, `Name`, `VersionId`
   - `DeleteSecret` → returns `ARN`, `Name`, `DeletionDate`
   - `ListSecrets` → returns a list with at least one entry containing `ARN` and `Name`
-- [ ] Matching is done on the `X-Amz-Target` header (e.g. `secretsmanager.GetSecretValue`) via `registerJsonTargetStub`
-- [ ] Response templates use Handlebars to echo `SecretId` from the request into the `Name` field and to construct a plausible `ARN` (e.g. `arn:aws:secretsmanager:us-east-1:000000000000:secret:<SecretId>`)
-- [ ] Stub registration uses only `StubRegistrar` — no WireMock type is referenced in module source
-- [ ] `cloudmock-secretsmanager` has no compile dependency on any other `cloudmock-*` module
-- [ ] The build constraint from ticket 0001 passes with `cloudmock-secretsmanager` present
+- [x] Matching is done on the `X-Amz-Target` header (e.g. `secretsmanager.GetSecretValue`) via `registerJsonTargetStub`
+- [x] Response templates use Handlebars to echo `SecretId` from the request into the `Name` field and to construct a plausible `ARN` (e.g. `arn:aws:secretsmanager:us-east-1:000000000000:secret:<SecretId>`)
+- [x] Stub registration uses only `StubRegistrar` — no WireMock type is referenced in module source
+- [x] `cloudmock-secretsmanager` has no compile dependency on any other `cloudmock-*` module
+- [x] The build constraint from ticket 0001 passes with `cloudmock-secretsmanager` present
 
 ## Dependencies
 

@@ -9,13 +9,13 @@ Design and implement the two interfaces every service module must satisfy: `Clou
 
 ## Acceptance criteria
 
-- [ ] `CloudMockService` interface is in `cloudmock-core` with `String serviceId()` and `void register(StubRegistrar registrar)` methods
-- [ ] `StubRegistrar` interface is in `cloudmock-core` with `registerXmlFormStub(String actionName, String responseTemplate)`, `registerJsonTargetStub(String target, String responseTemplate)`, and `registerRestStub(HttpMethod method, String pathPattern, String responseTemplate)` methods
-- [ ] `HttpMethod` enum (at minimum: GET, POST, PUT, DELETE, HEAD, PATCH) is defined in `cloudmock-core` — no WireMock type appears anywhere in the public API
-- [ ] All public types carry Javadoc that explains the contract, not just the signature
-- [ ] No WireMock type is reachable from any `cloudmock-core` public API surface; enforced by a Checkstyle or ArchUnit rule if feasible
-- [ ] Open question 1 (escape hatch for raw WireMock `MappingBuilder`) is resolved and the decision is recorded in `docs/adr.md`
-- [ ] Open question 2 (versioning and compatibility policy between core and module JARs) is resolved and recorded in `docs/adr.md`
+- [x] `CloudMockService` interface is in `cloudmock-core` with `String serviceId()` and `void register(StubRegistrar registrar)` methods
+- [x] `StubRegistrar` interface is in `cloudmock-core` with `registerXmlFormStub(String actionName, String responseTemplate)`, `registerJsonTargetStub(String target, String responseTemplate)`, and `registerRestStub(HttpMethod method, String pathPattern, String responseTemplate)` methods
+- [x] `HttpMethod` enum (at minimum: GET, POST, PUT, DELETE, HEAD, PATCH) is defined in `cloudmock-core` — no WireMock type appears anywhere in the public API
+- [x] All public types carry Javadoc that explains the contract, not just the signature
+- [x] No WireMock type is reachable from any `cloudmock-core` public API surface; enforced by a Checkstyle or ArchUnit rule if feasible
+- [x] Open question 1 (escape hatch for raw WireMock `MappingBuilder`) is resolved and the decision is recorded in `docs/adr.md`
+- [x] Open question 2 (versioning and compatibility policy between core and module JARs) is resolved and recorded in `docs/adr.md`
 
 ## Dependencies
 

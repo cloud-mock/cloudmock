@@ -40,14 +40,14 @@ public interface StubRequest {
      * once per request.
      *
      * <p>The path is a sequence of segments separated by {@code '.'}; a leading {@code "$."} is
-     * tolerated for familiarity with JSONPath. A numeric segment indexes into a JSON array. Examples:
-     * {@code "QueueName"}, {@code "Item.id.S"}, {@code "Records.0.eventName"}, {@code "$.MessageBody"}.
-     * String values are returned unescaped; numbers and booleans are returned in their JSON textual
-     * form (e.g. {@code "10"}, {@code "true"}).
+     * tolerated for familiarity with JSONPath. A numeric segment indexes into a JSON array.
+     * Examples: {@code "QueueName"}, {@code "Item.id.S"}, {@code "Records.0.eventName"}, {@code
+     * "$.MessageBody"}. String values are returned unescaped; numbers and booleans are returned in
+     * their JSON textual form (e.g. {@code "10"}, {@code "true"}).
      *
-     * <p>Returns {@code null} if the body is empty or not valid JSON, the path is empty or absent, or
-     * the value at the path is JSON {@code null} or a non-scalar (object/array). It never throws on
-     * malformed input — a bad body yields {@code null}, not an exception out of the handler.
+     * <p>Returns {@code null} if the body is empty or not valid JSON, the path is empty or absent,
+     * or the value at the path is JSON {@code null} or a non-scalar (object/array). It never throws
+     * on malformed input — a bad body yields {@code null}, not an exception out of the handler.
      *
      * @param path dotted path to a scalar field, e.g. {@code "QueueName"}
      * @return the field value as a string, or {@code null}

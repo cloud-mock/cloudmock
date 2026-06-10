@@ -9,14 +9,14 @@ Deliver `CloudMockExtension` so that test classes can be annotated with `@Extend
 
 ## Acceptance criteria
 
-- [ ] `CloudMockExtension` implements JUnit 6 `BeforeAllCallback` and `AfterAllCallback`
-- [ ] Annotating a test class with `@ExtendWith(CloudMockExtension.class)` starts `CloudMock` before any test method runs and stops it after the last
-- [ ] The running `CloudMock` instance is accessible to test methods via a `@RegisterExtension` static field pattern (e.g. `static CloudMockExtension cloudMock = new CloudMockExtension()`) so tests can read the port
-- [ ] Both `@ExtendWith` (no-instance access needed) and `@RegisterExtension` (instance access needed) usage modes are supported and documented
-- [ ] Multiple test classes running in the same JVM each get an independent lifecycle — one class's `stop()` does not affect another's running instance
-- [ ] `CloudMockExtension` is packaged in a new `cloudmock-junit6` module so that JUnit 6 is not a required dependency for consumers who manage the lifecycle manually
-- [ ] `cloudmock-junit6` declares `cloudmock-core` as `implementation` and JUnit 6 as `compileOnly`
-- [ ] Integration tests cover: class-level lifecycle starts and stops correctly, `@RegisterExtension` exposes the port, two test classes in the same run are isolated
+- [x] `CloudMockExtension` implements JUnit 6 `BeforeAllCallback` and `AfterAllCallback`
+- [x] Annotating a test class with `@ExtendWith(CloudMockExtension.class)` starts `CloudMock` before any test method runs and stops it after the last
+- [x] The running `CloudMock` instance is accessible to test methods via a `@RegisterExtension` static field pattern (e.g. `static CloudMockExtension cloudMock = new CloudMockExtension()`) so tests can read the port
+- [x] Both `@ExtendWith` (no-instance access needed) and `@RegisterExtension` (instance access needed) usage modes are supported and documented
+- [x] Multiple test classes running in the same JVM each get an independent lifecycle — one class's `stop()` does not affect another's running instance
+- [x] `CloudMockExtension` is packaged in a new `cloudmock-junit6` module so that JUnit 6 is not a required dependency for consumers who manage the lifecycle manually
+- [x] `cloudmock-junit6` declares `cloudmock-core` as `implementation` and JUnit 6 as `compileOnly`
+- [x] Integration tests cover: class-level lifecycle starts and stops correctly, `@RegisterExtension` exposes the port, two test classes in the same run are isolated
 
 ## Dependencies
 

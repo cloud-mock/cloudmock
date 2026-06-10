@@ -2,7 +2,6 @@ package io.cloudmock.core.internal;
 
 import io.cloudmock.core.StatePersistence;
 import io.cloudmock.core.spi.CloudMockService;
-
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -17,10 +16,10 @@ import java.util.Set;
  */
 public final class CloudMockSettings {
 
-    private int port = 0;                  // 0 = dynamic port
-    private int maxRequestHistory;         // <= 0 = unbounded
+    private int port = 0; // 0 = dynamic port
+    private int maxRequestHistory; // <= 0 = unbounded
     private Set<String> enabledServiceIds; // null = register every discovered module
-    private Path storeDirectory;           // null = in-memory store
+    private Path storeDirectory; // null = in-memory store
     private StatePersistence persistenceBackend = StatePersistence.APPEND_LOG;
     private final List<CloudMockService> explicitServices = new ArrayList<>();
 
@@ -60,17 +59,23 @@ public final class CloudMockSettings {
         return maxRequestHistory;
     }
 
-    /** @return the set of enabled service IDs, or {@code null} to register every discovered module. */
+    /**
+     * @return the set of enabled service IDs, or {@code null} to register every discovered module.
+     */
     public Set<String> enabledServiceIds() {
         return enabledServiceIds;
     }
 
-    /** @return the persistent store directory, or {@code null} for an in-memory store. */
+    /**
+     * @return the persistent store directory, or {@code null} for an in-memory store.
+     */
     public Path storeDirectory() {
         return storeDirectory;
     }
 
-    /** @return the persistent backend to use when {@link #storeDirectory()} is set. */
+    /**
+     * @return the persistent backend to use when {@link #storeDirectory()} is set.
+     */
     public StatePersistence persistenceBackend() {
         return persistenceBackend;
     }

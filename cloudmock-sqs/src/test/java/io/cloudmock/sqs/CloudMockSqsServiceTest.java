@@ -1,6 +1,14 @@
 package io.cloudmock.sqs;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import io.cloudmock.core.CloudMock;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -11,15 +19,6 @@ import software.amazon.awssdk.services.sqs.model.GetQueueAttributesResponse;
 import software.amazon.awssdk.services.sqs.model.Message;
 import software.amazon.awssdk.services.sqs.model.QueueAttributeName;
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageResponse;
-
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.util.List;
-import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class CloudMockSqsServiceTest {
 
@@ -32,15 +31,15 @@ class CloudMockSqsServiceTest {
 
     @BeforeAll
     static void start() {
-        cloudMock = new CloudMock()
-                .withService(new CloudMockSqsService());
+        cloudMock = new CloudMock().withService(new CloudMockSqsService());
         cloudMock.start();
 
-        sqsClient = SqsClient.builder()
-                .endpointOverride(URI.create("http://localhost:" + cloudMock.port()))
-                .credentialsProvider(AnonymousCredentialsProvider.create())
-                .region(Region.US_EAST_1)
-                .build();
+        sqsClient =
+                SqsClient.builder()
+                        .endpointOverride(URI.create("http://localhost:" + cloudMock.port()))
+                        .credentialsProvider(AnonymousCredentialsProvider.create())
+                        .region(Region.US_EAST_1)
+                        .build();
     }
 
     @AfterAll
@@ -54,20 +53,23 @@ class CloudMockSqsServiceTest {
         return sqsClient.createQueue(b -> b.queueName("q-" + UUID.randomUUID())).queueUrl();
     }
 
-    /** Sends a raw JSON request with X-Amz-Target — verifies stub registration and JSON matching. */
+    /**
+     * Sends a raw JSON request with X-Amz-Target — verifies stub registration and JSON matching.
+     */
     @Test
     void rawJsonRequestMatchesStub() throws Exception {
-        HttpResponse<String> response = HTTP.send(
-                HttpRequest.newBuilder()
-                        .uri(URI.create("http://localhost:" + cloudMock.port() + "/"))
-                        .POST(HttpRequest.BodyPublishers.ofString("{}"))
-                        .header("Content-Type", "application/x-amz-json-1.0")
-                        .header("X-Amz-Target", "AmazonSQS.ListQueues")
-                        .build(),
-                HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response =
+                HTTP.send(
+                        HttpRequest.newBuilder()
+                                .uri(URI.create("http://localhost:" + cloudMock.port() + "/"))
+                                .POST(HttpRequest.BodyPublishers.ofString("{}"))
+                                .header("Content-Type", "application/x-amz-json-1.0")
+                                .header("X-Amz-Target", "AmazonSQS.ListQueues")
+                                .build(),
+                        HttpResponse.BodyHandlers.ofString());
 
-        assertEquals(200, response.statusCode(),
-                "JSON stub did not match — check stub registration");
+        assertEquals(
+                200, response.statusCode(), "JSON stub did not match — check stub registration");
     }
 
     @Test
@@ -87,10 +89,10 @@ class CloudMockSqsServiceTest {
     @Test
     void sendMessageReturnsNonEmptyMessageId() {
         String queueUrl = newQueue();
-        String messageId = sqsClient.sendMessage(b -> b
-                .queueUrl(queueUrl)
-                .messageBody("hello from cloudmock"))
-                .messageId();
+        String messageId =
+                sqsClient
+                        .sendMessage(b -> b.queueUrl(queueUrl).messageBody("hello from cloudmock"))
+                        .messageId();
         assertNotNull(messageId);
         assertFalse(messageId.isBlank());
     }
@@ -100,16 +102,17 @@ class CloudMockSqsServiceTest {
         String queueUrl = newQueue();
         sqsClient.sendMessage(b -> b.queueUrl(queueUrl).messageBody("round-trip payload"));
 
-        ReceiveMessageResponse response = sqsClient.receiveMessage(b -> b
-                .queueUrl(queueUrl)
-                .maxNumberOfMessages(1));
+        ReceiveMessageResponse response =
+                sqsClient.receiveMessage(b -> b.queueUrl(queueUrl).maxNumberOfMessages(1));
 
         List<Message> messages = response.messages();
         assertEquals(1, messages.size());
         Message msg = messages.get(0);
         assertNotNull(msg.messageId());
         assertNotNull(msg.receiptHandle());
-        assertEquals("round-trip payload", msg.body(),
+        assertEquals(
+                "round-trip payload",
+                msg.body(),
                 "stateful receive must return the body that was sent");
     }
 
@@ -122,7 +125,9 @@ class CloudMockSqsServiceTest {
         sqsClient.sendMessage(b -> b.queueUrl(queueUrl).messageBody(payload));
 
         Message msg = sqsClient.receiveMessage(b -> b.queueUrl(queueUrl)).messages().get(0);
-        assertEquals(payload, msg.body(),
+        assertEquals(
+                payload,
+                msg.body(),
                 "handler body must not be re-evaluated as a Handlebars template");
     }
 
@@ -134,7 +139,8 @@ class CloudMockSqsServiceTest {
         sqsClient.sendMessage(b -> b.queueUrl(queueUrl).messageBody(payload));
 
         Message msg = sqsClient.receiveMessage(b -> b.queueUrl(queueUrl)).messages().get(0);
-        assertEquals(payload, msg.body(), "special characters must survive extraction and re-encoding");
+        assertEquals(
+                payload, msg.body(), "special characters must survive extraction and re-encoding");
     }
 
     @Test
@@ -176,9 +182,10 @@ class CloudMockSqsServiceTest {
         sqsClient.sendMessage(b -> b.queueUrl(queueUrl).messageBody("one"));
         sqsClient.sendMessage(b -> b.queueUrl(queueUrl).messageBody("two"));
 
-        GetQueueAttributesResponse response = sqsClient.getQueueAttributes(b -> b
-                .queueUrl(queueUrl)
-                .attributeNames(QueueAttributeName.ALL));
-        assertEquals("2", response.attributes().get(QueueAttributeName.APPROXIMATE_NUMBER_OF_MESSAGES));
+        GetQueueAttributesResponse response =
+                sqsClient.getQueueAttributes(
+                        b -> b.queueUrl(queueUrl).attributeNames(QueueAttributeName.ALL));
+        assertEquals(
+                "2", response.attributes().get(QueueAttributeName.APPROXIMATE_NUMBER_OF_MESSAGES));
     }
 }

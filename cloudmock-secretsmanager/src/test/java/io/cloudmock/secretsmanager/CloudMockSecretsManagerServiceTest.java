@@ -1,6 +1,9 @@
 package io.cloudmock.secretsmanager;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import io.cloudmock.core.CloudMock;
+import java.net.URI;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -12,16 +15,12 @@ import software.amazon.awssdk.services.secretsmanager.model.DeleteSecretResponse
 import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueResponse;
 import software.amazon.awssdk.services.secretsmanager.model.PutSecretValueResponse;
 
-import java.net.URI;
-
-import static org.junit.jupiter.api.Assertions.*;
-
 /**
  * Integration tests for {@link CloudMockSecretsManagerService}.
  *
- * <p>Each test drives a real {@code SecretsManagerClient} (AWS SDK v2) against a live
- * {@code CloudMock} instance. Assertions verify that responses are well-formed enough for
- * the SDK to parse — not that AWS service semantics are reproduced. Stage 1 contract mocking.
+ * <p>Each test drives a real {@code SecretsManagerClient} (AWS SDK v2) against a live {@code
+ * CloudMock} instance. Assertions verify that responses are well-formed enough for the SDK to parse
+ * — not that AWS service semantics are reproduced. Stage 1 contract mocking.
  *
  * <p>This test class is the reference example for the JSON/X-Amz-Target module pattern.
  */
@@ -34,14 +33,14 @@ class CloudMockSecretsManagerServiceTest {
 
     @BeforeAll
     static void start() {
-        cloudMock = new CloudMock()
-                .withService(new CloudMockSecretsManagerService());
+        cloudMock = new CloudMock().withService(new CloudMockSecretsManagerService());
         cloudMock.start();
-        client = SecretsManagerClient.builder()
-                .endpointOverride(URI.create("http://localhost:" + cloudMock.port()))
-                .credentialsProvider(AnonymousCredentialsProvider.create())
-                .region(Region.US_EAST_1)
-                .build();
+        client =
+                SecretsManagerClient.builder()
+                        .endpointOverride(URI.create("http://localhost:" + cloudMock.port()))
+                        .credentialsProvider(AnonymousCredentialsProvider.create())
+                        .region(Region.US_EAST_1)
+                        .build();
     }
 
     @AfterAll
@@ -52,9 +51,8 @@ class CloudMockSecretsManagerServiceTest {
 
     @Test
     void createSecretReturnsArnAndName() {
-        CreateSecretResponse response = client.createSecret(b -> b
-                .name(SECRET_NAME)
-                .secretString("value"));
+        CreateSecretResponse response =
+                client.createSecret(b -> b.name(SECRET_NAME).secretString("value"));
         assertNotNull(response.arn());
         assertTrue(response.arn().contains(SECRET_NAME));
         assertEquals(SECRET_NAME, response.name());
@@ -73,9 +71,8 @@ class CloudMockSecretsManagerServiceTest {
 
     @Test
     void putSecretValueReturnsArnAndVersionId() {
-        PutSecretValueResponse response = client.putSecretValue(b -> b
-                .secretId(SECRET_NAME)
-                .secretString("new-value"));
+        PutSecretValueResponse response =
+                client.putSecretValue(b -> b.secretId(SECRET_NAME).secretString("new-value"));
         assertNotNull(response.arn());
         assertNotNull(response.versionId());
     }

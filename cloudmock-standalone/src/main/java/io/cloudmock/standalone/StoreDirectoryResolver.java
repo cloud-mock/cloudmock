@@ -9,8 +9,8 @@ import java.nio.file.Path;
  * stored.
  *
  * <p>Precedence: {@code --store-dir=<path>} CLI flag, then {@code CLOUDMOCK_STORE_DIR} environment
- * variable, then the {@link #DEFAULT_STORE_DIR default directory}. Passing {@code none} (or
- * {@code off}) selects an in-memory store that leaves no files behind.
+ * variable, then the {@link #DEFAULT_STORE_DIR default directory}. Passing {@code none} (or {@code
+ * off}) selects an in-memory store that leaves no files behind.
  */
 final class StoreDirectoryResolver {
 
@@ -18,7 +18,9 @@ final class StoreDirectoryResolver {
 
     private StoreDirectoryResolver() {}
 
-    /** @return the directory for persistent state, or {@code null} for an in-memory store. */
+    /**
+     * @return the directory for persistent state, or {@code null} for an in-memory store.
+     */
     static Path resolve(String[] args) {
         for (int i = 0; i < args.length; i++) {
             if (args[i].startsWith("--store-dir=")) {
@@ -37,7 +39,9 @@ final class StoreDirectoryResolver {
 
     private static Path parse(String value) {
         String trimmed = value.trim();
-        if (trimmed.isEmpty() || "none".equalsIgnoreCase(trimmed) || "off".equalsIgnoreCase(trimmed)) {
+        if (trimmed.isEmpty()
+                || "none".equalsIgnoreCase(trimmed)
+                || "off".equalsIgnoreCase(trimmed)) {
             return null;
         }
         return Path.of(trimmed);
