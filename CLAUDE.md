@@ -13,7 +13,7 @@ Documentation — javadoc, inline comments, and reference docs — describes onl
 does, how to use it, parameters, return values, contracts, thread-safety, and concrete caveats (e.g. what is and is not
 simulated). It must not carry narrative: no project history, issue-number storytelling, design-philosophy rationale, or
 marketing framing (e.g. "reference implementation", "canonical example", "the lesson is", "promise of permanence").
-Inline comments may explain a non-obvious *why* for a specific line when it prevents a bug, but must not editorialize.
+Inline comments may explain a non-obvious _why_ for a specific line when it prevents a bug, but must not editorialize.
 Keep documentation factual and minimal; rationale belongs in commits and issues, not in the code's documentation.
 
 ## Current state
@@ -57,13 +57,18 @@ into `check`/`build` and CI fails on unformatted sources. Spotless also enforces
 removes unused imports, trims trailing whitespace, and ensures files end with a newline. Sources
 under `**/build/**` and `**/generated/**` (codegen output) are excluded.
 
+Markdown is formatted with Prettier (`.prettierrc.json`), checked by the `Prettier` GitHub Actions
+workflow on every push and pull request. Run `npx prettier --write "**/*.md"` to fix locally. The
+`issues/` directory and `docs/gh-pages/` (MkDocs Material source, whose admonition syntax a
+CommonMark formatter would break) are excluded via `.prettierignore`.
+
 The `clm` / `cloudmock` CLI lives in its own repository (`cloud-mock/cloudmock-cli`), not in this
 monorepo — see the **CLI** section below.
 
 ### Subprojects
 
 | Module                     | Status           | Notes                                                                                  |
-|----------------------------|------------------|----------------------------------------------------------------------------------------|
+| -------------------------- | ---------------- | -------------------------------------------------------------------------------------- |
 | `cloudmock-core`           | Done             | Shaded fat JAR (WireMock + Jetty bundled, no classpath leakage)                        |
 | `cloudmock-junit`          | Done             | `@ExtendWith` + `@RegisterExtension`, fault injection annotations; JUnit 5 and 6       |
 | `cloudmock-sns`            | Done             | XML/Form protocol; reference implementation for `registerXmlFormStub`                  |
@@ -163,7 +168,7 @@ store directory is configured via `withStoreDirectory`. All persistent backends 
 repository** (`cloud-mock/cloudmock-cli`, cloned locally at `../cloudmock-cli`), not in this monorepo — that placement
 is intentional and required by issue #0033. The notes below describe how it integrates with this repo's REST API.
 
-- **No dependencies on CloudMock:** depends only on picocli + jackson — *not* on `cloudmock-core`, WireMock, or any
+- **No dependencies on CloudMock:** depends only on picocli + jackson — _not_ on `cloudmock-core`, WireMock, or any
   service module. That zero-coupling is what lets it be a separate repo: it never imports a CloudMock type, it only
   speaks HTTP to `/api/status` and `/api/<service>/…`.
 - **Runtime discovery:** built-in commands are `status` and `reset`; every other command is built at startup from the
@@ -273,7 +278,7 @@ The SPI (`CloudMockService`, `CloudMockContext`, `StubRegistrar`, `StubHandler`,
 `CloudMockApiService` family) stays **open to change** — now and after 1.0. It has already changed twice during normal
 development (`register(StubRegistrar)` → `register(CloudMockContext)` for the state store; the `StubHandler` overloads
 for stateful stubs), and we deliberately keep the freedom to change it again whenever a better design appears rather
-than locking ourselves out of one. The question is never *whether* the contract may change but *how* a change is
+than locking ourselves out of one. The question is never _whether_ the contract may change but _how_ a change is
 managed:
 
 - **Additive changes** (new methods, new overloads, new interfaces, new `default` methods) are routine. They go in via
@@ -285,7 +290,7 @@ managed:
   `CloudMock-Core-Min-Version` entry in its `MANIFEST.MF`; the core reads this attribute at startup and warns when the
   running core is older. This is the mechanism that lets the SPI stay open to change safely: a module built against a
   newer additive method states its floor, and an out-of-date core is detected rather than failing obscurely. Core and
-  module JARs therefore version independently — a module pins only its *minimum* core, not an exact one.
+  module JARs therefore version independently — a module pins only its _minimum_ core, not an exact one.
 
 The result is stability through versioning and a clear additive-vs-breaking line.
 
@@ -307,7 +312,7 @@ All three `StubRegistrar` routing methods are now exercised by real modules: JSO
 `cloudmock-secretsmanager`, XML/Form by `cloudmock-sns`, and REST path by `cloudmock-s3`.
 
 | Protocol            | Services                       | Matching rule                |
-|---------------------|--------------------------------|------------------------------|
+| ------------------- | ------------------------------ | ---------------------------- |
 | JSON / X-Amz-Target | SQS, Secrets Manager, DynamoDB | `X-Amz-Target` header        |
 | XML / Form URL      | SNS (legacy)                   | `Action` form body parameter |
 | REST path           | S3                             | HTTP method + path regex     |
