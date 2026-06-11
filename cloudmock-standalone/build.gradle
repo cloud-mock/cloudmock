@@ -53,7 +53,10 @@ shadowJar {
     mergeServiceFiles()
 }
 
-test {
+// The end-to-end tests in src/integrationTest launch the fat JAR as a subprocess, so they need it
+// built first and pointed at via a system property. Unit tests (src/test) run in-process and do
+// not require the JAR, so this is scoped to the integrationTest task, not test.
+tasks.named('integrationTest') {
     dependsOn shadowJar
     systemProperty 'cloudmock.standalone.jar', shadowJar.archiveFile.get().asFile.absolutePath
 }

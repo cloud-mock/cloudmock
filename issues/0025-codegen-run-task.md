@@ -11,7 +11,7 @@ the remaining tasks follow the same pattern.
 
 ## Status
 
-This issue is split. The first branch (`feature/0025-gradle-convenience-tasks`) delivers the
+This issue was split. The first branch (`feature/0025-gradle-convenience-tasks`) delivered the
 three tasks that depend only on already-completed work:
 
 - `./gradlew :cloudmock-codegen:run` — **done**
@@ -19,9 +19,17 @@ three tasks that depend only on already-completed work:
   entry point; the task injects it so callers pass only `--model`)
 - `./gradlew :cloudmock-standalone:run` — **done** (see the corrected task below)
 
-The remaining tasks (`generateDocs`, `checkCompatibility`, `integrationTest`, and the
-`spotlessApply` documentation note) depend on other issues that are not yet complete and are
-deferred to a follow-up branch.
+The follow-up branch (`feature/0025-deferred-gradle-tasks`) delivers the remaining tasks, whose
+dependencies are now complete:
+
+- `./gradlew checkCompatibility` — **done** (runs the `cloudmock-example:junit5` and `:junit6`
+  suites; depends on the JUnit-compatibility work, issue 0042, which renamed the module to
+  `cloudmock-junit` and added the dual example projects)
+- `./gradlew integrationTest` — **done** (a dedicated `src/integrationTest` source set per module,
+  configured from the root build; the standalone subprocess fat-JAR tests are the first consumer)
+- `./gradlew generateDocs` — **done** (aggregated Javadoc → `docs/api/`, wired into the docs
+  deployment workflow)
+- `spotlessApply` — **done**; delivered by the Spotless issue (0041) and documented in `CLAUDE.md`.
 
 ## Tasks
 
@@ -72,12 +80,12 @@ is applied — see the Spotless issue. Documented here for completeness.
   exactly as before — both plugins coexist
 - [x] `workingDir` is pinned to `rootProject.projectDir` for both codegen and standalone `run` tasks
 - [x] `./gradlew :cloudmock-standalone:run` starts CloudMock in standalone mode from the repo root
-- [ ] `./gradlew generateDocs` generates Javadoc for all public modules to `docs/api/` _(deferred)_
-- [ ] `./gradlew checkCompatibility` verifies JUnit 5 and JUnit 6 compatibility _(deferred)_
-- [ ] `./gradlew integrationTest` runs integration tests separately from unit tests _(deferred)_
-- [ ] `integrationTest` has its own source set — integration test code is not mixed with unit tests _(deferred)_
-- [x] All (in-scope) tasks work from the repo root
-- [x] All (in-scope) tasks documented in `CLAUDE.md` under the standard commands block
+- [x] `./gradlew generateDocs` generates Javadoc for all public modules to `docs/api/`
+- [x] `./gradlew checkCompatibility` verifies JUnit 5 and JUnit 6 compatibility
+- [x] `./gradlew integrationTest` runs integration tests separately from unit tests
+- [x] `integrationTest` has its own source set — integration test code is not mixed with unit tests
+- [x] All tasks work from the repo root
+- [x] All tasks documented in `CLAUDE.md` under the standard commands block
 - [x] `docs/gh-pages/codegen.md` documents `run` as the primary in-repo workflow and retains
   `java -jar` as the standalone/distribution path
 - [x] Publishing configuration is unaffected — `cloudmock-codegen` still publishes the shadow JAR

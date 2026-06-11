@@ -35,10 +35,13 @@ compile or runtime dependency on another service module. CI validates this on ev
 Standard commands:
 
 ```
-./gradlew build                      # compile + test all subprojects (runs spotlessCheck)
+./gradlew build                      # compile + unit-test all subprojects (runs spotlessCheck; not integrationTest)
 ./gradlew spotlessApply              # reformat all Java sources (run before pushing)
 ./gradlew spotlessCheck              # fail if any Java source is unformatted
 ./gradlew :cloudmock-core:test       # single subproject tests
+./gradlew integrationTest            # run only integration tests (src/integrationTest; boots the full engine end to end)
+./gradlew checkCompatibility         # run cloudmock-junit against both JUnit 5 and JUnit 6 (example suites)
+./gradlew generateDocs               # aggregated Javadoc for public modules → docs/api/
 ./gradlew publishToMavenLocal        # publish for local smoke testing
 ./gradlew :cloudmock-codegen:run --args="--model <path-or-url> --output <dir>"   # in-repo stub generation (no fat JAR build)
 ./gradlew :cloudmock-codegen:validate --args="--model <path>"          # validate a Smithy model without generating output
@@ -67,6 +70,23 @@ CommonMark formatter would break) are excluded via `.prettierignore`.
 
 The `clm` / `cloudmock` CLI lives in its own repository (`cloud-mock/cloudmock-cli`), not in this
 monorepo — see the **CLI** section below.
+
+### Test source sets
+
+Every subproject has two test source sets, configured from the root `build.gradle`:
+
+- `src/test/java` — unit tests, run by `test` and therefore by `check`/`build`. Fast feedback.
+- `src/integrationTest/java` — integration tests that boot the full CloudMock engine end to end,
+  run by the `integrationTest` task. Its configurations extend the `test` ones (so integration
+  tests reuse the test dependency set and are exempt from the inter-module isolation check), but it
+  is **not** wired into `check`/`build`, so `./gradlew build` stays unit-test-fast. CI runs
+  `./gradlew integrationTest` separately. Running the task by name from the repo root executes every
+  module's integration tests. Currently only `cloudmock-standalone` has integration tests — the
+  subprocess fat-JAR end-to-end tests; other modules' `integrationTest` tasks are `NO-SOURCE`.
+
+`generateDocs` aggregates Javadoc for the published modules into `docs/api/` (gitignored; built in
+CI). The docs deployment workflow runs it and copies the output under the MkDocs site so the API
+reference deploys at `/api/`.
 
 ### Subprojects
 

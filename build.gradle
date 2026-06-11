@@ -59,6 +59,37 @@ subprojects {
         useJUnitPlatform()
     }
 
+    // Integration tests live in their own source set (src/integrationTest/java) so end-to-end
+    // tests that boot the full CloudMock engine are not mixed with fast unit tests. The
+    // integrationTest configurations extend the test ones, so integration tests reuse the test
+    // dependency set and (because the config name contains "test") are exempt from the
+    // inter-module isolation check below. The `integrationTest` task is deliberately NOT wired
+    // into `check`/`build`, keeping `./gradlew build` at unit-test speed; CI runs
+    // `./gradlew integrationTest` explicitly. Running the task by name from the repo root
+    // executes every module's integration tests.
+    sourceSets {
+        integrationTest {
+            java.srcDir 'src/integrationTest/java'
+            resources.srcDir 'src/integrationTest/resources'
+            compileClasspath += sourceSets.main.output + sourceSets.test.output
+            runtimeClasspath += sourceSets.main.output + sourceSets.test.output
+        }
+    }
+
+    configurations {
+        integrationTestImplementation.extendsFrom testImplementation
+        integrationTestRuntimeOnly.extendsFrom testRuntimeOnly
+    }
+
+    tasks.register('integrationTest', Test) {
+        description = 'Runs integration tests (src/integrationTest) that boot the full engine end to end.'
+        group = 'verification'
+        testClassesDirs = sourceSets.integrationTest.output.classesDirs
+        classpath = sourceSets.integrationTest.runtimeClasspath
+        useJUnitPlatform()
+        shouldRunAfter tasks.named('test')
+    }
+
     // Publishing is configured in afterEvaluate so that modules applying the
     // Shadow plugin (cloudmock-core) can publish the shadow JAR via components.shadow
     // rather than the empty components.java.
@@ -107,5 +138,45 @@ subprojects {
                 }
             }
         }
+    }
+}
+
+// Verifies cloudmock-junit works under both supported JUnit versions: the junit5 example pins
+// JUnit 5, the junit6 example runs on JUnit 6, both exercising the extension end to end. JUnit 4
+// is not supported. Run from the repo root: ./gradlew checkCompatibility
+tasks.register('checkCompatibility') {
+    group = 'verification'
+    description = 'Runs cloudmock-junit against both JUnit 5 and JUnit 6 via the example suites.'
+    dependsOn ':cloudmock-example:junit5:test', ':cloudmock-example:junit6:test'
+}
+
+// Aggregated Javadoc for the public (published) modules, written to docs/api/ so the API
+// reference ships alongside the MkDocs site. Example modules are demonstration apps, not
+// libraries, and are excluded. Run from the repo root: ./gradlew generateDocs
+tasks.register('generateDocs', Javadoc) {
+    group = 'documentation'
+    description = 'Generates aggregated Javadoc for the public modules into docs/api/.'
+    destinationDir = file("$rootDir/docs/api")
+    title = 'CloudMock API'
+    // Doc warnings (missing tags in modules not yet fully documented) must not fail the build;
+    // the goal is a published reference, not lint enforcement.
+    failOnError = false
+    options.addStringOption('Xdoclint:none', '-quiet')
+}
+
+// Wire the public modules into generateDocs once every subproject is evaluated, so their main
+// source sets and compile classpaths are available.
+gradle.projectsEvaluated {
+    def docModules = subprojects.findAll {
+        it.plugins.hasPlugin('java') &&
+            it.path != ':cloudmock-example' && !it.path.startsWith(':cloudmock-example:')
+    }
+    tasks.named('generateDocs', Javadoc) {
+        // Javadoc parses .java sources and resolves references against the classpath; it does not
+        // need the doc modules' own compiled output. `source` carries the sources and `classpath`
+        // (a buildable file collection) carries an implicit dependency on the dependency jars, so
+        // no explicit dependsOn compileJava is required.
+        source docModules.collect { it.sourceSets.main.allJava }
+        classpath = files(docModules.collect { it.sourceSets.main.compileClasspath })
     }
 }
