@@ -10,7 +10,6 @@ CloudMock lets you test AWS service integrations without Docker, without credent
 container to spin up. It runs entirely in-process inside the JVM, starts in milliseconds, and loads only the service
 modules your project actually needs.
 
-
 ## Why CloudMock
 
 Testing AWS integrations on the JVM typically means running an external process — a Docker container, a Python runtime, or both. That adds startup time and environment dependencies to every test and CI run.
@@ -129,7 +128,7 @@ clm sqs send-message --queue orders --body "hello"
 ## Supported services
 
 | Module                     | Service         |
-|----------------------------|-----------------|
+| -------------------------- | --------------- |
 | `cloudmock-sqs`            | Amazon SQS      |
 | `cloudmock-secretsmanager` | Secrets Manager |
 | `cloudmock-s3`             | Amazon S3       |
@@ -138,7 +137,7 @@ clm sqs send-message --queue orders --body "hello"
 **Tooling**
 
 | Module              | Purpose                                                                        |
-|---------------------|--------------------------------------------------------------------------------|
+| ------------------- | ------------------------------------------------------------------------------ |
 | `cloudmock-junit`   | JUnit extension (JUnit 5 and 6) — `@ExtendWith` + fault injection              |
 | `cloudmock-codegen` | Stub generator — produces a module skeleton from a Smithy model                |
 | `cloudmock-sdk-v1`  | AWS SDK v1 companion — one-line endpoint redirection for teams still on SDK v1 |

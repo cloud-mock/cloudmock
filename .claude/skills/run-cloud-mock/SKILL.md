@@ -13,7 +13,7 @@ it cleanly.
 Any documentation you write or touch — javadoc, inline comments, reference docs — describes only the actual behavior of
 the code (what it does, how to use it, parameters, contracts, caveats). No narrative: no project history, issue-number
 storytelling, design-philosophy rationale, or marketing framing ("reference implementation", "canonical example", "the
-lesson is"). Inline comments may explain a non-obvious *why* for a specific line when it prevents a bug, but must not
+lesson is"). Inline comments may explain a non-obvious _why_ for a specific line when it prevents a bug, but must not
 editorialize. Rationale belongs in commits and issues, not in the code's documentation.
 
 ## Prerequisites
@@ -78,7 +78,7 @@ java -jar cloudmock-standalone/build/libs/cloudmock-standalone.jar \
 All on the API port (default 4567):
 
 | Method | Path                       | Purpose                                            |
-|--------|----------------------------|----------------------------------------------------|
+| ------ | -------------------------- | -------------------------------------------------- |
 | GET    | `/api/status`              | Port, uptime, loaded modules and stubs, all routes |
 | GET    | `/api/history[?service=X]` | Captured request log                               |
 | POST   | `/api/reset[?service=X]`   | Clear state (and history on full reset)            |
@@ -121,7 +121,7 @@ curl -X POST http://localhost:4566 \
 ## Troubleshooting
 
 | Symptom                           | Fix                                                                  |
-|-----------------------------------|----------------------------------------------------------------------|
+| --------------------------------- | -------------------------------------------------------------------- |
 | `JAR not found`                   | Run `./gradlew :cloudmock-standalone:shadowJar` or use `--build`     |
 | `Server did not start within 10s` | Check `/tmp/cloudmock-smoke.log` for the cause                       |
 | `Address already in use`          | Another process holds the port — kill it or use `--port=N`           |

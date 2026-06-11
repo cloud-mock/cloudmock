@@ -1,0 +1,12 @@
+# Build output and dependencies
+**/build/**
+**/generated/**
+node_modules/
+
+# Issue tickets are freeform and must not be auto-formatted
+issues/
+
+# MkDocs Material source: uses Python-Markdown extensions (admonitions `!!! note`,
+# content tabs) whose required indentation a CommonMark formatter strips, breaking the
+# rendered site. Left to MkDocs, not Prettier.
+docs/gh-pages/
