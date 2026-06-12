@@ -1,55 +1,55 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
-         <loc>https://cloud-mock.github.io/cloudmock/</loc>
-         <lastmod>2026-06-11</lastmod>
+         <loc>https://cloudstub.github.io/cloudstub/</loc>
+         <lastmod>2026-06-12</lastmod>
     </url>
     <url>
-         <loc>https://cloud-mock.github.io/cloudmock/cli/</loc>
-         <lastmod>2026-06-11</lastmod>
+         <loc>https://cloudstub.github.io/cloudstub/cli/</loc>
+         <lastmod>2026-06-12</lastmod>
     </url>
     <url>
-         <loc>https://cloud-mock.github.io/cloudmock/codegen/</loc>
-         <lastmod>2026-06-11</lastmod>
+         <loc>https://cloudstub.github.io/cloudstub/codegen/</loc>
+         <lastmod>2026-06-12</lastmod>
     </url>
     <url>
-         <loc>https://cloud-mock.github.io/cloudmock/console/</loc>
-         <lastmod>2026-06-11</lastmod>
+         <loc>https://cloudstub.github.io/cloudstub/console/</loc>
+         <lastmod>2026-06-12</lastmod>
     </url>
     <url>
-         <loc>https://cloud-mock.github.io/cloudmock/fault-injection/</loc>
-         <lastmod>2026-06-11</lastmod>
+         <loc>https://cloudstub.github.io/cloudstub/fault-injection/</loc>
+         <lastmod>2026-06-12</lastmod>
     </url>
     <url>
-         <loc>https://cloud-mock.github.io/cloudmock/getting-started/</loc>
-         <lastmod>2026-06-11</lastmod>
+         <loc>https://cloudstub.github.io/cloudstub/getting-started/</loc>
+         <lastmod>2026-06-12</lastmod>
     </url>
     <url>
-         <loc>https://cloud-mock.github.io/cloudmock/junit-extension/</loc>
-         <lastmod>2026-06-11</lastmod>
+         <loc>https://cloudstub.github.io/cloudstub/junit-extension/</loc>
+         <lastmod>2026-06-12</lastmod>
     </url>
     <url>
-         <loc>https://cloud-mock.github.io/cloudmock/logging/</loc>
-         <lastmod>2026-06-11</lastmod>
+         <loc>https://cloudstub.github.io/cloudstub/logging/</loc>
+         <lastmod>2026-06-12</lastmod>
     </url>
     <url>
-         <loc>https://cloud-mock.github.io/cloudmock/module-authoring/</loc>
-         <lastmod>2026-06-11</lastmod>
+         <loc>https://cloudstub.github.io/cloudstub/module-authoring/</loc>
+         <lastmod>2026-06-12</lastmod>
     </url>
     <url>
-         <loc>https://cloud-mock.github.io/cloudmock/rest-api/</loc>
-         <lastmod>2026-06-11</lastmod>
+         <loc>https://cloudstub.github.io/cloudstub/rest-api/</loc>
+         <lastmod>2026-06-12</lastmod>
     </url>
     <url>
-         <loc>https://cloud-mock.github.io/cloudmock/sdk-v1/</loc>
-         <lastmod>2026-06-11</lastmod>
+         <loc>https://cloudstub.github.io/cloudstub/sdk-v1/</loc>
+         <lastmod>2026-06-12</lastmod>
     </url>
     <url>
-         <loc>https://cloud-mock.github.io/cloudmock/spring-boot/</loc>
-         <lastmod>2026-06-11</lastmod>
+         <loc>https://cloudstub.github.io/cloudstub/spring-boot/</loc>
+         <lastmod>2026-06-12</lastmod>
     </url>
     <url>
-         <loc>https://cloud-mock.github.io/cloudmock/standalone/</loc>
-         <lastmod>2026-06-11</lastmod>
+         <loc>https://cloudstub.github.io/cloudstub/standalone/</loc>
+         <lastmod>2026-06-12</lastmod>
     </url>
 </urlset>
