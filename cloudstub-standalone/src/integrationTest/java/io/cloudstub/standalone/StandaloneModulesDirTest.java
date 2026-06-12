@@ -85,7 +85,7 @@ class StandaloneModulesDirTest {
         Path emptyDir = Files.createTempDirectory("cloudstub-test-modules-empty");
         try (StandaloneProcess p = StandaloneProcess.startWithModulesDir(PORT_EMPTY, emptyDir)) {
             assertTrue(
-                    p.awaitOutput(l -> l.contains("Available services: (none)"), 5_000),
+                    p.awaitOutput(l -> l.contains("Available services: (none)")),
                     "Expected no available services with empty modules dir, got: " + p.output());
         } finally {
             deleteDir(emptyDir);

@@ -94,8 +94,8 @@ final class StandaloneProcess implements AutoCloseable {
      *
      * @return {@code true} if a matching line appeared before the timeout
      */
-    boolean awaitOutput(Predicate<String> predicate, long timeoutMs) throws InterruptedException {
-        long deadline = System.currentTimeMillis() + timeoutMs;
+    boolean awaitOutput(Predicate<String> predicate) throws InterruptedException {
+        long deadline = System.currentTimeMillis() + (long) 5000;
         while (System.currentTimeMillis() < deadline) {
             if (output.stream().anyMatch(predicate)) {
                 return true;
