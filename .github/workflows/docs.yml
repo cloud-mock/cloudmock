@@ -39,14 +39,14 @@ jobs:
       - name: Install MkDocs Material
         run: pip install mkdocs-material
 
-      - name: Generate API docs
+      - name: Generate Javadoc
         run: |
           gradle generateDocs
-          rm -rf docs/gh-pages/api
-          cp -r docs/api docs/gh-pages/api
+          rm -rf docs/gh-pages/javadoc
+          cp -r docs/javadoc docs/gh-pages/javadoc
           # Javadoc bundles third-party license texts as Markdown (legal/*.md). MkDocs would render
           # them as orphan pages; drop them so only the API HTML/CSS/JS is published.
-          find docs/gh-pages/api -name '*.md' -delete
+          find docs/gh-pages/javadoc -name '*.md' -delete
 
       - name: Deploy to GitHub Pages
         run: mkdocs gh-deploy --force

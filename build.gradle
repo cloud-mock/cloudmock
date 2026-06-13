@@ -145,13 +145,13 @@ tasks.register('checkCompatibility') {
     dependsOn ':cloudstub-example:junit5:test', ':cloudstub-example:junit6:test'
 }
 
-// Aggregated Javadoc for the public (published) modules, written to docs/api/ so the API
+// Aggregated Javadoc for the public (published) modules, written to docs/javadoc/ so the API
 // reference ships alongside the MkDocs site. Example modules are demonstration apps, not
 // libraries, and are excluded. Run from the repo root: ./gradlew generateDocs
 tasks.register('generateDocs', Javadoc) {
     group = 'documentation'
-    description = 'Generates aggregated Javadoc for the public modules into docs/api/.'
-    destinationDir = file("$rootDir/docs/api")
+    description = 'Generates aggregated Javadoc for the public modules into docs/javadoc/.'
+    destinationDir = file("$rootDir/docs/javadoc")
     title = 'CloudStub API'
     // Doc warnings (missing tags in modules not yet fully documented) must not fail the build;
     // the goal is a published reference, not lint enforcement.

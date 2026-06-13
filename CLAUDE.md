@@ -41,7 +41,7 @@ Standard commands:
 ./gradlew :cloudstub-core:test       # single subproject tests
 ./gradlew integrationTest            # run only integration tests (src/integrationTest; boots the full engine end to end)
 ./gradlew checkCompatibility         # run cloudstub-junit against both JUnit 5 and JUnit 6 (example suites)
-./gradlew generateDocs               # aggregated Javadoc for public modules → docs/api/
+./gradlew generateDocs               # aggregated Javadoc for public modules → docs/javadoc/
 ./gradlew publishToMavenLocal        # publish for local smoke testing
 ./gradlew :cloudstub-codegen:run --args="--model <path-or-url> --output <dir>"   # in-repo stub generation (no fat JAR build)
 ./gradlew :cloudstub-codegen:validate --args="--model <path>"          # validate a Smithy model without generating output
@@ -84,9 +84,10 @@ Every subproject has two test source sets, configured from the root `build.gradl
   module's integration tests. Currently only `cloudstub-standalone` has integration tests — the
   subprocess fat-JAR end-to-end tests; other modules' `integrationTest` tasks are `NO-SOURCE`.
 
-`generateDocs` aggregates Javadoc for the published modules into `docs/api/` (gitignored; built in
-CI). The docs deployment workflow runs it and copies the output under the MkDocs site so the API
-reference deploys at `/api/`.
+`generateDocs` aggregates Javadoc for the published modules into `docs/javadoc/` (gitignored; built
+in CI). The docs deployment workflow runs it and copies the output under the MkDocs site so the
+Javadoc reference deploys at `/javadoc/` (a top-level **Javadoc** nav entry, distinct from the
+**REST API** guide for the HTTP admin API).
 
 ### Subprojects
 
