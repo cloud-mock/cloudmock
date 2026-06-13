@@ -19,14 +19,13 @@ CloudStub runs inside the JVM itself. No container, no external process, no extr
 
 ## Installation
 
-Add `cloudstub-core`, the JUnit extension, and the service module(s) you need.
+Add `cloudstub-testing` (it brings in `cloudstub-core` and the JUnit extension) and the service module(s) you need.
 
 **Gradle**
 
 ```groovy
 dependencies {
-    testImplementation 'io.github.cloudstub:cloudstub-core:0.1.0'
-    testImplementation 'io.github.cloudstub:cloudstub-junit:0.1.0'
+    testImplementation 'io.github.cloudstub:cloudstub-testing:0.1.0'
 
     // Service modules — add only what your project uses
     testImplementation 'io.github.cloudstub:cloudstub-sqs:0.1.0'
@@ -45,13 +44,7 @@ dependencies {
 <dependencies>
     <dependency>
         <groupId>io.github.cloudstub</groupId>
-        <artifactId>cloudstub-core</artifactId>
-        <version>0.1.0</version>
-        <scope>test</scope>
-    </dependency>
-    <dependency>
-        <groupId>io.github.cloudstub</groupId>
-        <artifactId>cloudstub-junit</artifactId>
+        <artifactId>cloudstub-testing</artifactId>
         <version>0.1.0</version>
         <scope>test</scope>
     </dependency>
