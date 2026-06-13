@@ -16,13 +16,13 @@ Precedence: `--api-port` flag → `CLOUDSTUB_API_PORT` env var → default `4567
 === "CLI flag"
 
     ```
-    java -jar cloudstub-standalone.jar --api-port=9001
+    java -jar cloudstub-local.jar --api-port=9001
     ```
 
 === "Environment variable"
 
     ```
-    CLOUDSTUB_API_PORT=9001 java -jar cloudstub-standalone.jar
+    CLOUDSTUB_API_PORT=9001 java -jar cloudstub-local.jar
     ```
 
 The API port is printed at startup alongside the mock port:

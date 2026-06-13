@@ -6,7 +6,7 @@ Compatible with JUnit 5 and JUnit 6. JUnit 4 is not supported.
 
 ## Dependency
 
-`cloudstub-junit` declares JUnit as `compileOnly` — bring your own JUnit version; the module does not force one on your classpath.
+Most projects get `cloudstub-junit` transitively via [`cloudstub-testing`](getting-started.md); add it directly only to use the extension without the aggregator. `cloudstub-junit` declares JUnit as `compileOnly` — bring your own JUnit version; the module does not force one on your classpath.
 
 === "Gradle"
 

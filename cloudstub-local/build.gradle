@@ -1,0 +1,74 @@
+// application enables `:cloudstub-local:run`; applied before shadow so shadow's application
+// integration sees the configured mainClass.
+apply plugin: 'application'
+apply plugin: 'io.github.goooler.shadow'
+
+configurations {
+    // In-repo module jars copied into a plugin directory for `run` and the integration-test
+    // subprocess — loaded at runtime via PluginLoader, never bundled into the fat JAR.
+    integrationTestModuleJars {
+        canBeResolved = true
+        canBeConsumed = false
+    }
+}
+
+dependencies {
+    implementation project(':cloudstub-core')
+    implementation libs.jackson.databind
+    implementation libs.slf4j.api
+    runtimeOnly libs.slf4j.simple
+
+    testImplementation project(':cloudstub-core')
+    testImplementation libs.aws.sqs
+    testImplementation libs.slf4j.simple
+    // StatefulCrossSurfaceTest / ApiServerIntegrationTest need SQS discoverable via ServiceLoader.
+    testRuntimeOnly project(':cloudstub-sqs')
+
+    integrationTestModuleJars project(':cloudstub-sqs')
+    integrationTestModuleJars project(':cloudstub-sns')
+    integrationTestModuleJars project(':cloudstub-secretsmanager')
+    integrationTestModuleJars project(':cloudstub-s3')
+}
+
+application {
+    mainClass = 'io.cloudstub.local.LocalMain'
+}
+
+// Publish only the shadow (fat) JAR — skip the thin-jar apiElements/runtimeElements variants the
+// application plugin leaves on the component, so consumers resolve the fat JAR.
+components.java.withVariantsFromConfiguration(configurations.apiElements) { skip() }
+components.java.withVariantsFromConfiguration(configurations.runtimeElements) { skip() }
+
+// Run from the repo root so relative paths (the persistent `.cloudstub` dir) match `java -jar`.
+// The fat JAR bundles no modules, so point the plugin dir at the copied jars; services stay opt-in.
+run {
+    workingDir = rootProject.projectDir
+    dependsOn 'copyModuleJars'
+    environment 'CLOUDSTUB_MODULES_DIR', "${buildDir}/modules"
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'io.cloudstub.local.LocalMain'
+    }
+    archiveClassifier.set('original')
+}
+
+shadowJar {
+    archiveClassifier.set('')
+    archiveBaseName.set('cloudstub-local')
+    archiveVersion.set('')
+    mergeServiceFiles()
+}
+
+tasks.register('copyModuleJars', Copy) {
+    from configurations.integrationTestModuleJars
+    into "${buildDir}/modules"
+}
+
+// integrationTest launches the fat JAR as a subprocess: build it and pass its path + plugin dir.
+tasks.named('integrationTest') {
+    dependsOn shadowJar, copyModuleJars
+    systemProperty 'cloudstub.local.jar', shadowJar.archiveFile.get().asFile.absolutePath
+    systemProperty 'cloudstub.local.modules.dir', "${buildDir}/modules"
+}

@@ -60,7 +60,7 @@ If the server is not reachable the CLI prints a clear message and exits non-zero
 ```
 $ clm status
 CloudStub is not running at http://localhost:4567.
-Start it with: java -jar cloudstub-standalone.jar
+Start it with: java -jar cloudstub-local.jar
 ```
 
 ## Global commands

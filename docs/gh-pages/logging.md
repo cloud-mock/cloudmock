@@ -59,13 +59,13 @@ is acquired. Both promote the root level from INFO to DEBUG.
 === "System property"
 
     ```
-    java -Dcloudstub.debug=true -jar cloudstub-standalone/build/libs/cloudstub-standalone.jar
+    java -Dcloudstub.debug=true -jar cloudstub-local/build/libs/cloudstub-local.jar
     ```
 
 === "Environment variable"
 
     ```
-    CLOUDSTUB_DEBUG=true java -jar cloudstub-standalone/build/libs/cloudstub-standalone.jar
+    CLOUDSTUB_DEBUG=true java -jar cloudstub-local/build/libs/cloudstub-local.jar
     ```
 
 ### Embedded mode

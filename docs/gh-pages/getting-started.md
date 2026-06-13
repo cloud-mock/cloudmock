@@ -4,14 +4,13 @@ This guide walks you from zero to a passing CloudStub integration test in under 
 
 ## 1. Add dependencies
 
-CloudStub is modular. Add `cloudstub-core`, the JUnit extension, and only the AWS service modules your project needs.
+CloudStub is modular. Add `cloudstub-testing` (it brings in `cloudstub-core` and the JUnit extension), plus only the AWS service modules your project needs.
 
 === "Gradle"
 
     ```groovy
     dependencies {
-        testImplementation 'io.github.cloudstub:cloudstub-core:0.1.0'
-        testImplementation 'io.github.cloudstub:cloudstub-junit:0.1.0'
+        testImplementation 'io.github.cloudstub:cloudstub-testing:0.1.0'
 
         // Add one or more service modules
         testImplementation 'io.github.cloudstub:cloudstub-sqs:0.1.0'
@@ -29,13 +28,7 @@ CloudStub is modular. Add `cloudstub-core`, the JUnit extension, and only the AW
     <dependencies>
         <dependency>
             <groupId>io.github.cloudstub</groupId>
-            <artifactId>cloudstub-core</artifactId>
-            <version>0.1.0</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.github.cloudstub</groupId>
-            <artifactId>cloudstub-junit</artifactId>
+            <artifactId>cloudstub-testing</artifactId>
             <version>0.1.0</version>
             <scope>test</scope>
         </dependency>

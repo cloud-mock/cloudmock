@@ -24,10 +24,10 @@ download the server jar once, then download the module jars you want and drop th
 ## Build the fat JAR
 
 ```
-./gradlew :cloudstub-standalone:shadowJar
+./gradlew :cloudstub-local:shadowJar
 ```
 
-This produces `cloudstub-standalone/build/libs/cloudstub-standalone.jar` — the CloudStub engine (with shaded
+This produces `cloudstub-local/build/libs/cloudstub-local.jar` — the CloudStub engine (with shaded
 WireMock/Jetty) and the launcher, and nothing else. Each service module (`cloudstub-sqs`, `cloudstub-sns`,
 `cloudstub-secretsmanager`, `cloudstub-s3`) is a separate jar built by its own module.
 
@@ -38,19 +38,19 @@ The launcher loads every `.jar` in the plugin directory (default `./modules`):
 ```
 mkdir -p modules
 cp path/to/cloudstub-sqs.jar path/to/cloudstub-s3.jar modules/
-java -jar cloudstub-standalone/build/libs/cloudstub-standalone.jar --services=sqs,s3
+java -jar cloudstub-local/build/libs/cloudstub-local.jar --services=sqs,s3
 ```
 
 === "Custom plugin directory (CLI flag)"
 
     ```
-    java -jar cloudstub-standalone/build/libs/cloudstub-standalone.jar --modules-dir=/opt/cloudstub/modules --services=sqs
+    java -jar cloudstub-local/build/libs/cloudstub-local.jar --modules-dir=/opt/cloudstub/modules --services=sqs
     ```
 
 === "Custom plugin directory (environment variable)"
 
     ```
-    CLOUDSTUB_MODULES_DIR=/opt/cloudstub/modules java -jar cloudstub-standalone/build/libs/cloudstub-standalone.jar --services=sqs
+    CLOUDSTUB_MODULES_DIR=/opt/cloudstub/modules java -jar cloudstub-local/build/libs/cloudstub-local.jar --services=sqs
     ```
 
 Plugin directory precedence: `--modules-dir` flag → `CLOUDSTUB_MODULES_DIR` env var → default `./modules`. An
@@ -62,19 +62,19 @@ explicitly provided `--modules-dir` that does not exist fails fast with a clear 
 === "Default port (4566)"
 
     ```
-    java -jar cloudstub-standalone/build/libs/cloudstub-standalone.jar
+    java -jar cloudstub-local/build/libs/cloudstub-local.jar
     ```
 
 === "Custom port (CLI flag)"
 
     ```
-    java -jar cloudstub-standalone/build/libs/cloudstub-standalone.jar --port=9000
+    java -jar cloudstub-local/build/libs/cloudstub-local.jar --port=9000
     ```
 
 === "Custom port (environment variable)"
 
     ```
-    CLOUDSTUB_PORT=9000 java -jar cloudstub-standalone/build/libs/cloudstub-standalone.jar
+    CLOUDSTUB_PORT=9000 java -jar cloudstub-local/build/libs/cloudstub-local.jar
     ```
 
 Port resolution precedence: `--port` flag → `CLOUDSTUB_PORT` env var → default `4566`.
@@ -88,13 +88,13 @@ request.
 === "CLI flag"
 
     ```
-    java -jar cloudstub-standalone/build/libs/cloudstub-standalone.jar --services=sqs,secretsmanager
+    java -jar cloudstub-local/build/libs/cloudstub-local.jar --services=sqs,secretsmanager
     ```
 
 === "Environment variable"
 
     ```
-    CLOUDSTUB_SERVICES=sqs,secretsmanager java -jar cloudstub-standalone/build/libs/cloudstub-standalone.jar
+    CLOUDSTUB_SERVICES=sqs,secretsmanager java -jar cloudstub-local/build/libs/cloudstub-local.jar
     ```
 
 Service selection precedence: `--services` flag → `CLOUDSTUB_SERVICES` env var → nothing enabled.
@@ -115,13 +115,13 @@ capped at the last 1000 entries by default. Override the cap, or remove it entir
 === "CLI flag"
 
     ```
-    java -jar cloudstub-standalone/build/libs/cloudstub-standalone.jar --max-history=5000
+    java -jar cloudstub-local/build/libs/cloudstub-local.jar --max-history=5000
     ```
 
 === "Environment variable"
 
     ```
-    CLOUDSTUB_MAX_HISTORY=5000 java -jar cloudstub-standalone/build/libs/cloudstub-standalone.jar
+    CLOUDSTUB_MAX_HISTORY=5000 java -jar cloudstub-local/build/libs/cloudstub-local.jar
     ```
 
 History cap precedence: `--max-history` flag → `CLOUDSTUB_MAX_HISTORY` env var → default `1000`.

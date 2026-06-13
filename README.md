@@ -19,14 +19,13 @@ CloudStub runs inside the JVM itself. No container, no external process, no extr
 
 ## Installation
 
-Add `cloudstub-core`, the JUnit extension, and the service module(s) you need.
+Add `cloudstub-testing` (it brings in `cloudstub-core` and the JUnit extension) and the service module(s) you need.
 
 **Gradle**
 
 ```groovy
 dependencies {
-    testImplementation 'io.github.cloudstub:cloudstub-core:0.1.0'
-    testImplementation 'io.github.cloudstub:cloudstub-junit:0.1.0'
+    testImplementation 'io.github.cloudstub:cloudstub-testing:0.1.0'
 
     // Service modules — add only what your project uses
     testImplementation 'io.github.cloudstub:cloudstub-sqs:0.1.0'
@@ -45,13 +44,7 @@ dependencies {
 <dependencies>
     <dependency>
         <groupId>io.github.cloudstub</groupId>
-        <artifactId>cloudstub-core</artifactId>
-        <version>0.1.0</version>
-        <scope>test</scope>
-    </dependency>
-    <dependency>
-        <groupId>io.github.cloudstub</groupId>
-        <artifactId>cloudstub-junit</artifactId>
+        <artifactId>cloudstub-testing</artifactId>
         <version>0.1.0</version>
         <scope>test</scope>
     </dependency>
@@ -105,7 +98,7 @@ Download the module jars you want and drop them in a plugin directory (default `
 ```
 mkdir -p modules
 # drop cloudstub-sqs.jar, cloudstub-s3.jar, … into ./modules
-java -jar cloudstub-standalone.jar --services=sqs,secretsmanager
+java -jar cloudstub-local.jar --services=sqs,secretsmanager
 ```
 
 The launcher loads every jar in the plugin directory; point it elsewhere with `--modules-dir=<path>` (or
@@ -144,11 +137,12 @@ clm sqs send-message --queue orders --body "hello"
 
 **Tooling**
 
-| Module              | Purpose                                                                        |
-| ------------------- | ------------------------------------------------------------------------------ |
-| `cloudstub-junit`   | JUnit extension (JUnit 5 and 6) — `@ExtendWith` + fault injection              |
-| `cloudstub-codegen` | Stub generator — produces a module skeleton from a Smithy model                |
-| `cloudstub-sdk-v1`  | AWS SDK v1 companion — one-line endpoint redirection for teams still on SDK v1 |
+| Module              | Purpose                                                                             |
+| ------------------- | ----------------------------------------------------------------------------------- |
+| `cloudstub-testing` | Test aggregator — one dependency that brings `cloudstub-core` + the JUnit extension |
+| `cloudstub-junit`   | JUnit extension (JUnit 5 and 6) — `@ExtendWith` + fault injection                   |
+| `cloudstub-codegen` | Stub generator — produces a module skeleton from a Smithy model                     |
+| `cloudstub-sdk-v1`  | AWS SDK v1 companion — one-line endpoint redirection for teams still on SDK v1      |
 
 The `clm` / `cloudstub` command-line client ships separately at
 [cloudstub/cloudstub-cli](https://github.com/cloudstub/cloudstub-cli).

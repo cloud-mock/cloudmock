@@ -7,6 +7,9 @@ buildscript {
     }
 }
 
+// Module classification (serviceModules / shadowModules / publishedServices) as root ext properties.
+apply from: rootProject.file('gradle/modules.gradle')
+
 subprojects {
     apply plugin: 'java'
     apply plugin: 'com.diffplug.spotless'
@@ -72,30 +75,33 @@ subprojects {
         shouldRunAfter tasks.named('test')
     }
 
-    // No service module may depend on another at compile/runtime — cloudstub-core is the only
-    // allowed io.github.cloudstub dependency. Test configs are exempt (tests combine modules).
-    afterEvaluate {
-        ['compileClasspath', 'runtimeClasspath'].each { cfgName ->
-            configurations.findByName(cfgName)?.allDependencies?.each { dep ->
-                if (dep.group == 'io.github.cloudstub' && dep.name != 'cloudstub-core') {
-                    throw new GradleException(
-                        "Module isolation violation in '${project.name}': " +
-                        "declared dependency on '${dep.group}:${dep.name}' is forbidden. " +
-                        "cloudstub-* service modules must not depend on each other."
-                    )
+    // Service modules stay independently installable: each may depend, among our own modules, only
+    // on cloudstub-core. Non-services (aggregators/tools) are free to depend on others. Gradle
+    // natively rejects dependency cycles.
+    if (project.name in rootProject.serviceModules) {
+        afterEvaluate {
+            ['compileClasspath', 'runtimeClasspath'].each { cfgName ->
+                configurations.findByName(cfgName)?.allDependencies?.each { dep ->
+                    if (dep.group == 'io.github.cloudstub' && dep.name != 'cloudstub-core') {
+                        throw new GradleException(
+                            "Module isolation violation in '${project.name}': " +
+                            "declared dependency on '${dep.group}:${dep.name}' is forbidden. " +
+                            "cloudstub-* service modules must not depend on each other."
+                        )
+                    }
                 }
             }
         }
-    }
 
-    configurations.matching { !it.name.toLowerCase().contains('test') }.configureEach {
-        resolutionStrategy.eachDependency { DependencyResolveDetails details ->
-            if (details.requested.group == 'io.github.cloudstub' && details.requested.name != 'cloudstub-core') {
-                throw new GradleException(
-                    "Module isolation violation in '${project.name}': " +
-                    "transitive dependency on '${details.requested.group}:${details.requested.name}' is forbidden. " +
-                    "cloudstub-* service modules must not depend on each other."
-                )
+        configurations.matching { !it.name.toLowerCase().contains('test') }.configureEach {
+            resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+                if (details.requested.group == 'io.github.cloudstub' && details.requested.name != 'cloudstub-core') {
+                    throw new GradleException(
+                        "Module isolation violation in '${project.name}': " +
+                        "transitive dependency on '${details.requested.group}:${details.requested.name}' is forbidden. " +
+                        "cloudstub-* service modules must not depend on each other."
+                    )
+                }
             }
         }
     }

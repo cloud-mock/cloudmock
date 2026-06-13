@@ -29,8 +29,8 @@ java -version   # must print 17 or higher
 The standalone fat JAR must be built before running:
 
 ```
-./gradlew :cloudstub-standalone:shadowJar
-# output: cloudstub-standalone/build/libs/cloudstub-standalone.jar
+./gradlew :cloudstub-local:shadowJar
+# output: cloudstub-local/build/libs/cloudstub-local.jar
 ```
 
 Or pass `--build` to the smoke script and it will build first.
@@ -62,7 +62,7 @@ Server log is written to `/tmp/cloudstub-smoke.log` — check it if startup fail
 ## Run (human path)
 
 ```bash
-java -jar cloudstub-standalone/build/libs/cloudstub-standalone.jar --services=sqs,sns,secretsmanager,s3
+java -jar cloudstub-local/build/libs/cloudstub-local.jar --services=sqs,sns,secretsmanager,s3
 # mock on :4566, API on :4567 — Ctrl-C to stop
 # services are opt-in: with no --services the server starts but serves nothing
 ```
@@ -70,7 +70,7 @@ java -jar cloudstub-standalone/build/libs/cloudstub-standalone.jar --services=sq
 Port overrides:
 
 ```bash
-java -jar cloudstub-standalone/build/libs/cloudstub-standalone.jar \
+java -jar cloudstub-local/build/libs/cloudstub-local.jar \
   --port=4566 --api-port=4567 --services=sqs,sns
 ```
 
@@ -123,7 +123,7 @@ curl -X POST http://localhost:4566 \
 
 | Symptom                           | Fix                                                                   |
 | --------------------------------- | --------------------------------------------------------------------- |
-| `JAR not found`                   | Run `./gradlew :cloudstub-standalone:shadowJar` or use `--build`      |
+| `JAR not found`                   | Run `./gradlew :cloudstub-local:shadowJar` or use `--build`           |
 | `Server did not start within 10s` | Check `/tmp/cloudstub-smoke.log` for the cause                        |
 | `Address already in use`          | Another process holds the port — kill it or use `--port=N`            |
 | `Unknown service(s): ...`         | Service name typo; valid IDs are `sqs`, `sns`, `secretsmanager`, `s3` |
