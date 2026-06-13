@@ -95,6 +95,7 @@ Javadoc reference deploys at `/javadoc/` (a top-level **Javadoc** nav entry, dis
 | -------------------------- | ---------------- | --------------------------------------------------------------------------------------------- |
 | `cloudstub-core`           | Done             | Shaded fat JAR (WireMock + Jetty bundled, no classpath leakage)                               |
 | `cloudstub-junit`          | Done             | `@ExtendWith` + `@RegisterExtension`, fault injection annotations; JUnit 5 and 6              |
+| `cloudstub-testing`        | Done             | Aggregator — one test dependency that pulls in cloudstub-core + cloudstub-junit (api)         |
 | `cloudstub-sns`            | Done             | XML/Form protocol; reference implementation for `registerXmlFormStub`                         |
 | `cloudstub-sqs`            | Done             | Stateful reference — JSON/X-Amz-Target; send→receive backed by the state store (#0044)        |
 | `cloudstub-secretsmanager` | Done             | Reference impl — JSON/X-Amz-Target protocol                                                   |
@@ -172,11 +173,11 @@ loaded at runtime from a plugin directory. It is the drop-in replacement for Loc
   standalone launcher defaults to a persistent `.cloudstub` directory); see the **State store** notes. Template-only
   modules remain stateless. A full `POST /api/reset` clears all state (`StateStore.clearAll()`); `?service=X` clears
   only that service's prefix.
-- **Module isolation rule:** `cloudstub-local` is **not** exempt from the inter-module isolation check — it
-  depends only on `cloudstub-core` at compile/runtime. The in-repo module jars are referenced solely through a
-  test-scoped jar-collection configuration (`integrationTestModuleJars`) that is copied into `build/modules` to
-  populate a plugin directory for the `run` task and the integration-test subprocess; these are not compile or runtime
-  dependencies and do not bundle the modules into the fat JAR.
+- **Module isolation rule:** the inter-module isolation check polices only service modules, so `cloudstub-local` (a
+  non-service launcher) is not subject to it. It still depends only on `cloudstub-core` at compile/runtime: the in-repo
+  module jars are referenced solely through a test-scoped jar-collection configuration (`integrationTestModuleJars`)
+  copied into `build/modules` to populate a plugin directory for the `run` task and the integration-test subprocess;
+  these are not compile or runtime dependencies and do not bundle the modules into the fat JAR.
 - **API service filtering:** `LocalMain` filters discovered `CloudStubApiService` implementations by the enabled
   service set, so a service not enabled via `--services` exposes neither stubs nor REST routes nor CLI commands
 

@@ -137,11 +137,12 @@ clm sqs send-message --queue orders --body "hello"
 
 **Tooling**
 
-| Module              | Purpose                                                                        |
-| ------------------- | ------------------------------------------------------------------------------ |
-| `cloudstub-junit`   | JUnit extension (JUnit 5 and 6) — `@ExtendWith` + fault injection              |
-| `cloudstub-codegen` | Stub generator — produces a module skeleton from a Smithy model                |
-| `cloudstub-sdk-v1`  | AWS SDK v1 companion — one-line endpoint redirection for teams still on SDK v1 |
+| Module              | Purpose                                                                             |
+| ------------------- | ----------------------------------------------------------------------------------- |
+| `cloudstub-testing` | Test aggregator — one dependency that brings `cloudstub-core` + the JUnit extension |
+| `cloudstub-junit`   | JUnit extension (JUnit 5 and 6) — `@ExtendWith` + fault injection                   |
+| `cloudstub-codegen` | Stub generator — produces a module skeleton from a Smithy model                     |
+| `cloudstub-sdk-v1`  | AWS SDK v1 companion — one-line endpoint redirection for teams still on SDK v1      |
 
 The `clm` / `cloudstub` command-line client ships separately at
 [cloudstub/cloudstub-cli](https://github.com/cloudstub/cloudstub-cli).
