@@ -6,7 +6,7 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/../../.." && pwd)"
-JAR="$REPO_ROOT/cloudstub-standalone/build/libs/cloudstub-standalone.jar"
+JAR="$REPO_ROOT/cloudstub-local/build/libs/cloudstub-local.jar"
 PORT=14566
 API_PORT=14567
 EXTRA_ARGS=()
@@ -19,7 +19,7 @@ for arg in "$@"; do
     --services=*)  EXTRA_ARGS+=("$arg"); SERVICES_SET=true ;;
     --build)
       echo "==> Building standalone JAR..."
-      cd "$REPO_ROOT" && ./gradlew :cloudstub-standalone:shadowJar -q
+      cd "$REPO_ROOT" && ./gradlew :cloudstub-local:shadowJar -q
       ;;
   esac
 done
@@ -32,7 +32,7 @@ fi
 
 if [[ ! -f "$JAR" ]]; then
   echo "JAR not found: $JAR"
-  echo "Run: ./gradlew :cloudstub-standalone:shadowJar"
+  echo "Run: ./gradlew :cloudstub-local:shadowJar"
   exit 1
 fi
 

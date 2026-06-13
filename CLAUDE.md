@@ -47,11 +47,11 @@ Standard commands:
 ./gradlew :cloudstub-codegen:validate --args="--model <path>"          # validate a Smithy model without generating output
 ./gradlew :cloudstub-codegen:shadowJar                                 # build the codegen fat JAR (distribution / CI)
 java -jar cloudstub-codegen/build/libs/cloudstub-codegen.jar --model <path-or-url> [--output <dir>] [--validate]  # stub generation
-./gradlew :cloudstub-standalone:run --args="--services=sqs,sns,secretsmanager,s3"   # start from repo root; copies in-repo module jars into build/modules (no fat JAR build)
-./gradlew :cloudstub-standalone:shadowJar                              # build the standalone fat JAR (launcher + core only; no service modules)
-java -jar cloudstub-standalone/build/libs/cloudstub-standalone.jar --services=sqs   # start on default ports; loads module jars from ./modules
-java -jar cloudstub-standalone/build/libs/cloudstub-standalone.jar --modules-dir=/path/to/modules --services=sqs   # explicit plugin directory
-CLOUDSTUB_PORT=4566 CLOUDSTUB_API_PORT=4567 java -jar cloudstub-standalone/build/libs/cloudstub-standalone.jar  # ports via env vars
+./gradlew :cloudstub-local:run --args="--services=sqs,sns,secretsmanager,s3"   # start from repo root; copies in-repo module jars into build/modules (no fat JAR build)
+./gradlew :cloudstub-local:shadowJar                              # build the standalone fat JAR (launcher + core only; no service modules)
+java -jar cloudstub-local/build/libs/cloudstub-local.jar --services=sqs   # start on default ports; loads module jars from ./modules
+java -jar cloudstub-local/build/libs/cloudstub-local.jar --modules-dir=/path/to/modules --services=sqs   # explicit plugin directory
+CLOUDSTUB_PORT=4566 CLOUDSTUB_API_PORT=4567 java -jar cloudstub-local/build/libs/cloudstub-local.jar  # ports via env vars
 ```
 
 ### Code formatting
@@ -81,7 +81,7 @@ Every subproject has two test source sets, configured from the root `build.gradl
   tests reuse the test dependency set and are exempt from the inter-module isolation check), but it
   is **not** wired into `check`/`build`, so `./gradlew build` stays unit-test-fast. CI runs
   `./gradlew integrationTest` separately. Running the task by name from the repo root executes every
-  module's integration tests. Currently only `cloudstub-standalone` has integration tests — the
+  module's integration tests. Currently only `cloudstub-local` has integration tests — the
   subprocess fat-JAR end-to-end tests; other modules' `integrationTest` tasks are `NO-SOURCE`.
 
 `generateDocs` aggregates Javadoc for the published modules into `docs/javadoc/` (gitignored; built
@@ -102,7 +102,7 @@ Javadoc reference deploys at `/javadoc/` (a top-level **Javadoc** nav entry, dis
 | `cloudstub-dynamodb`       | Scaffolding only | JSON/X-Amz-Target protocol                                                                    |
 | `cloudstub-lambda`         | Scaffolding only | JSON/X-Amz-Target protocol                                                                    |
 | `cloudstub-codegen`        | Done             | Smithy → CloudStubService stub generator                                                      |
-| `cloudstub-standalone`     | Done             | Runnable fat JAR (launcher + core only); loads module jars from a plugin directory; port 4566 |
+| `cloudstub-local`          | Done             | Runnable fat JAR (launcher + core only); loads module jars from a plugin directory; port 4566 |
 | `cloudstub-example:junit6` | Done             | Spring Boot app + integration tests with JUnit 6 (CloudStubExtension)                         |
 | `cloudstub-example:junit5` | Done             | Standalone CloudStubExtension tests compiled and run against JUnit 5                          |
 
@@ -134,7 +134,7 @@ Three layers, strictly in order of dependency:
 
 ## Standalone mode
 
-`cloudstub-standalone` is a thin launcher module. Its fat JAR contains only the launcher and `cloudstub-core` (with
+`cloudstub-local` is a thin launcher module. Its fat JAR contains only the launcher and `cloudstub-core` (with
 its shaded WireMock/Jetty) — **no service modules are bundled**. Service modules are distributed as separate jars and
 loaded at runtime from a plugin directory. It is the drop-in replacement for LocalStack in local development scripts.
 
@@ -172,12 +172,12 @@ loaded at runtime from a plugin directory. It is the drop-in replacement for Loc
   standalone launcher defaults to a persistent `.cloudstub` directory); see the **State store** notes. Template-only
   modules remain stateless. A full `POST /api/reset` clears all state (`StateStore.clearAll()`); `?service=X` clears
   only that service's prefix.
-- **Module isolation rule:** `cloudstub-standalone` is **not** exempt from the inter-module isolation check — it
+- **Module isolation rule:** `cloudstub-local` is **not** exempt from the inter-module isolation check — it
   depends only on `cloudstub-core` at compile/runtime. The in-repo module jars are referenced solely through a
   test-scoped jar-collection configuration (`integrationTestModuleJars`) that is copied into `build/modules` to
   populate a plugin directory for the `run` task and the integration-test subprocess; these are not compile or runtime
   dependencies and do not bundle the modules into the fat JAR.
-- **API service filtering:** `StandaloneMain` filters discovered `CloudStubApiService` implementations by the enabled
+- **API service filtering:** `LocalMain` filters discovered `CloudStubApiService` implementations by the enabled
   service set, so a service not enabled via `--services` exposes neither stubs nor REST routes nor CLI commands
 
 ## State store

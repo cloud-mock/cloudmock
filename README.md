@@ -105,7 +105,7 @@ Download the module jars you want and drop them in a plugin directory (default `
 ```
 mkdir -p modules
 # drop cloudstub-sqs.jar, cloudstub-s3.jar, … into ./modules
-java -jar cloudstub-standalone.jar --services=sqs,secretsmanager
+java -jar cloudstub-local.jar --services=sqs,secretsmanager
 ```
 
 The launcher loads every jar in the plugin directory; point it elsewhere with `--modules-dir=<path>` (or

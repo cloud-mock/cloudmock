@@ -4,10 +4,10 @@
 // Module classes:
 //   - not published yet: examples, scaffolding, and the services not yet rolled out
 //   - plain library modules: published via the vanniktech plugin (POM + -sources + -javadoc)
-//   - shadow/tool modules (core, standalone, codegen): publish their shadow (fat) JAR as primary
+//   - shadow/tool modules (core, local, codegen): publish their shadow (fat) JAR as primary
 
 def isExample = project.path == ':cloudstub-example' || project.path.startsWith(':cloudstub-example:')
-def isShadowModule = project.name in ['cloudstub-core', 'cloudstub-standalone', 'cloudstub-codegen']
+def isShadowModule = project.name in ['cloudstub-core', 'cloudstub-local', 'cloudstub-codegen']
 // Scaffolding (not implemented) plus the service modules rolled out one issue at a time — sqs is
 // published first; sns/secretsmanager/s3 follow in later issues.
 def notPublishedYet = ['cloudstub-dynamodb', 'cloudstub-lambda',
