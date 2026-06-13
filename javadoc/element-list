@@ -7,9 +7,9 @@ io.cloudstub.core.restapi
 io.cloudstub.core.spi
 io.cloudstub.core.spi.restapi
 io.cloudstub.junit
+io.cloudstub.local
 io.cloudstub.s3
 io.cloudstub.sdkv1
 io.cloudstub.secretsmanager
 io.cloudstub.sns
 io.cloudstub.sqs
-io.cloudstub.standalone

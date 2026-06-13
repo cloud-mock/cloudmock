@@ -1073,7 +1073,7 @@
 <p><code>CloudStubExtension</code> manages the CloudStub lifecycle around a test class and applies fault injection annotations to individual test methods.</p>
 <p>Compatible with JUnit 5 and JUnit 6. JUnit 4 is not supported.</p>
 <h2 id="dependency">Dependency</h2>
-<p><code>cloudstub-junit</code> declares JUnit as <code>compileOnly</code> — bring your own JUnit version; the module does not force one on your classpath.</p>
+<p>Most projects get <code>cloudstub-junit</code> transitively via <a href="../getting-started/"><code>cloudstub-testing</code></a>; add it directly only to use the extension without the aggregator. <code>cloudstub-junit</code> declares JUnit as <code>compileOnly</code> — bring your own JUnit version; the module does not force one on your classpath.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Gradle</label><label for="__tabbed_1_2">Maven</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">

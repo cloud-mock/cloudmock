@@ -1240,25 +1240,25 @@ download the server jar once, then download the module jars you want and drop th
 <li><code>--services</code> (below) narrows what is <strong>enabled</strong> among those.</li>
 </ul>
 <h2 id="build-the-fat-jar">Build the fat JAR</h2>
-<div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>./gradlew :cloudstub-standalone:shadowJar
+<div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>./gradlew :cloudstub-local:shadowJar
 </span></code></pre></div>
-<p>This produces <code>cloudstub-standalone/build/libs/cloudstub-standalone.jar</code> — the CloudStub engine (with shaded
+<p>This produces <code>cloudstub-local/build/libs/cloudstub-local.jar</code> — the CloudStub engine (with shaded
 WireMock/Jetty) and the launcher, and nothing else. Each service module (<code>cloudstub-sqs</code>, <code>cloudstub-sns</code>,
 <code>cloudstub-secretsmanager</code>, <code>cloudstub-s3</code>) is a separate jar built by its own module.</p>
 <h2 id="add-the-modules-you-want">Add the modules you want</h2>
 <p>The launcher loads every <code>.jar</code> in the plugin directory (default <code>./modules</code>):</p>
 <div class="highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>mkdir -p modules
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>cp path/to/cloudstub-sqs.jar path/to/cloudstub-s3.jar modules/
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>java -jar cloudstub-standalone/build/libs/cloudstub-standalone.jar --services=sqs,s3
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>java -jar cloudstub-local/build/libs/cloudstub-local.jar --services=sqs,s3
 </span></code></pre></div>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Custom plugin directory (CLI flag)</label><label for="__tabbed_1_2">Custom plugin directory (environment variable)</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>java -jar cloudstub-standalone/build/libs/cloudstub-standalone.jar --modules-dir=/opt/cloudstub/modules --services=sqs
+<div class="highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>java -jar cloudstub-local/build/libs/cloudstub-local.jar --modules-dir=/opt/cloudstub/modules --services=sqs
 </span></code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>CLOUDSTUB_MODULES_DIR=/opt/cloudstub/modules java -jar cloudstub-standalone/build/libs/cloudstub-standalone.jar --services=sqs
+<div class="highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>CLOUDSTUB_MODULES_DIR=/opt/cloudstub/modules java -jar cloudstub-local/build/libs/cloudstub-local.jar --services=sqs
 </span></code></pre></div>
 </div>
 </div>
@@ -1270,15 +1270,15 @@ explicitly provided <code>--modules-dir</code> that does not exist fails fast wi
 <div class="tabbed-set tabbed-alternate" data-tabs="2:3"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Default port (4566)</label><label for="__tabbed_2_2">Custom port (CLI flag)</label><label for="__tabbed_2_3">Custom port (environment variable)</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>java -jar cloudstub-standalone/build/libs/cloudstub-standalone.jar
+<div class="highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>java -jar cloudstub-local/build/libs/cloudstub-local.jar
 </span></code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>java -jar cloudstub-standalone/build/libs/cloudstub-standalone.jar --port=9000
+<div class="highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>java -jar cloudstub-local/build/libs/cloudstub-local.jar --port=9000
 </span></code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>CLOUDSTUB_PORT=9000 java -jar cloudstub-standalone/build/libs/cloudstub-standalone.jar
+<div class="highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>CLOUDSTUB_PORT=9000 java -jar cloudstub-local/build/libs/cloudstub-local.jar
 </span></code></pre></div>
 </div>
 </div>
@@ -1291,11 +1291,11 @@ request.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="3:2"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">CLI flag</label><label for="__tabbed_3_2">Environment variable</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>java -jar cloudstub-standalone/build/libs/cloudstub-standalone.jar --services=sqs,secretsmanager
+<div class="highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>java -jar cloudstub-local/build/libs/cloudstub-local.jar --services=sqs,secretsmanager
 </span></code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>CLOUDSTUB_SERVICES=sqs,secretsmanager java -jar cloudstub-standalone/build/libs/cloudstub-standalone.jar
+<div class="highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>CLOUDSTUB_SERVICES=sqs,secretsmanager java -jar cloudstub-local/build/libs/cloudstub-local.jar
 </span></code></pre></div>
 </div>
 </div>
@@ -1312,11 +1312,11 @@ capped at the last 1000 entries by default. Override the cap, or remove it entir
 <div class="tabbed-set tabbed-alternate" data-tabs="4:2"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">CLI flag</label><label for="__tabbed_4_2">Environment variable</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>java -jar cloudstub-standalone/build/libs/cloudstub-standalone.jar --max-history=5000
+<div class="highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>java -jar cloudstub-local/build/libs/cloudstub-local.jar --max-history=5000
 </span></code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>CLOUDSTUB_MAX_HISTORY=5000 java -jar cloudstub-standalone/build/libs/cloudstub-standalone.jar
+<div class="highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>CLOUDSTUB_MAX_HISTORY=5000 java -jar cloudstub-local/build/libs/cloudstub-local.jar
 </span></code></pre></div>
 </div>
 </div>

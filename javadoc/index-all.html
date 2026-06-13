@@ -100,11 +100,11 @@ loadScripts(document, 'script');</script>
 <div class="block">Passed to <a href="io/cloudstub/core/spi/CloudStubApiService.html#registerRoutes(io.cloudstub.core.spi.restapi.CloudStubApiContext)"><code>CloudStubApiService.registerRoutes(io.cloudstub.core.spi.restapi.CloudStubApiContext)</code></a> so modules can declare API routes without
  depending on any HTTP transport type.</div>
 </dd>
-<dt><a href="io/cloudstub/standalone/ApiServer.html" class="type-name-link" title="class in io.cloudstub.standalone">ApiServer</a> - Class in <a href="io/cloudstub/standalone/package-summary.html">io.cloudstub.standalone</a></dt>
+<dt><a href="io/cloudstub/local/ApiServer.html" class="type-name-link" title="class in io.cloudstub.local">ApiServer</a> - Class in <a href="io/cloudstub/local/package-summary.html">io.cloudstub.local</a></dt>
 <dd>
-<div class="block">Lightweight REST API server for standalone mode.</div>
+<div class="block">Lightweight REST API server for local mode.</div>
 </dd>
-<dt><a href="io/cloudstub/standalone/ApiServer.html#%3Cinit%3E(io.cloudstub.core.CloudStub,int,java.util.List)" class="member-name-link">ApiServer(CloudStub, int, List&lt;CloudStubApiService&gt;)</a> - Constructor for class io.cloudstub.standalone.<a href="io/cloudstub/standalone/ApiServer.html" title="class in io.cloudstub.standalone">ApiServer</a></dt>
+<dt><a href="io/cloudstub/local/ApiServer.html#%3Cinit%3E(io.cloudstub.core.CloudStub,int,java.util.List)" class="member-name-link">ApiServer(CloudStub, int, List&lt;CloudStubApiService&gt;)</a> - Constructor for class io.cloudstub.local.<a href="io/cloudstub/local/ApiServer.html" title="class in io.cloudstub.local">ApiServer</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/cloudstub/core/StatePersistence.html#APPEND_LOG" class="member-name-link">APPEND_LOG</a> - Enum constant in enum class io.cloudstub.core.<a href="io/cloudstub/core/StatePersistence.html" title="enum class in io.cloudstub.core">StatePersistence</a></dt>
 <dd>
@@ -194,7 +194,7 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="io/cloudstub/core/CloudStub.html#close()" class="member-name-link">close()</a> - Method in class io.cloudstub.core.<a href="io/cloudstub/core/CloudStub.html" title="class in io.cloudstub.core">CloudStub</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="io/cloudstub/standalone/ApiServer.html#close()" class="member-name-link">close()</a> - Method in class io.cloudstub.standalone.<a href="io/cloudstub/standalone/ApiServer.html" title="class in io.cloudstub.standalone">ApiServer</a></dt>
+<dt><a href="io/cloudstub/local/ApiServer.html#close()" class="member-name-link">close()</a> - Method in class io.cloudstub.local.<a href="io/cloudstub/local/ApiServer.html" title="class in io.cloudstub.local">ApiServer</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/cloudstub/core/CloudStub.html" class="type-name-link" title="class in io.cloudstub.core">CloudStub</a> - Class in <a href="io/cloudstub/core/package-summary.html">io.cloudstub.core</a></dt>
 <dd>
@@ -549,6 +549,8 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="io/cloudstub/junit/package-summary.html">io.cloudstub.junit</a> - package io.cloudstub.junit</dt>
 <dd>&nbsp;</dd>
+<dt><a href="io/cloudstub/local/package-summary.html">io.cloudstub.local</a> - package io.cloudstub.local</dt>
+<dd>&nbsp;</dd>
 <dt><a href="io/cloudstub/s3/package-summary.html">io.cloudstub.s3</a> - package io.cloudstub.s3</dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/cloudstub/sdkv1/package-summary.html">io.cloudstub.sdkv1</a> - package io.cloudstub.sdkv1</dt>
@@ -558,8 +560,6 @@ loadScripts(document, 'script');</script>
 <dt><a href="io/cloudstub/sns/package-summary.html">io.cloudstub.sns</a> - package io.cloudstub.sns</dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/cloudstub/sqs/package-summary.html">io.cloudstub.sqs</a> - package io.cloudstub.sqs</dt>
-<dd>&nbsp;</dd>
-<dt><a href="io/cloudstub/standalone/package-summary.html">io.cloudstub.standalone</a> - package io.cloudstub.standalone</dt>
 <dd>&nbsp;</dd>
 </dl>
 <h2 class="title" id="I:J">J</h2>
@@ -596,12 +596,16 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">List all keys whose path begins with <code>prefix</code>.</div>
 </dd>
+<dt><a href="io/cloudstub/local/LocalMain.html" class="type-name-link" title="class in io.cloudstub.local">LocalMain</a> - Class in <a href="io/cloudstub/local/package-summary.html">io.cloudstub.local</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="io/cloudstub/local/LocalMain.html#%3Cinit%3E()" class="member-name-link">LocalMain()</a> - Constructor for class io.cloudstub.local.<a href="io/cloudstub/local/LocalMain.html" title="class in io.cloudstub.local">LocalMain</a></dt>
+<dd>&nbsp;</dd>
 </dl>
 <h2 class="title" id="I:M">M</h2>
 <dl class="index">
 <dt><a href="io/cloudstub/codegen/Main.html#main(java.lang.String%5B%5D)" class="member-name-link">main(String[])</a> - Static method in class io.cloudstub.codegen.<a href="io/cloudstub/codegen/Main.html" title="class in io.cloudstub.codegen">Main</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="io/cloudstub/standalone/StandaloneMain.html#main(java.lang.String%5B%5D)" class="member-name-link">main(String[])</a> - Static method in class io.cloudstub.standalone.<a href="io/cloudstub/standalone/StandaloneMain.html" title="class in io.cloudstub.standalone">StandaloneMain</a></dt>
+<dt><a href="io/cloudstub/local/LocalMain.html#main(java.lang.String%5B%5D)" class="member-name-link">main(String[])</a> - Static method in class io.cloudstub.local.<a href="io/cloudstub/local/LocalMain.html" title="class in io.cloudstub.local">LocalMain</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/cloudstub/codegen/Main.html" class="type-name-link" title="class in io.cloudstub.codegen">Main</a> - Class in <a href="io/cloudstub/codegen/package-summary.html">io.cloudstub.codegen</a></dt>
 <dd>
@@ -718,7 +722,7 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Returns the port the embedded server is listening on.</div>
 </dd>
-<dt><a href="io/cloudstub/standalone/ApiServer.html#port()" class="member-name-link">port()</a> - Method in class io.cloudstub.standalone.<a href="io/cloudstub/standalone/ApiServer.html" title="class in io.cloudstub.standalone">ApiServer</a></dt>
+<dt><a href="io/cloudstub/local/ApiServer.html#port()" class="member-name-link">port()</a> - Method in class io.cloudstub.local.<a href="io/cloudstub/local/ApiServer.html" title="class in io.cloudstub.local">ApiServer</a></dt>
 <dd>
 <div class="block">The port the API is listening on.</div>
 </dd>
@@ -976,16 +980,12 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="io/cloudstub/junit/SimulateTimeout.List.html" class="type-name-link" title="annotation interface in io.cloudstub.junit">SimulateTimeout.List</a> - Annotation Interface in <a href="io/cloudstub/junit/package-summary.html">io.cloudstub.junit</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="io/cloudstub/standalone/StandaloneMain.html" class="type-name-link" title="class in io.cloudstub.standalone">StandaloneMain</a> - Class in <a href="io/cloudstub/standalone/package-summary.html">io.cloudstub.standalone</a></dt>
-<dd>&nbsp;</dd>
-<dt><a href="io/cloudstub/standalone/StandaloneMain.html#%3Cinit%3E()" class="member-name-link">StandaloneMain()</a> - Constructor for class io.cloudstub.standalone.<a href="io/cloudstub/standalone/StandaloneMain.html" title="class in io.cloudstub.standalone">StandaloneMain</a></dt>
-<dd>&nbsp;</dd>
 <dt><a href="io/cloudstub/core/CloudStub.html#start()" class="member-name-link">start()</a> - Method in class io.cloudstub.core.<a href="io/cloudstub/core/CloudStub.html" title="class in io.cloudstub.core">CloudStub</a></dt>
 <dd>
 <div class="block">Starts the embedded server, registers all discovered service stubs, and injects <code>
  aws.endpoint-url</code> so the AWS SDK v2 routes traffic locally.</div>
 </dd>
-<dt><a href="io/cloudstub/standalone/ApiServer.html#start()" class="member-name-link">start()</a> - Method in class io.cloudstub.standalone.<a href="io/cloudstub/standalone/ApiServer.html" title="class in io.cloudstub.standalone">ApiServer</a></dt>
+<dt><a href="io/cloudstub/local/ApiServer.html#start()" class="member-name-link">start()</a> - Method in class io.cloudstub.local.<a href="io/cloudstub/local/ApiServer.html" title="class in io.cloudstub.local">ApiServer</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/cloudstub/core/CloudStub.html#startedAt()" class="member-name-link">startedAt()</a> - Method in class io.cloudstub.core.<a href="io/cloudstub/core/CloudStub.html" title="class in io.cloudstub.core">CloudStub</a></dt>
 <dd>
@@ -1034,7 +1034,7 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Stops the embedded server and removes the <code>aws.endpoint-url</code> system property.</div>
 </dd>
-<dt><a href="io/cloudstub/standalone/ApiServer.html#stop()" class="member-name-link">stop()</a> - Method in class io.cloudstub.standalone.<a href="io/cloudstub/standalone/ApiServer.html" title="class in io.cloudstub.standalone">ApiServer</a></dt>
+<dt><a href="io/cloudstub/local/ApiServer.html#stop()" class="member-name-link">stop()</a> - Method in class io.cloudstub.local.<a href="io/cloudstub/local/ApiServer.html" title="class in io.cloudstub.local">ApiServer</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="io/cloudstub/core/internal/CloudStubSettings.html#storeDirectory()" class="member-name-link">storeDirectory()</a> - Method in class io.cloudstub.core.internal.<a href="io/cloudstub/core/internal/CloudStubSettings.html" title="class in io.cloudstub.core.internal">CloudStubSettings</a></dt>
 <dd>&nbsp;</dd>
