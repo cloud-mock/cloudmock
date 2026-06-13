@@ -1,0 +1,26 @@
+/* Additive javadoc stylesheet (--add-stylesheet); .cloudstub-banner matches the -top HTML in build.gradle. */
+
+.cloudstub-banner {
+    background-color: #3f51b5;
+    padding: 10px 18px;
+    font-family: Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 14px;
+}
+
+.cloudstub-banner a:link,
+.cloudstub-banner a:visited {
+    color: #fff;
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.cloudstub-banner a:hover {
+    color: #fff;
+    text-decoration: underline;
+}
+
+/* Indigo accent for content links, matching the Material 'indigo' palette. */
+a:link,
+a:visited {
+    color: #3949ab;
+}
