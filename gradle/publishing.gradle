@@ -24,11 +24,17 @@ if (publishable && !isShadowModule) {
         'cloudstub-sdk-v1' : ['CloudStub AWS SDK v1 Support',
             'CloudStub companion library for AWS SDK v1 consumers.'],
     ]
+    def info = pomInfo[project.name]
+    if (info == null) {
+        throw new GradleException(
+            "No pomInfo entry for published module '${project.name}' — add its name/description " +
+            "to pomInfo in gradle/publishing.gradle (it was likely just added to publishedServices).")
+    }
 
     mavenPublishing {
         pom {
-            name = pomInfo[project.name][0]
-            description = pomInfo[project.name][1]
+            name = info[0]
+            description = info[1]
             inceptionYear = '2026'
             url = 'https://github.com/cloudstub/cloudstub'
             licenses {

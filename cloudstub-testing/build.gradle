@@ -1,4 +1,8 @@
 // Aggregator: a single test dependency that brings in the engine and the JUnit extension.
+// java-library so the `api` dependencies are transitive to consumers (also applied by the
+// publication wiring, but declared here so the module is self-contained).
+apply plugin: 'java-library'
+
 dependencies {
     api project(':cloudstub-core')
     api project(':cloudstub-junit')
