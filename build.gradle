@@ -24,8 +24,6 @@ subprojects {
         }
     }
 
-    // group and version are single-sourced from the root gradle.properties.
-
     // Publication wiring (module classification, POM, sources/javadoc) lives in its own script.
     apply from: rootProject.file('gradle/publishing.gradle')
 
