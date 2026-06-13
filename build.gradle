@@ -157,6 +157,10 @@ tasks.register('generateDocs', Javadoc) {
     // the goal is a published reference, not lint enforcement.
     failOnError = false
     options.addStringOption('Xdoclint:none', '-quiet')
+    options.addStringOption('-add-stylesheet', file("$rootDir/gradle/javadoc/cloudstub-javadoc.css").absolutePath)
+    options.addStringOption('top',
+        '<div class="cloudstub-banner">' +
+        '<a href="https://cloudstub.github.io/cloudstub/">&#8592; Back to CloudStub Docs</a></div>')
 }
 
 // Wire the public modules into generateDocs once every subproject is evaluated, so their main
